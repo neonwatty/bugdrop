@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Feedback Widget E2E Test Page</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 3rem;
+    }
+
+    h1 {
+      color: #667eea;
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+
+    h2 {
+      color: #764ba2;
+      font-size: 1.8rem;
+      margin: 2rem 0 1rem;
+      font-weight: 600;
+    }
+
+    p {
+      margin-bottom: 1rem;
+      color: #555;
+      font-size: 1.1rem;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+
+    .feature-card {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      border: 2px solid #e9ecef;
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      border-color: #667eea;
+      transform: translateY(-4px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    }
+
+    .feature-card h3 {
+      color: #667eea;
+      margin-bottom: 0.5rem;
+      font-size: 1.2rem;
+    }
+
+    .feature-card p {
+      font-size: 0.95rem;
+      color: #666;
+    }
+
+    .cta-section {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 2rem;
+      border-radius: 8px;
+      margin: 2rem 0;
+      text-align: center;
+    }
+
+    .cta-section h2 {
+      color: white;
+      margin-top: 0;
+    }
+
+    .cta-section p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.1rem;
+    }
+
+    .test-elements {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      background: #f1f3f5;
+      border-radius: 8px;
+    }
+
+    .test-elements button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .test-elements button:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .test-elements input {
+      padding: 0.75rem;
+      border: 2px solid #dee2e6;
+      border-radius: 6px;
+      font-size: 1rem;
+      margin: 0.5rem;
+      width: calc(100% - 1rem);
+      max-width: 400px;
+    }
+
+    code {
+      background: #f8f9fa;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      color: #764ba2;
+      font-size: 0.9em;
+    }
+
+    .info-box {
+      background: #e7f5ff;
+      border-left: 4px solid #667eea;
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+      border-radius: 4px;
+    }
+
+    .info-box p {
+      margin: 0;
+      color: #1864ab;
+    }
+
+    footer {
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 2px solid #e9ecef;
+      text-align: center;
+      color: #868e96;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Feedback Widget Test Page</h1>
+    <p>This page is used for E2E testing of the feedback widget. The widget should appear in the bottom-right corner of the page.</p>
+
+    <div class="info-box">
+      <p><strong>Test Instructions:</strong> Look for the feedback button (💬) in the bottom-right corner. Click it to open the feedback modal and test all features.</p>
+    </div>
+
+    <h2>Widget Features</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <h3>📸 Screenshot Capture</h3>
+        <p>Capture full page or specific element screenshots to include with your feedback.</p>
+      </div>
+
+      <div class="feature-card">
+        <h3>🎨 Annotations</h3>
+        <p>Draw, add arrows, and create rectangles to highlight specific areas of concern.</p>
+      </div>
+
+      <div class="feature-card">
+        <h3>🎯 Element Picker</h3>
+        <p>Click on any element to capture a screenshot of just that component.</p>
+      </div>
+
+      <div class="feature-card">
+        <h3>📝 Rich Feedback</h3>
+        <p>Provide detailed feedback with titles, descriptions, and visual annotations.</p>
+      </div>
+
+      <div class="feature-card">
+        <h3>🔒 Shadow DOM</h3>
+        <p>Widget styles are isolated from your page using Shadow DOM technology.</p>
+      </div>
+
+      <div class="feature-card">
+        <h3>✅ Validation</h3>
+        <p>Form validation ensures all required fields are filled before submission.</p>
+      </div>
+    </div>
+
+    <div class="cta-section">
+      <h2>Try It Out!</h2>
+      <p>Click the feedback button in the bottom-right corner to test the widget. Try capturing screenshots, adding annotations, and submitting feedback.</p>
+    </div>
+
+    <h2>Test Elements</h2>
+    <div class="test-elements">
+      <p>These elements can be used to test the element picker and annotation features:</p>
+      <button id="test-button-1">Primary Action Button</button>
+      <button id="test-button-2">Secondary Action Button</button>
+      <input type="text" placeholder="Test input field" id="test-input">
+      <div style="margin-top: 1rem;">
+        <code id="test-code">const widget = new FeedbackWidget();</code>
+      </div>
+    </div>
+
+    <h2>How It Works</h2>
+    <p>The feedback widget is loaded from <code>/widget.js</code> and creates an isolated environment using Shadow DOM. This ensures that:</p>
+    <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+      <li>Widget styles don't interfere with your page styles</li>
+      <li>Your page styles don't affect the widget appearance</li>
+      <li>The widget maintains consistent behavior across all sites</li>
+      <li>No CSS conflicts or naming collisions occur</li>
+    </ul>
+
+    <p>When you submit feedback, it's sent to the <code>/api/feedback</code> endpoint as a JSON payload containing:</p>
+    <ul style="margin-left: 2rem; margin-bottom: 1rem;">
+      <li>Title and description of the feedback</li>
+      <li>Optional screenshot (base64 encoded)</li>
+      <li>Optional annotations layer</li>
+      <li>Metadata (URL, viewport size, user agent, timestamp)</li>
+      <li>Optional element selector for targeted feedback</li>
+    </ul>
+
+    <footer>
+      <p>Feedback Widget E2E Test Page &copy; 2024</p>
+      <p>Built for testing with Playwright</p>
+    </footer>
+  </div>
+
+  <!-- Load the feedback widget -->
+  <script src="/widget.js" data-repo="testowner/testrepo"></script>
+</body>
+</html>

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "wrangler dev",
     "build": "tsc",
-    "build:widget": "esbuild src/widget/index.ts --bundle --format=iife --outfile=public/widget.js",
+    "build:widget": "esbuild src/widget/index.ts --bundle --minify --format=iife --outfile=public/widget.js",
     "deploy": "wrangler deploy",
     "test": "vitest run",
     "test:watch": "vitest",
