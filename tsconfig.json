@@ -3,17 +3,21 @@
     "target": "ES2022",
     "module": "ES2022",
     "lib": ["ES2022"],
-    "moduleResolution": "node",
-    "types": ["@cloudflare/workers-types"],
+    "moduleResolution": "bundler",
+    "types": ["@cloudflare/workers-types", "@types/node"],
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": false,
+    "outDir": "./dist",
+    "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
+    "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
-    "outDir": "./dist",
-    "rootDir": "./src"
+    "noEmit": true
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "test", "e2e"]
 }
