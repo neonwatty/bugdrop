@@ -366,7 +366,7 @@ describe('API Routes', () => {
       });
       await app.fetch(req, mockEnv);
 
-      const issueBody = mockCreateIssue.mock.calls[0][3];
+      const issueBody = mockCreateIssue.mock.calls[0][4];
       expect(issueBody).toContain('## Description');
       expect(issueBody).toContain('This is a test feedback');
       expect(issueBody).toContain('Technical Details');
