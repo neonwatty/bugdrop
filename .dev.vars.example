@@ -1,0 +1,14 @@
+# GitHub App credentials
+# Copy this file to .dev.vars and fill in your actual values
+
+# Your GitHub App ID (numeric)
+GITHUB_APP_ID=123456
+
+# Your GitHub App Private Key (PKCS#8 format)
+# Include the full key with headers:
+# -----BEGIN PRIVATE KEY-----
+# ...
+# -----END PRIVATE KEY-----
+GITHUB_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----
+YOUR_PRIVATE_KEY_HERE
+-----END PRIVATE KEY-----"
