@@ -39,7 +39,7 @@ function initWidget(config: WidgetConfig) {
   host.id = 'feedback-widget-host';
   document.body.appendChild(host);
 
-  const shadow = host.attachShadow({ mode: 'closed' });
+  const shadow = host.attachShadow({ mode: 'open' });
 
   // Inject styles and trigger button
   injectStyles(shadow, config);
