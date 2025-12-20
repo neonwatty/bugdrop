@@ -123,35 +123,39 @@ export async function uploadFile(
 }
 
 /**
- * Upload screenshot and return URL
- * @deprecated This function is no longer used. Screenshots are now embedded as base64 in issue bodies.
+ * Upload screenshot to repo and return the raw URL for embedding in issues
+ * Requires Contents:write permission on the GitHub App
  */
-export async function uploadScreenshot(
+export async function uploadScreenshotAsAsset(
   token: string,
   owner: string,
   repo: string,
   base64DataUrl: string
 ): Promise<string> {
-  // Remove data URL prefix
+  // Remove data URL prefix and extract the base64 content
   const content = base64DataUrl.replace(/^data:image\/\w+;base64,/, '');
 
-  // Generate unique filename
-  const filename = `.feedback/screenshots/${Date.now()}.png`;
+  // Generate unique filename with timestamp
+  const timestamp = Date.now();
+  const filename = `.feedback/screenshots/${timestamp}.png`;
 
-  return uploadFile(
-    token,
-    owner,
-    repo,
-    filename,
-    content,
-    'Add feedback screenshot'
+  const response = await fetch(
+    `${GITHUB_API}/repos/${owner}/${repo}/contents/${filename}`,
+    {
+      method: 'PUT',
+      headers: headers(token),
+      body: JSON.stringify({
+        message: `Add feedback screenshot ${timestamp}`,
+        content: content,
+      }),
+    }
   );
-}
 
-/**
- * Prepare screenshot data URL for embedding in markdown
- * Returns the base64 data URL as-is for direct embedding in issue body
- */
-export function prepareScreenshotForEmbed(base64DataUrl: string): string {
-  return base64DataUrl;
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Failed to upload screenshot: ${response.status} - ${error}`);
+  }
+
+  const data = (await response.json()) as { content: { download_url: string } };
+  return data.content.download_url;
 }

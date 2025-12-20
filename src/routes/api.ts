@@ -4,7 +4,7 @@ import type { Env, FeedbackPayload } from '../types';
 import {
   getInstallationToken,
   createIssue,
-  prepareScreenshotForEmbed,
+  uploadScreenshotAsAsset,
 } from '../lib/github';
 
 const api = new Hono<{ Bindings: Env }>();
@@ -72,15 +72,25 @@ api.post('/feedback', async (c) => {
       }, 403);
     }
 
-    // Prepare screenshot for embedding if provided
-    let screenshotDataUrl: string | undefined;
-    const imageData = payload.annotations || payload.screenshot;
-    if (imageData) {
-      screenshotDataUrl = prepareScreenshotForEmbed(imageData);
+    // Upload screenshot as file and get URL
+    let screenshotUrl: string | undefined;
+    const imageData = payload.screenshot;
+    if (imageData && imageData.startsWith('data:image/')) {
+      try {
+        screenshotUrl = await uploadScreenshotAsAsset(
+          token,
+          owner,
+          repo,
+          imageData
+        );
+      } catch (error) {
+        console.error('Failed to upload screenshot:', error);
+        // Continue without screenshot rather than failing the whole submission
+      }
     }
 
     // Build issue body
-    const body = formatIssueBody(payload, screenshotDataUrl);
+    const body = formatIssueBody(payload, screenshotUrl);
 
     // Create issue
     const issue = await createIssue(
