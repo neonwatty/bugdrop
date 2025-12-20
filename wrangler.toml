@@ -1,0 +1,16 @@
+name = "feedback-widget"
+main = "src/index.ts"
+compatibility_date = "2024-01-29"
+
+# Static assets directory (for widget.js)
+[assets]
+directory = "public"
+binding = "ASSETS"
+
+# Environment variables
+[vars]
+ENVIRONMENT = "development"
+
+# Secrets (set with: wrangler secret put GITHUB_APP_ID)
+# GITHUB_APP_ID
+# GITHUB_PRIVATE_KEY

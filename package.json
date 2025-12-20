@@ -1,0 +1,30 @@
+{
+  "name": "feedback-widget",
+  "version": "1.0.0",
+  "description": "Lightweight embeddable feedback widget that creates GitHub Issues",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build": "tsc",
+    "build:widget": "esbuild src/widget/index.ts --bundle --minify --format=iife --outfile=public/widget.js",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "typecheck": "tsc --noEmit && tsc --project tsconfig.widget.json --noEmit"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241127.0",
+    "@playwright/test": "^1.49.0",
+    "@types/node": "^22.10.2",
+    "esbuild": "^0.24.0",
+    "html-to-image": "^1.11.13",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8",
+    "wrangler": "^3.96.0"
+  },
+  "dependencies": {
+    "hono": "^4.6.14"
+  }
+}
