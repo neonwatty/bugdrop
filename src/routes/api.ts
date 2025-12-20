@@ -4,7 +4,7 @@ import type { Env, FeedbackPayload } from '../types';
 import {
   getInstallationToken,
   createIssue,
-  uploadScreenshot,
+  prepareScreenshotForEmbed,
 } from '../lib/github';
 
 const api = new Hono<{ Bindings: Env }>();
@@ -72,15 +72,15 @@ api.post('/feedback', async (c) => {
       }, 403);
     }
 
-    // Upload screenshot if provided
-    let screenshotUrl: string | undefined;
+    // Prepare screenshot for embedding if provided
+    let screenshotDataUrl: string | undefined;
     const imageData = payload.annotations || payload.screenshot;
     if (imageData) {
-      screenshotUrl = await uploadScreenshot(token, owner, repo, imageData);
+      screenshotDataUrl = prepareScreenshotForEmbed(imageData);
     }
 
     // Build issue body
-    const body = formatIssueBody(payload, screenshotUrl);
+    const body = formatIssueBody(payload, screenshotDataUrl);
 
     // Create issue
     const issue = await createIssue(
@@ -111,7 +111,7 @@ api.post('/feedback', async (c) => {
  */
 function formatIssueBody(
   payload: FeedbackPayload,
-  screenshotUrl?: string
+  screenshotDataUrl?: string
 ): string {
   const sections: string[] = [];
 
@@ -120,10 +120,10 @@ function formatIssueBody(
   sections.push(payload.description);
   sections.push('');
 
-  // Screenshot
-  if (screenshotUrl) {
+  // Screenshot - embedded as base64 data URL
+  if (screenshotDataUrl) {
     sections.push('## Screenshot');
-    sections.push(`![Screenshot](${screenshotUrl})`);
+    sections.push(`![Screenshot](${screenshotDataUrl})`);
     sections.push('');
   }
 

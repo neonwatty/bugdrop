@@ -124,6 +124,7 @@ export async function uploadFile(
 
 /**
  * Upload screenshot and return URL
+ * @deprecated This function is no longer used. Screenshots are now embedded as base64 in issue bodies.
  */
 export async function uploadScreenshot(
   token: string,
@@ -145,4 +146,12 @@ export async function uploadScreenshot(
     content,
     'Add feedback screenshot'
   );
+}
+
+/**
+ * Prepare screenshot data URL for embedding in markdown
+ * Returns the base64 data URL as-is for direct embedding in issue body
+ */
+export function prepareScreenshotForEmbed(base64DataUrl: string): string {
+  return base64DataUrl;
 }
