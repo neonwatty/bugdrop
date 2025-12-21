@@ -4,7 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Feedback Widget E2E Test Page</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
+    :root {
+      /* Tokyo Night inspired palette */
+      --bg-deep: #1a1b26;
+      --bg-surface: #24283b;
+      --bg-elevated: #414868;
+      --text-primary: #c0caf5;
+      --text-muted: #565f89;
+      --text-subtle: #787c99;
+      --accent-warm: #ff9e64;
+      --accent-rose: #f7768e;
+      --accent-cyan: #7dcfff;
+      --accent-green: #9ece6a;
+      --accent-purple: #bb9af7;
+      --border: #3b4261;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -12,243 +31,561 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      line-height: 1.6;
-      color: #333;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      line-height: 1.7;
+      color: var(--text-primary);
+      background: var(--bg-deep);
       min-height: 100vh;
-      padding: 2rem;
+      overflow-x: hidden;
+    }
+
+    /* Atmospheric background layers */
+    .bg-atmosphere {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        radial-gradient(ellipse 80% 50% at 20% 40%, rgba(255, 158, 100, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 80% 20%, rgba(125, 207, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 80% at 60% 80%, rgba(187, 154, 247, 0.04) 0%, transparent 50%),
+        var(--bg-deep);
+    }
+
+    /* Subtle noise texture */
+    .bg-atmosphere::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none;
     }
 
     .container {
-      max-width: 1200px;
+      max-width: 1100px;
       margin: 0 auto;
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-      padding: 3rem;
+      padding: 4rem 2rem;
+    }
+
+    /* Hero section */
+    .hero {
+      text-align: center;
+      margin-bottom: 5rem;
+      animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent-cyan);
+      background: rgba(125, 207, 255, 0.1);
+      border: 1px solid rgba(125, 207, 255, 0.2);
+      padding: 0.5rem 1rem;
+      border-radius: 100px;
+      margin-bottom: 2rem;
     }
 
     h1 {
-      color: #667eea;
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 300;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-muted) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    h1 strong {
       font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-warm) 0%, var(--accent-rose) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
     }
 
+    .hero-description {
+      font-size: 1.25rem;
+      color: var(--text-subtle);
+      max-width: 600px;
+      margin: 0 auto;
+      font-weight: 400;
+    }
+
+    /* Section titles */
     h2 {
-      color: #764ba2;
-      font-size: 1.8rem;
-      margin: 2rem 0 1rem;
+      font-size: 0.8rem;
       font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
 
-    p {
-      margin-bottom: 1rem;
-      color: #555;
-      font-size: 1.1rem;
+    h2::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, var(--border) 0%, transparent 100%);
     }
 
+    /* Feature grid */
     .feature-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 1.5rem;
-      margin: 2rem 0;
+      margin-bottom: 5rem;
     }
 
     .feature-card {
-      background: #f8f9fa;
-      padding: 1.5rem;
-      border-radius: 8px;
-      border: 2px solid #e9ecef;
-      transition: all 0.3s ease;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .feature-card:nth-child(1) { animation-delay: 0.1s; }
+    .feature-card:nth-child(2) { animation-delay: 0.15s; }
+    .feature-card:nth-child(3) { animation-delay: 0.2s; }
+    .feature-card:nth-child(4) { animation-delay: 0.25s; }
+    .feature-card:nth-child(5) { animation-delay: 0.3s; }
+    .feature-card:nth-child(6) { animation-delay: 0.35s; }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-warm), transparent);
+      opacity: 0;
+      transition: opacity 0.4s ease;
     }
 
     .feature-card:hover {
-      border-color: #667eea;
       transform: translateY(-4px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+      border-color: var(--accent-warm);
+      box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.3),
+        0 0 60px rgba(255, 158, 100, 0.05);
+    }
+
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      display: block;
     }
 
     .feature-card h3 {
-      color: #667eea;
-      margin-bottom: 0.5rem;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.01em;
     }
 
     .feature-card p {
-      font-size: 0.95rem;
-      color: #666;
+      font-size: 0.9rem;
+      color: var(--text-subtle);
+      line-height: 1.6;
     }
 
+    /* CTA section */
     .cta-section {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 2rem;
-      border-radius: 8px;
-      margin: 2rem 0;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 3rem;
       text-align: center;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 5rem;
+      animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both;
     }
 
-    .cta-section h2 {
-      color: white;
-      margin-top: 0;
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 30% 50%, rgba(255, 158, 100, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 70% 50%, rgba(125, 207, 255, 0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .cta-title {
+      font-size: 2rem;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      color: var(--text-primary);
+    }
+
+    .cta-title strong {
+      font-weight: 700;
+      color: var(--accent-warm);
     }
 
     .cta-section p {
-      color: rgba(255, 255, 255, 0.9);
+      color: var(--text-subtle);
       font-size: 1.1rem;
+      max-width: 500px;
+      margin: 0 auto;
     }
 
-    .test-elements {
-      margin: 2rem 0;
-      padding: 1.5rem;
-      background: #f1f3f5;
-      border-radius: 8px;
+    /* Test elements section */
+    .test-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 5rem;
+      animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
     }
 
-    .test-elements button {
-      background: #667eea;
-      color: white;
+    .test-section p {
+      color: var(--text-subtle);
+      margin-bottom: 1.5rem;
+    }
+
+    .test-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .btn {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 0.875rem 1.5rem;
+      border-radius: 10px;
       border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 6px;
       cursor: pointer;
-      font-size: 1rem;
-      margin: 0.5rem;
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .test-elements button:hover {
-      background: #5568d3;
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-warm) 0%, var(--accent-rose) 100%);
+      color: var(--bg-deep);
+    }
+
+    .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      box-shadow: 0 10px 30px rgba(255, 158, 100, 0.3);
     }
 
-    .test-elements input {
-      padding: 0.75rem;
-      border: 2px solid #dee2e6;
-      border-radius: 6px;
-      font-size: 1rem;
-      margin: 0.5rem;
-      width: calc(100% - 1rem);
-      max-width: 400px;
+    .btn-secondary {
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
     }
 
-    code {
-      background: #f8f9fa;
-      padding: 0.2rem 0.4rem;
-      border-radius: 4px;
-      font-family: 'Monaco', 'Courier New', monospace;
-      color: #764ba2;
-      font-size: 0.9em;
+    .btn-secondary:hover {
+      background: var(--border);
+      transform: translateY(-2px);
     }
 
-    .info-box {
-      background: #e7f5ff;
-      border-left: 4px solid #667eea;
-      padding: 1rem 1.5rem;
-      margin: 1.5rem 0;
-      border-radius: 4px;
+    .test-input {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.9rem;
+      padding: 0.875rem 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      flex: 1;
+      min-width: 200px;
+      max-width: 300px;
+      transition: all 0.3s ease;
     }
 
-    .info-box p {
+    .test-input:focus {
+      outline: none;
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 0 3px rgba(125, 207, 255, 0.15);
+    }
+
+    .test-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    /* Code block */
+    .code-block {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      color: var(--accent-cyan);
+      margin-top: 1.5rem;
+      overflow-x: auto;
+    }
+
+    .code-block .keyword { color: var(--accent-purple); }
+    .code-block .variable { color: var(--accent-cyan); }
+    .code-block .function { color: var(--accent-warm); }
+
+    /* Info callout */
+    .info-callout {
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+      background: rgba(125, 207, 255, 0.05);
+      border: 1px solid rgba(125, 207, 255, 0.15);
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 3rem;
+      animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+    }
+
+    .info-callout-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+
+    .info-callout p {
+      color: var(--text-subtle);
+      font-size: 0.95rem;
       margin: 0;
-      color: #1864ab;
     }
 
+    .info-callout strong {
+      color: var(--accent-cyan);
+    }
+
+    /* Documentation section */
+    .docs-section {
+      animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.6s both;
+    }
+
+    .docs-section p {
+      color: var(--text-subtle);
+      margin-bottom: 1rem;
+    }
+
+    .docs-section code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85em;
+      background: var(--bg-elevated);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      color: var(--accent-warm);
+    }
+
+    .docs-section ul {
+      list-style: none;
+      margin: 1.5rem 0;
+    }
+
+    .docs-section li {
+      color: var(--text-subtle);
+      padding: 0.5rem 0;
+      padding-left: 1.5rem;
+      position: relative;
+    }
+
+    .docs-section li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--accent-cyan);
+    }
+
+    /* Footer */
     footer {
-      margin-top: 3rem;
-      padding-top: 2rem;
-      border-top: 2px solid #e9ecef;
       text-align: center;
-      color: #868e96;
+      padding-top: 3rem;
+      border-top: 1px solid var(--border);
+      animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.7s both;
+    }
+
+    footer p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+
+    footer .tech-stack {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    footer .tech-tag {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: var(--bg-surface);
+      padding: 0.4rem 0.8rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .container {
+        padding: 2rem 1rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .test-controls {
+        flex-direction: column;
+      }
+
+      .test-input {
+        max-width: 100%;
+      }
+
+      footer .tech-stack {
+        flex-wrap: wrap;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Feedback Widget Test Page</h1>
-    <p>This page is used for E2E testing of the feedback widget. The widget should appear in the bottom-right corner of the page.</p>
+  <div class="bg-atmosphere"></div>
 
-    <div class="info-box">
+  <div class="container">
+    <header class="hero">
+      <span class="hero-badge">E2E Testing</span>
+      <h1>Feedback Widget<br><strong>Test Page</strong></h1>
+      <p class="hero-description">Click the feedback button in the bottom-right corner to open the widget and explore all features.</p>
+    </header>
+
+    <div class="info-callout">
+      <span class="info-callout-icon">💡</span>
       <p><strong>Test Instructions:</strong> Look for the feedback button (💬) in the bottom-right corner. Click it to open the feedback modal and test all features.</p>
     </div>
 
     <h2>Widget Features</h2>
     <div class="feature-grid">
       <div class="feature-card">
-        <h3>📸 Screenshot Capture</h3>
+        <span class="feature-icon">📸</span>
+        <h3>Screenshot Capture</h3>
         <p>Capture full page or specific element screenshots to include with your feedback.</p>
       </div>
 
       <div class="feature-card">
-        <h3>🎨 Annotations</h3>
+        <span class="feature-icon">🎨</span>
+        <h3>Annotations</h3>
         <p>Draw, add arrows, and create rectangles to highlight specific areas of concern.</p>
       </div>
 
       <div class="feature-card">
-        <h3>🎯 Element Picker</h3>
+        <span class="feature-icon">🎯</span>
+        <h3>Element Picker</h3>
         <p>Click on any element to capture a screenshot of just that component.</p>
       </div>
 
       <div class="feature-card">
-        <h3>📝 Rich Feedback</h3>
+        <span class="feature-icon">📝</span>
+        <h3>Rich Feedback</h3>
         <p>Provide detailed feedback with titles, descriptions, and visual annotations.</p>
       </div>
 
       <div class="feature-card">
-        <h3>🔒 Shadow DOM</h3>
+        <span class="feature-icon">🔒</span>
+        <h3>Shadow DOM</h3>
         <p>Widget styles are isolated from your page using Shadow DOM technology.</p>
       </div>
 
       <div class="feature-card">
-        <h3>✅ Validation</h3>
+        <span class="feature-icon">✅</span>
+        <h3>Validation</h3>
         <p>Form validation ensures all required fields are filled before submission.</p>
       </div>
     </div>
 
     <div class="cta-section">
-      <h2>Try It Out!</h2>
+      <h3 class="cta-title">Ready to <strong>Try It?</strong></h3>
       <p>Click the feedback button in the bottom-right corner to test the widget. Try capturing screenshots, adding annotations, and submitting feedback.</p>
     </div>
 
     <h2>Test Elements</h2>
-    <div class="test-elements">
+    <div class="test-section">
       <p>These elements can be used to test the element picker and annotation features:</p>
-      <button id="test-button-1">Primary Action Button</button>
-      <button id="test-button-2">Secondary Action Button</button>
-      <input type="text" placeholder="Test input field" id="test-input">
-      <div style="margin-top: 1rem;">
-        <code id="test-code">const widget = new FeedbackWidget();</code>
+      <div class="test-controls">
+        <button class="btn btn-primary" id="test-button-1">Primary Action</button>
+        <button class="btn btn-secondary" id="test-button-2">Secondary Action</button>
+        <input type="text" class="test-input" placeholder="Test input field..." id="test-input">
+      </div>
+      <div class="code-block" id="test-code">
+        <span class="keyword">const</span> <span class="variable">widget</span> = <span class="keyword">new</span> <span class="function">FeedbackWidget</span>();
       </div>
     </div>
 
     <h2>How It Works</h2>
-    <p>The feedback widget is loaded from <code>/widget.js</code> and creates an isolated environment using Shadow DOM. This ensures that:</p>
-    <ul style="margin-left: 2rem; margin-bottom: 1rem;">
-      <li>Widget styles don't interfere with your page styles</li>
-      <li>Your page styles don't affect the widget appearance</li>
-      <li>The widget maintains consistent behavior across all sites</li>
-      <li>No CSS conflicts or naming collisions occur</li>
-    </ul>
+    <div class="docs-section">
+      <p>The feedback widget is loaded from <code>/widget.js</code> and creates an isolated environment using Shadow DOM. This ensures that:</p>
+      <ul>
+        <li>Widget styles don't interfere with your page styles</li>
+        <li>Your page styles don't affect the widget appearance</li>
+        <li>The widget maintains consistent behavior across all sites</li>
+        <li>No CSS conflicts or naming collisions occur</li>
+      </ul>
 
-    <p>When you submit feedback, it's sent to the <code>/api/feedback</code> endpoint as a JSON payload containing:</p>
-    <ul style="margin-left: 2rem; margin-bottom: 1rem;">
-      <li>Title and description of the feedback</li>
-      <li>Optional screenshot (base64 encoded)</li>
-      <li>Optional annotations layer</li>
-      <li>Metadata (URL, viewport size, user agent, timestamp)</li>
-      <li>Optional element selector for targeted feedback</li>
-    </ul>
+      <p>When you submit feedback, it's sent to the <code>/api/feedback</code> endpoint as a JSON payload containing:</p>
+      <ul>
+        <li>Title and description of the feedback</li>
+        <li>Optional screenshot (base64 encoded)</li>
+        <li>Optional annotations layer</li>
+        <li>Metadata (URL, viewport size, user agent, timestamp)</li>
+        <li>Optional element selector for targeted feedback</li>
+      </ul>
+    </div>
 
     <footer>
-      <p>Feedback Widget E2E Test Page &copy; 2024</p>
+      <p>Feedback Widget E2E Test Page</p>
       <p>Built for testing with Playwright</p>
+      <div class="tech-stack">
+        <span class="tech-tag">Shadow DOM</span>
+        <span class="tech-tag">TypeScript</span>
+        <span class="tech-tag">Cloudflare Workers</span>
+      </div>
     </footer>
   </div>
 
-  <!-- Load the feedback widget (change data-theme to "dark" to test dark mode) -->
-  <script src="/widget.js" data-repo="neonwatty/feedback-widget-test" data-theme="light"></script>
+  <!-- Load the feedback widget (change data-theme to "light" to test light mode) -->
+  <script src="/widget.js" data-repo="neonwatty/feedback-widget-test" data-theme="dark"></script>
 </body>
 </html>
