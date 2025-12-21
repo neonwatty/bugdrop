@@ -44,21 +44,17 @@ test.describe('Widget Loading', () => {
 test.describe('Widget Interaction', () => {
   test('clicking feedback button triggers modal', async ({ page }) => {
     await page.goto('/test/');
-    await page.waitForTimeout(500);
+
+    // Wait for widget to be ready
+    const button = page.locator('#feedback-widget-host').locator('css=.fw-trigger');
+    await expect(button).toBeVisible({ timeout: 5000 });
 
     // Click the trigger button
-    const button = page.locator('#feedback-widget-host').locator('css=.fw-trigger');
     await button.click();
 
-    // Wait for modal to appear
-    await page.waitForTimeout(500);
-
-    // Modal should be visible (or installation prompt if not installed)
+    // Modal should appear (or installation prompt if not installed)
     const modal = page.locator('#feedback-widget-host').locator('css=.fw-modal');
-    const hasModal = await modal.count() > 0;
-
-    // Either modal or some UI response should happen
-    expect(hasModal).toBe(true);
+    await expect(modal).toBeVisible({ timeout: 5000 });
   });
 });
 
