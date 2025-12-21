@@ -11,15 +11,16 @@ function startPicker(resolve: (element: Element | null) => void): void {
   // Create highlight overlay with higher z-index than modal (1000000)
   const highlight = document.createElement('div');
   highlight.id = 'feedback-element-picker-highlight';
+  // Use teal color to match the widget theme
   highlight.style.cssText = `
     position: fixed;
     pointer-events: none;
-    border: 3px solid #0066ff;
-    background: rgba(0, 102, 255, 0.15);
+    border: 3px solid #14b8a6;
+    background: rgba(20, 184, 166, 0.15);
     z-index: 2147483646;
     transition: all 0.05s ease-out;
-    box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.3);
-    border-radius: 4px;
+    box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.3);
+    border-radius: 6px;
   `;
   document.body.appendChild(highlight);
 
@@ -31,15 +32,16 @@ function startPicker(resolve: (element: Element | null) => void): void {
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: #1a1a1a;
-    color: white;
+    background: #0f172a;
+    color: #f1f5f9;
     padding: 14px 28px;
-    border-radius: 8px;
-    font-family: system-ui, sans-serif;
+    border-radius: 10px;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
     font-size: 14px;
     font-weight: 500;
     z-index: 2147483647;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 40px rgba(34, 211, 238, 0.1);
+    border: 1px solid #334155;
   `;
   tooltip.textContent = 'Click on any element to capture it (ESC to cancel)';
   document.body.appendChild(tooltip);

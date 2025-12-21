@@ -1,7 +1,16 @@
 import { captureScreenshot } from './screenshot';
 import { createElementPicker } from './picker';
 import { createAnnotator } from './annotator';
-import { injectStyles, createModal, showToast } from './ui';
+import {
+  injectStyles,
+  createModal,
+  showToast,
+  showLoadingOverlay,
+  hideLoadingOverlay,
+  setButtonLoading,
+  showError,
+  clearError,
+} from './ui';
 
 interface WidgetConfig {
   repo: string;
@@ -16,6 +25,9 @@ interface FeedbackData {
   screenshot: string | null;
   elementSelector: string | null;
 }
+
+// Store root element for global access
+let widgetRoot: HTMLElement | null = null;
 
 // Read config from script tag
 const script = document.currentScript as HTMLScriptElement;
@@ -41,39 +53,40 @@ function initWidget(config: WidgetConfig) {
 
   const shadow = host.attachShadow({ mode: 'open' });
 
-  // Inject styles and trigger button
-  injectStyles(shadow, config);
+  // Inject styles and create root wrapper
+  const root = injectStyles(shadow, config);
+  widgetRoot = root;
 
   const trigger = document.createElement('button');
   trigger.className = 'fw-trigger';
   trigger.innerHTML = '💬';
   trigger.setAttribute('aria-label', 'Send feedback');
-  shadow.appendChild(trigger);
+  root.appendChild(trigger);
 
   // Handle trigger click
-  trigger.addEventListener('click', () => openFeedbackFlow(shadow, config));
+  trigger.addEventListener('click', () => openFeedbackFlow(root, config));
 }
 
-async function openFeedbackFlow(shadow: ShadowRoot, config: WidgetConfig) {
+async function openFeedbackFlow(root: HTMLElement, config: WidgetConfig) {
   // Check if app is installed
   const installed = await checkInstallation(config);
   if (!installed) {
-    showInstallPrompt(shadow, config);
+    showInstallPrompt(root, config);
     return;
   }
 
   // Step 1: Screenshot options
-  const screenshotChoice = await showScreenshotOptions(shadow);
+  const screenshotChoice = await showScreenshotOptions(root);
 
   let screenshot: string | null = null;
   let elementSelector: string | null = null;
 
   if (screenshotChoice === 'capture') {
-    screenshot = await captureScreenshot();
+    screenshot = await captureWithLoading(root);
   } else if (screenshotChoice === 'element') {
     const element = await createElementPicker();
     if (element) {
-      screenshot = await captureScreenshot(element);
+      screenshot = await captureWithLoading(root, element);
       elementSelector = getElementSelector(element);
     }
   }
@@ -81,19 +94,84 @@ async function openFeedbackFlow(shadow: ShadowRoot, config: WidgetConfig) {
   // Step 2: Annotate (if screenshot exists)
   let annotatedScreenshot = screenshot;
   if (screenshot) {
-    annotatedScreenshot = await showAnnotationStep(shadow, screenshot);
+    annotatedScreenshot = await showAnnotationStep(root, screenshot);
   }
 
   // Step 3: Feedback form
-  const formData = await showFeedbackForm(shadow, annotatedScreenshot);
+  const formData = await showFeedbackForm(root, annotatedScreenshot);
   if (!formData) return; // User cancelled
 
   // Submit
-  await submitFeedback(shadow, config, {
+  await submitFeedback(root, config, {
     ...formData,
     screenshot: annotatedScreenshot,
     elementSelector,
   });
+}
+
+async function captureWithLoading(
+  root: HTMLElement,
+  element?: Element
+): Promise<string | null> {
+  // Show a temporary loading indicator
+  const loadingModal = createModal(
+    root,
+    'Capturing...',
+    `
+      <div style="display: flex; flex-direction: column; align-items: center; padding: 20px;">
+        <div class="fw-spinner fw-spinner--lg"></div>
+        <p class="fw-loading-text" style="margin-top: 12px;">Capturing screenshot...</p>
+      </div>
+    `
+  );
+
+  try {
+    const screenshot = await captureScreenshot(element);
+    loadingModal.remove();
+    return screenshot;
+  } catch (error) {
+    loadingModal.remove();
+
+    // Show error with retry option
+    return new Promise((resolve) => {
+      const errorModal = createModal(
+        root,
+        'Capture Failed',
+        `
+          <div class="fw-error-message">
+            <svg class="fw-error-message__icon" viewBox="0 0 16 16" fill="currentColor">
+              <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-9.5a.75.75 0 0 0-.75.75v2.5a.75.75 0 0 0 1.5 0v-2.5A.75.75 0 0 0 8 5.5zm0 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+            </svg>
+            <span class="fw-error-message__text">Failed to capture screenshot. This might be due to browser restrictions.</span>
+          </div>
+          <div class="fw-actions">
+            <button class="fw-btn fw-btn-secondary" data-action="skip">Skip Screenshot</button>
+            <button class="fw-btn fw-btn-primary" data-action="retry">Try Again</button>
+          </div>
+        `
+      );
+
+      const closeBtn = errorModal.querySelector('.fw-close') as HTMLElement;
+      const skipBtn = errorModal.querySelector('[data-action="skip"]') as HTMLElement;
+      const retryBtn = errorModal.querySelector('[data-action="retry"]') as HTMLElement;
+
+      closeBtn?.addEventListener('click', () => {
+        errorModal.remove();
+        resolve(null);
+      });
+
+      skipBtn?.addEventListener('click', () => {
+        errorModal.remove();
+        resolve(null);
+      });
+
+      retryBtn?.addEventListener('click', async () => {
+        errorModal.remove();
+        const result = await captureWithLoading(root, element);
+        resolve(result);
+      });
+    });
+  }
 }
 
 async function checkInstallation(config: WidgetConfig): Promise<boolean> {
@@ -106,12 +184,12 @@ async function checkInstallation(config: WidgetConfig): Promise<boolean> {
   }
 }
 
-function showInstallPrompt(shadow: ShadowRoot, config: WidgetConfig) {
+function showInstallPrompt(root: HTMLElement, config: WidgetConfig) {
   const modal = createModal(
-    shadow,
+    root,
     'Install Required',
     `
-      <p style="margin: 0 0 16px;">This feedback widget requires GitHub App installation.</p>
+      <p style="margin: 0 0 16px; color: var(--fw-text-secondary);">This feedback widget requires GitHub App installation.</p>
       <div class="fw-actions">
         <button class="fw-btn fw-btn-secondary" data-action="cancel">Cancel</button>
         <a href="https://github.com/apps/YOUR_APP_NAME/installations/new" target="_blank" class="fw-btn fw-btn-primary" style="text-decoration: none;">Install App</a>
@@ -126,13 +204,13 @@ function showInstallPrompt(shadow: ShadowRoot, config: WidgetConfig) {
   cancelBtn?.addEventListener('click', () => modal.remove());
 }
 
-function showScreenshotOptions(shadow: ShadowRoot): Promise<'skip' | 'capture' | 'element'> {
+function showScreenshotOptions(root: HTMLElement): Promise<'skip' | 'capture' | 'element'> {
   return new Promise((resolve) => {
     const modal = createModal(
-      shadow,
+      root,
       'Capture Screenshot',
       `
-        <p style="margin: 0 0 16px;">Would you like to include a screenshot with your feedback?</p>
+        <p style="margin: 0 0 16px; color: var(--fw-text-secondary);">Would you like to include a screenshot with your feedback?</p>
         <div class="fw-actions">
           <button class="fw-btn fw-btn-secondary" data-action="skip">Skip</button>
           <button class="fw-btn fw-btn-secondary" data-action="element">Select Element</button>
@@ -168,10 +246,10 @@ function showScreenshotOptions(shadow: ShadowRoot): Promise<'skip' | 'capture' |
   });
 }
 
-function showAnnotationStep(shadow: ShadowRoot, screenshot: string): Promise<string> {
+function showAnnotationStep(root: HTMLElement, screenshot: string): Promise<string> {
   return new Promise((resolve) => {
     const modal = createModal(
-      shadow,
+      root,
       'Annotate Screenshot',
       `
         <div class="fw-tools">
@@ -235,7 +313,7 @@ function showAnnotationStep(shadow: ShadowRoot, screenshot: string): Promise<str
 }
 
 function showFeedbackForm(
-  shadow: ShadowRoot,
+  root: HTMLElement,
   screenshot: string | null
 ): Promise<{ title: string; description: string } | null> {
   return new Promise((resolve) => {
@@ -244,7 +322,7 @@ function showFeedbackForm(
       : '';
 
     const modal = createModal(
-      shadow,
+      root,
       'Send Feedback',
       `
         ${previewHtml}
@@ -259,7 +337,7 @@ function showFeedbackForm(
           </div>
           <div class="fw-actions">
             <button type="button" class="fw-btn fw-btn-secondary" data-action="cancel">Cancel</button>
-            <button type="submit" class="fw-btn fw-btn-primary">Submit</button>
+            <button type="submit" class="fw-btn fw-btn-primary" id="submit-btn">Submit</button>
           </div>
         </form>
       `
@@ -270,6 +348,13 @@ function showFeedbackForm(
     const descriptionInput = modal.querySelector('#description') as HTMLTextAreaElement;
     const closeBtn = modal.querySelector('.fw-close') as HTMLElement;
     const cancelBtn = modal.querySelector('[data-action="cancel"]') as HTMLElement;
+
+    // Clear validation errors on input
+    titleInput?.addEventListener('input', () => {
+      titleInput.classList.remove('fw-input--error');
+      const errorHint = form.querySelector('.fw-field-error');
+      if (errorHint) errorHint.remove();
+    });
 
     closeBtn?.addEventListener('click', () => {
       modal.remove();
@@ -283,9 +368,25 @@ function showFeedbackForm(
 
     form?.addEventListener('submit', (e) => {
       e.preventDefault();
+
+      // Validate
+      const title = titleInput.value.trim();
+      if (!title) {
+        titleInput.classList.add('fw-input--error');
+        const existingError = form.querySelector('.fw-field-error');
+        if (!existingError) {
+          const errorHint = document.createElement('div');
+          errorHint.className = 'fw-field-error';
+          errorHint.textContent = 'Title is required';
+          titleInput.parentElement?.appendChild(errorHint);
+        }
+        titleInput.focus();
+        return;
+      }
+
       modal.remove();
       resolve({
-        title: titleInput.value.trim(),
+        title,
         description: descriptionInput.value.trim(),
       });
     });
@@ -293,10 +394,22 @@ function showFeedbackForm(
 }
 
 async function submitFeedback(
-  shadow: ShadowRoot,
+  root: HTMLElement,
   config: WidgetConfig,
   data: FeedbackData
 ) {
+  // Show submitting modal with loading state
+  const modal = createModal(
+    root,
+    'Submitting...',
+    `
+      <div style="display: flex; flex-direction: column; align-items: center; padding: 20px;">
+        <div class="fw-spinner fw-spinner--lg"></div>
+        <p class="fw-loading-text" style="margin-top: 12px;">Creating issue...</p>
+      </div>
+    `
+  );
+
   try {
     const response = await fetch(`${config.apiUrl}/feedback`, {
       method: 'POST',
@@ -320,15 +433,53 @@ async function submitFeedback(
     });
 
     const result = await response.json();
+    modal.remove();
 
     if (result.success) {
-      showToast(shadow, `Issue #${result.issueNumber} created!`, 'success');
+      showToast(root, `Issue #${result.issueNumber} created!`, 'success');
     } else {
-      showToast(shadow, result.error || 'Failed to submit', 'error');
+      showSubmitError(root, config, data, result.error || 'Failed to submit');
     }
   } catch (error) {
-    showToast(shadow, 'Network error', 'error');
+    modal.remove();
+    showSubmitError(root, config, data, 'Network error. Please check your connection.');
   }
+}
+
+function showSubmitError(
+  root: HTMLElement,
+  config: WidgetConfig,
+  data: FeedbackData,
+  errorMessage: string
+) {
+  const modal = createModal(
+    root,
+    'Submission Failed',
+    `
+      <div class="fw-error-message">
+        <svg class="fw-error-message__icon" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-9.5a.75.75 0 0 0-.75.75v2.5a.75.75 0 0 0 1.5 0v-2.5A.75.75 0 0 0 8 5.5zm0 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+        </svg>
+        <span class="fw-error-message__text">${errorMessage}</span>
+      </div>
+      <div class="fw-actions">
+        <button class="fw-btn fw-btn-secondary" data-action="cancel">Cancel</button>
+        <button class="fw-btn fw-btn-primary" data-action="retry">Try Again</button>
+      </div>
+    `
+  );
+
+  const closeBtn = modal.querySelector('.fw-close') as HTMLElement;
+  const cancelBtn = modal.querySelector('[data-action="cancel"]') as HTMLElement;
+  const retryBtn = modal.querySelector('[data-action="retry"]') as HTMLElement;
+
+  closeBtn?.addEventListener('click', () => modal.remove());
+  cancelBtn?.addEventListener('click', () => modal.remove());
+
+  retryBtn?.addEventListener('click', async () => {
+    modal.remove();
+    await submitFeedback(root, config, data);
+  });
 }
 
 function getElementSelector(element: Element): string {
