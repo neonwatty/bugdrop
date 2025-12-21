@@ -8,7 +8,7 @@ Embeddable bug reporting widget that creates GitHub Issues with screenshots and 
 
 **1. Install the GitHub App** on your repository:
 
-https://github.com/apps/feedback-widget-test/installations/new
+https://github.com/apps/neonwatty-feedback-widget/installations/new
 
 **2. Add the script** to your website:
 
