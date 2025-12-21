@@ -14,7 +14,7 @@ const headers = (token: string) => ({
 /**
  * Get installation ID for a repository
  */
-export async function getInstallationId(
+async function getInstallationId(
   env: Env,
   owner: string,
   repo: string
@@ -91,35 +91,6 @@ export async function createIssue(
   }
 
   return response.json();
-}
-
-/**
- * Upload a file to the repository
- */
-export async function uploadFile(
-  token: string,
-  owner: string,
-  repo: string,
-  path: string,
-  content: string,  // base64 encoded
-  message: string
-): Promise<string> {
-  const response = await fetch(
-    `${GITHUB_API}/repos/${owner}/${repo}/contents/${path}`,
-    {
-      method: 'PUT',
-      headers: headers(token),
-      body: JSON.stringify({ message, content }),
-    }
-  );
-
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Failed to upload file: ${response.status} - ${error}`);
-  }
-
-  const data = await response.json() as { content: { download_url: string } };
-  return data.content.download_url;
 }
 
 /**

@@ -5,12 +5,12 @@ import type { Env, FeedbackPayload } from '../src/types';
 // Mock GitHub API functions
 const mockGetInstallationToken = vi.fn();
 const mockCreateIssue = vi.fn();
-const mockPrepareScreenshotForEmbed = vi.fn();
+const mockUploadScreenshotAsAsset = vi.fn();
 
 vi.mock('../src/lib/github', () => ({
   getInstallationToken: (...args: unknown[]) => mockGetInstallationToken(...args),
   createIssue: (...args: unknown[]) => mockCreateIssue(...args),
-  prepareScreenshotForEmbed: (...args: unknown[]) => mockPrepareScreenshotForEmbed(...args),
+  uploadScreenshotAsAsset: (...args: unknown[]) => mockUploadScreenshotAsAsset(...args),
 }));
 
 // Import API routes after mocking
@@ -250,10 +250,11 @@ describe('API Routes', () => {
       expect(data.installUrl).toBeDefined();
     });
 
-    it('should embed screenshot as base64 when provided', async () => {
+    it('should upload screenshot and include URL in issue body', async () => {
       mockGetInstallationToken.mockResolvedValue('test-token');
       const screenshotDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
-      mockPrepareScreenshotForEmbed.mockReturnValue(screenshotDataUrl);
+      const uploadedUrl = 'https://raw.githubusercontent.com/testowner/testrepo/main/.feedback/screenshots/123456.png';
+      mockUploadScreenshotAsAsset.mockResolvedValue(uploadedUrl);
       mockCreateIssue.mockResolvedValue({
         number: 42,
         html_url: 'https://github.com/testowner/testrepo/issues/42',
@@ -272,40 +273,50 @@ describe('API Routes', () => {
       const res = await app.fetch(req, mockEnv);
 
       expect(res.status).toBe(200);
-      expect(mockPrepareScreenshotForEmbed).toHaveBeenCalledWith(screenshotDataUrl);
+      expect(mockUploadScreenshotAsAsset).toHaveBeenCalledWith(
+        'test-token',
+        'testowner',
+        'testrepo',
+        screenshotDataUrl
+      );
       expect(mockCreateIssue).toHaveBeenCalledWith(
         'test-token',
         'testowner',
         'testrepo',
         'Test feedback',
-        expect.stringContaining(screenshotDataUrl),
+        expect.stringContaining(uploadedUrl),
         ['feedback', 'widget']
       );
     });
 
-    it('should prefer annotations over screenshot', async () => {
+    it('should use screenshot when provided (annotations handled client-side)', async () => {
       mockGetInstallationToken.mockResolvedValue('test-token');
-      const annotatedDataUrl = 'data:image/png;base64,annotated';
-      mockPrepareScreenshotForEmbed.mockReturnValue(annotatedDataUrl);
+      const screenshotDataUrl = 'data:image/png;base64,screenshot';
+      const uploadedUrl = 'https://raw.githubusercontent.com/testowner/testrepo/main/.feedback/screenshots/789.png';
+      mockUploadScreenshotAsAsset.mockResolvedValue(uploadedUrl);
       mockCreateIssue.mockResolvedValue({
         number: 42,
         html_url: 'https://github.com/testowner/testrepo/issues/42',
       });
 
-      const payloadWithBoth = {
+      const payloadWithScreenshot = {
         ...validPayload,
-        screenshot: 'data:image/png;base64,screenshot',
-        annotations: annotatedDataUrl,
+        screenshot: screenshotDataUrl,
       };
 
       const req = new Request('http://localhost/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payloadWithBoth),
+        body: JSON.stringify(payloadWithScreenshot),
       });
       await app.fetch(req, mockEnv);
 
-      expect(mockPrepareScreenshotForEmbed).toHaveBeenCalledWith(annotatedDataUrl);
+      expect(mockUploadScreenshotAsAsset).toHaveBeenCalledWith(
+        'test-token',
+        'testowner',
+        'testrepo',
+        screenshotDataUrl
+      );
     });
 
     it('should include CORS headers', async () => {

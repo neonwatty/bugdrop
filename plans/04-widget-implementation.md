@@ -87,8 +87,8 @@ function initWidget(config: WidgetConfig) {
 
   const trigger = document.createElement('button');
   trigger.className = 'fw-trigger';
-  trigger.innerHTML = '💬';
-  trigger.setAttribute('aria-label', 'Send feedback');
+  trigger.innerHTML = '🐛';
+  trigger.setAttribute('aria-label', 'Report a bug or send feedback');
   shadow.appendChild(trigger);
 
   // Handle trigger click

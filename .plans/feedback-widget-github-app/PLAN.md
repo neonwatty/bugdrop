@@ -74,7 +74,7 @@ Build a feedback widget system with three main components: (1) Cloudflare Worker
 - [ ] npm run build:widget creates public/widget.js without errors
 - [ ] Built widget.js is a valid IIFE bundle (self-contained, no external dependencies except html-to-image CDN)
 - [ ] Widget loads on test page at http://localhost:3000 when served from wrangler dev
-- [ ] Floating feedback button (💬) appears in bottom-right corner with proper z-index and hover effects
+- [ ] Floating bug button (🐛) appears in bottom-right corner with proper z-index and hover effects
 - [ ] Clicking trigger button opens modal with screenshot options (skip, capture page, select element)
 - [ ] Full page screenshot captures correctly excluding the widget itself
 - [ ] Element picker activates with crosshair cursor, highlights elements on hover with blue border, and captures on click

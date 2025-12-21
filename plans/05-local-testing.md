@@ -217,13 +217,13 @@ python3 -m http.server 3000
 1. Navigate to `http://localhost:3000` (or whatever port serve uses)
 2. You should see:
    - The test page content
-   - A blue feedback button in the bottom-right corner (💬)
+   - A bug feedback button in the bottom-right corner (🐛)
 
 ## Test Full Flow
 
 ### 1. Click the Feedback Button
 
-- Click the 💬 button
+- Click the 🐛 button
 - The feedback modal should appear
 
 ### 2. Test Screenshot Capture
