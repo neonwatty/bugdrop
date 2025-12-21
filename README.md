@@ -1,6 +1,7 @@
 # Feedback Widget
 
 [![CI](https://github.com/neonwatty/feedback-widget/actions/workflows/ci.yml/badge.svg)](https://github.com/neonwatty/feedback-widget/actions/workflows/ci.yml)
+[![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](./SECURITY.md)
 
 Embeddable bug reporting widget that creates GitHub Issues with screenshots and annotations.
 
