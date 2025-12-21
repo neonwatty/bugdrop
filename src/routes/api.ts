@@ -9,12 +9,30 @@ import {
 
 const api = new Hono<{ Bindings: Env }>();
 
-// CORS middleware
-api.use('*', cors({
-  origin: '*',  // Configure for production
-  allowMethods: ['GET', 'POST', 'OPTIONS'],
-  allowHeaders: ['Content-Type'],
-}));
+// CORS middleware with origin whitelist
+api.use('*', async (c, next) => {
+  const allowedOrigins = c.env.ALLOWED_ORIGINS || '*';
+
+  // Parse allowed origins
+  const originList = allowedOrigins === '*'
+    ? ['*']
+    : allowedOrigins.split(',').map(o => o.trim()).filter(Boolean);
+
+  const corsMiddleware = cors({
+    origin: (origin) => {
+      // Allow requests with no origin (e.g., curl, server-to-server)
+      if (!origin) return '*';
+      // Wildcard allows all
+      if (originList.includes('*')) return origin;
+      // Check if origin is in whitelist
+      return originList.includes(origin) ? origin : null;
+    },
+    allowMethods: ['GET', 'POST', 'OPTIONS'],
+    allowHeaders: ['Content-Type'],
+  });
+
+  return corsMiddleware(c, next);
+});
 
 // Health check
 api.get('/health', (c) => {
@@ -54,6 +72,18 @@ api.post('/feedback', async (c) => {
     }, 400);
   }
 
+  // Validate screenshot size
+  const maxSizeMB = parseInt(c.env.MAX_SCREENSHOT_SIZE_MB || '5', 10);
+  if (payload.screenshot) {
+    const sizeBytes = (payload.screenshot.length * 3) / 4; // Base64 to bytes
+    const sizeMB = sizeBytes / (1024 * 1024);
+    if (sizeMB > maxSizeMB) {
+      return c.json({
+        error: `Screenshot too large: ${sizeMB.toFixed(1)}MB exceeds ${maxSizeMB}MB limit`,
+      }, 400);
+    }
+  }
+
   // Parse owner/repo
   const [owner, repo] = payload.repo.split('/');
   if (!owner || !repo) {
@@ -66,9 +96,10 @@ api.post('/feedback', async (c) => {
     // Get installation token
     const token = await getInstallationToken(c.env, owner, repo);
     if (!token) {
+      const appName = c.env.GITHUB_APP_NAME || 'your-app-name';
       return c.json({
         error: 'GitHub App not installed on this repository',
-        installUrl: 'https://github.com/apps/YOUR_APP_NAME/installations/new',
+        installUrl: `https://github.com/apps/${appName}/installations/new`,
       }, 403);
     }
 

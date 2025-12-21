@@ -1,67 +1,48 @@
 # Feedback Widget
 
+[![CI](https://github.com/neonwatty/feedback-widget/actions/workflows/ci.yml/badge.svg)](https://github.com/neonwatty/feedback-widget/actions/workflows/ci.yml)
+
 Embeddable bug reporting widget that creates GitHub Issues with screenshots and annotations.
 
-## Usage
+## Quick Start
 
-**1. Install the GitHub App** on your repository
+**1. Install the GitHub App** on your repository:
 
-**2. Add the script tag** to your website:
+https://github.com/apps/feedback-widget-test/installations/new
+
+**2. Add the script** to your website:
 
 ```html
-<script src="https://YOUR_WORKER_URL/widget.js" data-repo="owner/repo"></script>
+<script src="https://feedback-widget.neonwatty.workers.dev/widget.js"
+        data-repo="owner/repo"></script>
 ```
 
-Users click the bug button, capture/annotate screenshots, and submit feedback directly to GitHub Issues.
+That's it! Users can now click the bug button to submit feedback as GitHub Issues.
 
-## Development
+## Widget Options
 
-```bash
-# Setup
-make install
+| Attribute | Values | Default |
+|-----------|--------|---------|
+| `data-repo` | `owner/repo` | required |
+| `data-theme` | `light`, `dark`, `auto` | `auto` |
+| `data-position` | `bottom-right`, `bottom-left` | `bottom-right` |
 
-# Create .dev.vars with your GitHub App credentials:
-# GITHUB_APP_ID=...
-# GITHUB_PRIVATE_KEY=...
-
-# Run
-make dev
+```html
+<script src="https://feedback-widget.neonwatty.workers.dev/widget.js"
+        data-repo="owner/repo"
+        data-theme="dark"
+        data-position="bottom-left"></script>
 ```
 
-## Commands
+## Security
 
-```bash
-make help        # Show all commands
-make dev         # Start dev server (localhost:8787)
-make check       # Run lint, typecheck, knip
-make test        # Run unit tests
-make test-e2e    # Run E2E tests
-make ci          # Run full CI pipeline
-make build-all   # Build widget + worker
-make deploy      # Deploy to Cloudflare
-```
+- **Permissions**: Issues (R/W), Contents (R/W) - only on repos you install it on
+- **Data storage**: Screenshots stored in your repo's `.feedback/` folder
+- **Privacy**: No user data stored by the widget service
 
-## Project Structure
+## Self-Hosting
 
-```
-src/
-├── index.ts           # Worker entry
-├── routes/api.ts      # API endpoints
-├── lib/github.ts      # GitHub API
-└── widget/            # Client widget
-    ├── index.ts       # Entry point
-    ├── ui.ts          # UI + theming
-    ├── screenshot.ts  # Capture
-    ├── picker.ts      # Element selection
-    └── annotator.ts   # Drawing tools
-```
-
-## Tech Stack
-
-- **Runtime**: Cloudflare Workers + Hono
-- **Auth**: GitHub App
-- **Widget**: TypeScript IIFE in Shadow DOM
-- **Testing**: Vitest + Playwright
+Want to run your own instance? See [SELF_HOSTING.md](./SELF_HOSTING.md).
 
 ## License
 

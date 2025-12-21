@@ -10,6 +10,9 @@ binding = "ASSETS"
 # Environment variables
 [vars]
 ENVIRONMENT = "development"
+ALLOWED_ORIGINS = "*"  # "*" for dev, comma-separated URLs for production
+GITHUB_APP_NAME = "feedback-widget-test"  # Your GitHub App's URL slug
+MAX_SCREENSHOT_SIZE_MB = "5"  # Maximum screenshot size in MB
 
 # Secrets (set with: wrangler secret put GITHUB_APP_ID)
 # GITHUB_APP_ID

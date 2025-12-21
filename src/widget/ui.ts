@@ -2,12 +2,22 @@ interface WidgetConfig {
   repo: string;
   apiUrl: string;
   position: 'bottom-right' | 'bottom-left';
-  theme: 'light' | 'dark';
+  theme: 'light' | 'dark' | 'auto';
+}
+
+// Detect system dark mode preference
+function getSystemTheme(): 'light' | 'dark' {
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  return 'light';
 }
 
 export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
   const pos = config.position === 'bottom-left' ? 'left: 20px' : 'right: 20px';
-  const isDark = config.theme === 'dark';
+  // Resolve 'auto' to actual theme based on system preference
+  const resolvedTheme = config.theme === 'auto' ? getSystemTheme() : config.theme;
+  const isDark = resolvedTheme === 'dark';
 
   const styles = document.createElement('style');
   styles.textContent = `

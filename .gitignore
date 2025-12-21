@@ -19,6 +19,10 @@ private-key*.pem
 .vscode/
 .idea/
 
+# Claude Code artifacts
+.claude/
+.plans/
+
 # OS files
 .DS_Store
 Thumbs.db
@@ -29,3 +33,7 @@ npm-debug.log*
 
 # Test coverage
 coverage/
+
+# Test artifacts
+playwright-report/
+test-results/

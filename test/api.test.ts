@@ -25,6 +25,9 @@ describe('API Routes', () => {
     GITHUB_APP_ID: 'test-app-id',
     GITHUB_PRIVATE_KEY: 'test-private-key',
     ENVIRONMENT: 'test',
+    ALLOWED_ORIGINS: '*',
+    GITHUB_APP_NAME: 'test-feedback-app',
+    MAX_SCREENSHOT_SIZE_MB: '5',
     ASSETS: {} as Fetcher,
   };
 
@@ -234,7 +237,7 @@ describe('API Routes', () => {
       expect(data.error).toBe('Invalid JSON');
     });
 
-    it('should return 403 when app is not installed', async () => {
+    it('should return 403 when app is not installed with configurable app name', async () => {
       mockGetInstallationToken.mockResolvedValue(null);
 
       const req = new Request('http://localhost/feedback', {
@@ -247,7 +250,7 @@ describe('API Routes', () => {
 
       expect(res.status).toBe(403);
       expect(data.error).toContain('not installed');
-      expect(data.installUrl).toBeDefined();
+      expect(data.installUrl).toBe('https://github.com/apps/test-feedback-app/installations/new');
     });
 
     it('should upload screenshot and include URL in issue body', async () => {
@@ -334,6 +337,27 @@ describe('API Routes', () => {
       const res = await app.fetch(req, mockEnv);
 
       expect(res.headers.get('access-control-allow-origin')).toBe('*');
+    });
+
+    it('should reject screenshot exceeding size limit', async () => {
+      // Create a large base64 string (> 5MB when decoded)
+      // 5MB = 5 * 1024 * 1024 bytes, base64 encoding is ~4/3 ratio
+      const largeScreenshot = 'data:image/png;base64,' + 'A'.repeat(8 * 1024 * 1024);
+
+      const req = new Request('http://localhost/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...validPayload,
+          screenshot: largeScreenshot,
+        }),
+      });
+      const res = await app.fetch(req, mockEnv);
+      const data = await res.json();
+
+      expect(res.status).toBe(400);
+      expect(data.error).toContain('Screenshot too large');
+      expect(data.error).toContain('exceeds 5MB limit');
     });
 
     it('should return 500 when GitHub API fails', async () => {

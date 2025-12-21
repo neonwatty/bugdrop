@@ -11,7 +11,7 @@ interface WidgetConfig {
   repo: string;
   apiUrl: string;
   position: 'bottom-right' | 'bottom-left';
-  theme: 'light' | 'dark';
+  theme: 'light' | 'dark' | 'auto';
 }
 
 interface FeedbackData {
@@ -26,11 +26,12 @@ let _widgetRoot: HTMLElement | null = null;
 
 // Read config from script tag
 const script = document.currentScript as HTMLScriptElement;
+const rawTheme = script?.dataset.theme as WidgetConfig['theme'] | undefined;
 const config: WidgetConfig = {
   repo: script?.dataset.repo || '',
   apiUrl: script?.src.replace('/widget.js', '/api') || '',
   position: (script?.dataset.position as WidgetConfig['position']) || 'bottom-right',
-  theme: (script?.dataset.theme as WidgetConfig['theme']) || 'light',
+  theme: rawTheme || 'auto', // Default to auto-detection
 };
 
 // Validate config

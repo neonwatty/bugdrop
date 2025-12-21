@@ -5,6 +5,9 @@ export interface Env {
 
   // Variables (from wrangler.toml)
   ENVIRONMENT: string;
+  ALLOWED_ORIGINS: string; // Comma-separated list of allowed origins, or "*" for dev
+  GITHUB_APP_NAME: string; // Your GitHub App name for install URL
+  MAX_SCREENSHOT_SIZE_MB: string; // Max screenshot size in MB (default: 5)
 
   // Bindings
   ASSETS: Fetcher;

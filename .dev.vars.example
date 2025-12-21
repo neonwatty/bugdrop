@@ -1,14 +1,39 @@
-# GitHub App credentials
-# Copy this file to .dev.vars and fill in your actual values
+# Feedback Widget - Development Environment Variables
+# Copy this file to .dev.vars and fill in your values
 
-# Your GitHub App ID (numeric)
+# =============================================================================
+# REQUIRED: GitHub App Credentials
+# =============================================================================
+
+# Step 1: Create a GitHub App at https://github.com/settings/apps/new
+#   - Name: Choose a unique name (this becomes your GITHUB_APP_NAME)
+#   - Homepage URL: Your worker URL (e.g., https://feedback-widget.your-subdomain.workers.dev)
+#   - Webhook: Uncheck "Active" (not needed)
+#   - Permissions:
+#     - Repository > Issues: Read & Write
+#     - Repository > Contents: Read & Write (for screenshot uploads)
+#   - Where can this app be installed?: "Any account" or "Only on this account"
+
+# Step 2: After creating the app, note the App ID (shown at top of app settings)
 GITHUB_APP_ID=123456
 
-# Your GitHub App Private Key (PKCS#8 format)
-# Include the full key with headers:
-# -----BEGIN PRIVATE KEY-----
-# ...
-# -----END PRIVATE KEY-----
-GITHUB_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----
-YOUR_PRIVATE_KEY_HERE
------END PRIVATE KEY-----"
+# Step 3: Generate a private key (scroll down in app settings, click "Generate a private key")
+# The key downloads as a .pem file. Paste the entire contents here:
+GITHUB_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----
+YOUR_PRIVATE_KEY_CONTENT_HERE
+-----END RSA PRIVATE KEY-----"
+
+# =============================================================================
+# OPTIONAL: Override wrangler.toml defaults for local development
+# =============================================================================
+
+# Your GitHub App's URL slug (the name in lowercase with hyphens)
+# Find it at: https://github.com/apps/YOUR_APP_NAME
+# GITHUB_APP_NAME=my-feedback-app
+
+# Allowed origins for CORS (comma-separated, or "*" for all)
+# In production, set this to your actual domains
+# ALLOWED_ORIGINS=https://mysite.com,https://staging.mysite.com
+
+# Maximum screenshot size in MB
+# MAX_SCREENSHOT_SIZE_MB=5
