@@ -1,69 +1,100 @@
-.PHONY: dev build test test-e2e test-e2e-ui typecheck lint ci clean help install
+.PHONY: dev build build-widget build-all deploy test test-watch test-e2e test-e2e-ui test-e2e-shard lint lint-fix typecheck knip check ci clean install install-playwright help
 
-# Default target
-help:
-	@echo "Available targets:"
-	@echo "  make install      - Install dependencies"
-	@echo "  make dev          - Start wrangler dev server"
-	@echo "  make build        - Build widget and worker"
-	@echo "  make test         - Run unit tests"
-	@echo "  make test-e2e     - Run E2E tests"
-	@echo "  make test-e2e-ui  - Run E2E tests in UI mode"
-	@echo "  make typecheck    - Run TypeScript type checking"
-	@echo "  make lint         - Run linter (if configured)"
-	@echo "  make ci           - Run all CI checks"
-	@echo "  make clean        - Clean build artifacts"
-
-# Install dependencies
-install:
-	npm install
-
-# Start development server
+# Development
 dev:
 	npm run dev
 
-# Build widget and worker
+# Build
 build:
-	npm run build:widget
 	npm run build
 
-# Run unit tests
-test:
-	npm test
+build-widget:
+	npm run build:widget
 
-# Run unit tests in watch mode
+build-all: build-widget build
+
+deploy: build-all
+	npm run deploy
+
+# Testing
+test:
+	npm run test
+
 test-watch:
 	npm run test:watch
 
-# Run E2E tests
 test-e2e:
 	npm run test:e2e
 
-# Run E2E tests in UI mode
 test-e2e-ui:
 	npm run test:e2e:ui
 
-# Type check
-typecheck:
-	npx tsc --noEmit
+test-e2e-shard:
+	@if [ -z "$(SHARD)" ]; then \
+		echo "Usage: make test-e2e-shard SHARD=1/2"; \
+		exit 1; \
+	fi
+	npx playwright test --shard=$(SHARD)
 
-# Lint (placeholder - add eslint if needed)
+# Code Quality
 lint:
-	@echo "No linter configured. Add eslint to enable linting."
+	npx eslint .
 
-# Run all CI checks
-ci: typecheck build test test-e2e
-	@echo "✅ All CI checks passed!"
+lint-fix:
+	npx eslint . --fix
 
-# Clean build artifacts
+typecheck:
+	npm run typecheck
+
+knip:
+	npx knip
+
+# Combined Commands
+check: lint typecheck knip
+	@echo "✓ All checks passed"
+
+ci: check test build-all test-e2e
+	@echo "✓ Full CI passed"
+
+# Utilities
 clean:
-	rm -rf dist
-	rm -rf .wrangler
-	rm -rf public/widget.js
-	rm -rf playwright-report
-	rm -rf test-results
-	@echo "✅ Clean complete!"
+	rm -rf dist node_modules/.cache playwright-report test-results .wrangler/tmp public/widget.js
 
-# Deploy to Cloudflare (production)
-deploy: build
-	npm run deploy
+install:
+	npm ci
+
+install-playwright:
+	npx playwright install --with-deps chromium
+
+# Help (default target)
+help:
+	@echo "Available commands:"
+	@echo ""
+	@echo "  Development:"
+	@echo "    make dev              - Start development server"
+	@echo "    make build            - Build TypeScript"
+	@echo "    make build-widget     - Build widget bundle"
+	@echo "    make build-all        - Build widget and TypeScript"
+	@echo "    make deploy           - Deploy to Cloudflare"
+	@echo ""
+	@echo "  Testing:"
+	@echo "    make test             - Run unit tests"
+	@echo "    make test-watch       - Run unit tests in watch mode"
+	@echo "    make test-e2e         - Run E2E tests"
+	@echo "    make test-e2e-ui      - Run E2E tests with UI"
+	@echo "    make test-e2e-shard SHARD=1/2  - Run E2E test shard"
+	@echo ""
+	@echo "  Code Quality:"
+	@echo "    make lint             - Run ESLint"
+	@echo "    make lint-fix         - Run ESLint with auto-fix"
+	@echo "    make typecheck        - Run TypeScript type checking"
+	@echo "    make knip             - Check for dead code"
+	@echo ""
+	@echo "  Combined:"
+	@echo "    make check            - Run lint, typecheck, and knip"
+	@echo "    make ci               - Run full CI pipeline locally"
+	@echo ""
+	@echo "  Utilities:"
+	@echo "    make clean            - Clean build artifacts"
+	@echo "    make install          - Install dependencies"
+	@echo "    make install-playwright - Install Playwright browsers"
