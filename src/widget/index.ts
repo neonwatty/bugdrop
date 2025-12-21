@@ -5,11 +5,6 @@ import {
   injectStyles,
   createModal,
   showToast,
-  showLoadingOverlay,
-  hideLoadingOverlay,
-  setButtonLoading,
-  showError,
-  clearError,
 } from './ui';
 
 interface WidgetConfig {
@@ -26,8 +21,8 @@ interface FeedbackData {
   elementSelector: string | null;
 }
 
-// Store root element for global access
-let widgetRoot: HTMLElement | null = null;
+// Store root element for potential global access
+let _widgetRoot: HTMLElement | null = null;
 
 // Read config from script tag
 const script = document.currentScript as HTMLScriptElement;
@@ -55,7 +50,7 @@ function initWidget(config: WidgetConfig) {
 
   // Inject styles and create root wrapper
   const root = injectStyles(shadow, config);
-  widgetRoot = root;
+  _widgetRoot = root;
 
   const trigger = document.createElement('button');
   trigger.className = 'fw-trigger';
@@ -129,7 +124,7 @@ async function captureWithLoading(
     const screenshot = await captureScreenshot(element);
     loadingModal.remove();
     return screenshot;
-  } catch (error) {
+  } catch (_error) {
     loadingModal.remove();
 
     // Show error with retry option
@@ -184,7 +179,7 @@ async function checkInstallation(config: WidgetConfig): Promise<boolean> {
   }
 }
 
-function showInstallPrompt(root: HTMLElement, config: WidgetConfig) {
+function showInstallPrompt(root: HTMLElement, _config: WidgetConfig) {
   const modal = createModal(
     root,
     'Install Required',
@@ -440,7 +435,7 @@ async function submitFeedback(
     } else {
       showSubmitError(root, config, data, result.error || 'Failed to submit');
     }
-  } catch (error) {
+  } catch (_error) {
     modal.remove();
     showSubmitError(root, config, data, 'Network error. Please check your connection.');
   }
