@@ -5,20 +5,16 @@ import api from './routes/api';
 
 const app = new Hono<{ Bindings: Env }>();
 
-// Validate required environment variables on first request
-let envValidated = false;
+// Log warning about missing credentials (but don't block non-authenticated routes)
+let envChecked = false;
 app.use('*', async (c, next) => {
-  if (!envValidated) {
+  if (!envChecked) {
     const missing: string[] = [];
     if (!c.env.GITHUB_APP_ID) missing.push('GITHUB_APP_ID');
     if (!c.env.GITHUB_PRIVATE_KEY) missing.push('GITHUB_PRIVATE_KEY');
 
     if (missing.length > 0) {
-      console.error(`Missing required env vars: ${missing.join(', ')}`);
-      return c.json({
-        error: 'Server misconfigured',
-        details: `Missing required environment variables: ${missing.join(', ')}`,
-      }, 500);
+      console.warn(`Missing env vars (feedback endpoint will fail): ${missing.join(', ')}`);
     }
 
     // Warn about development-only settings
@@ -26,7 +22,7 @@ app.use('*', async (c, next) => {
       console.warn('WARNING: ALLOWED_ORIGINS is set to "*" in non-development environment');
     }
 
-    envValidated = true;
+    envChecked = true;
   }
   return next();
 });
