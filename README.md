@@ -34,6 +34,17 @@ That's it! Users can now click the bug button to submit feedback as GitHub Issue
         data-position="bottom-left"></script>
 ```
 
+## How It Works
+
+```
+User clicks bug button → Widget captures screenshot → Worker authenticates via GitHub App → Issue created in your repo
+```
+
+1. **Widget** loads in a Shadow DOM (isolated from your page styles)
+2. **Screenshot** captured client-side using html2canvas
+3. **Worker** (Cloudflare) exchanges GitHub App credentials for an installation token
+4. **GitHub API** creates the issue with the screenshot stored in `.feedback/`
+
 ## Security
 
 - **Permissions**: Issues (R/W), Contents (R/W) - only on repos you install it on
