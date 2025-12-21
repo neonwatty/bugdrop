@@ -4,7 +4,7 @@
   "description": "Lightweight embeddable feedback widget that creates GitHub Issues",
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --port 8787",
     "build": "tsc",
     "build:widget": "esbuild src/widget/index.ts --bundle --minify --format=iife --outfile=public/widget.js",
     "deploy": "wrangler deploy",
