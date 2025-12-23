@@ -10,7 +10,7 @@ export function createElementPicker(): Promise<Element | null> {
 function startPicker(resolve: (element: Element | null) => void): void {
   // Create highlight overlay with higher z-index than modal (1000000)
   const highlight = document.createElement('div');
-  highlight.id = 'feedback-element-picker-highlight';
+  highlight.id = 'bugdrop-element-picker-highlight';
   // Use teal color to match the widget theme
   highlight.style.cssText = `
     position: fixed;
@@ -26,7 +26,7 @@ function startPicker(resolve: (element: Element | null) => void): void {
 
   // Instruction tooltip with higher z-index
   const tooltip = document.createElement('div');
-  tooltip.id = 'feedback-element-picker-tooltip';
+  tooltip.id = 'bugdrop-element-picker-tooltip';
   tooltip.style.cssText = `
     position: fixed;
     top: 20px;
@@ -55,9 +55,9 @@ function startPicker(resolve: (element: Element | null) => void): void {
     // Find the first element that's not our picker UI
     const target = elementsAtPoint.find((el) => {
       if (el === highlight || el === tooltip) return false;
-      if (el.id === 'feedback-element-picker-highlight') return false;
-      if (el.id === 'feedback-element-picker-tooltip') return false;
-      if (el.closest('#feedback-widget-host')) return false;
+      if (el.id === 'bugdrop-element-picker-highlight') return false;
+      if (el.id === 'bugdrop-element-picker-tooltip') return false;
+      if (el.closest('#bugdrop-host')) return false;
       return true;
     });
 

@@ -6,8 +6,8 @@ Thanks for your interest in contributing!
 
 ```bash
 # Clone and install
-git clone https://github.com/neonwatty/feedback-widget
-cd feedback-widget
+git clone https://github.com/neonwatty/bugdrop
+cd bugdrop
 make install
 
 # Configure (see SELF_HOSTING.md for GitHub App setup)

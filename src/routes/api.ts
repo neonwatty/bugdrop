@@ -130,7 +130,7 @@ api.post('/feedback', async (c) => {
       repo,
       payload.title,
       body,
-      ['feedback', 'widget']
+      ['bug', 'bugdrop']
     );
 
     return c.json({
@@ -186,7 +186,7 @@ function formatIssueBody(
   sections.push('</details>');
   sections.push('');
   sections.push('---');
-  sections.push('*Submitted via Feedback Widget*');
+  sections.push('*Submitted via [BugDrop](https://github.com/neonwatty/bugdrop)*');
 
   return sections.join('\n');
 }

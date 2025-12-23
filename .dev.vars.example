@@ -1,4 +1,4 @@
-# Feedback Widget - Development Environment Variables
+# BugDrop - Development Environment Variables
 # Copy this file to .dev.vars and fill in your values
 
 # =============================================================================
@@ -7,7 +7,7 @@
 
 # Step 1: Create a GitHub App at https://github.com/settings/apps/new
 #   - Name: Choose a unique name (this becomes your GITHUB_APP_NAME)
-#   - Homepage URL: Your worker URL (e.g., https://feedback-widget.your-subdomain.workers.dev)
+#   - Homepage URL: Your worker URL (e.g., https://bugdrop.your-subdomain.workers.dev)
 #   - Webhook: Uncheck "Active" (not needed)
 #   - Permissions:
 #     - Repository > Issues: Read & Write
@@ -29,7 +29,7 @@ YOUR_PRIVATE_KEY_CONTENT_HERE
 
 # Your GitHub App's URL slug (the name in lowercase with hyphens)
 # Find it at: https://github.com/apps/YOUR_APP_NAME
-# GITHUB_APP_NAME=my-feedback-app
+# GITHUB_APP_NAME=my-bugdrop-app
 
 # Allowed origins for CORS (comma-separated, or "*" for all)
 # In production, set this to your actual domains

@@ -1,4 +1,4 @@
-name = "feedback-widget"
+name = "bugdrop"
 main = "src/index.ts"
 compatibility_date = "2024-01-29"
 
@@ -11,7 +11,7 @@ binding = "ASSETS"
 [vars]
 ENVIRONMENT = "development"
 ALLOWED_ORIGINS = "*"  # "*" for dev, comma-separated URLs for production
-GITHUB_APP_NAME = "neonwatty-feedback-widget"  # Your GitHub App's URL slug
+GITHUB_APP_NAME = "neonwatty-bugdrop"  # Your GitHub App's URL slug
 MAX_SCREENSHOT_SIZE_MB = "5"  # Maximum screenshot size in MB
 
 # Secrets (set with: wrangler secret put GITHUB_APP_ID)

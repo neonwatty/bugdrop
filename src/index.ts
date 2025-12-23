@@ -14,7 +14,7 @@ app.use('*', async (c, next) => {
     if (!c.env.GITHUB_PRIVATE_KEY) missing.push('GITHUB_PRIVATE_KEY');
 
     if (missing.length > 0) {
-      console.warn(`Missing env vars (feedback endpoint will fail): ${missing.join(', ')}`);
+      console.warn(`[BugDrop] Missing env vars (feedback endpoint will fail): ${missing.join(', ')}`);
     }
 
     // Warn about development-only settings
@@ -36,7 +36,7 @@ app.route('/api', api);
 // Root endpoint
 app.get('/', (c) => {
   return c.json({
-    name: 'Feedback Widget API',
+    name: 'BugDrop API',
     version: '1.0.0',
     docs: {
       health: 'GET /api/health',

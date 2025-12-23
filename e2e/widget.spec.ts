@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * E2E tests for the Feedback Widget
+ * E2E tests for BugDrop
  * Tests run against wrangler dev server at http://localhost:8787
  */
 
@@ -9,7 +9,7 @@ test.describe('Widget Loading', () => {
   test('page loads without console errors', async ({ page }) => {
     const errors: string[] = [];
     page.on('console', (msg) => {
-      if (msg.type() === 'error' && !msg.text().includes('FeedbackWidget')) {
+      if (msg.type() === 'error' && !msg.text().includes('BugDrop')) {
         errors.push(msg.text());
       }
     });
@@ -27,7 +27,7 @@ test.describe('Widget Loading', () => {
     await page.waitForTimeout(500);
 
     // Widget creates a host element
-    const host = page.locator('#feedback-widget-host');
+    const host = page.locator('#bugdrop-host');
     await expect(host).toBeAttached();
   });
 
@@ -36,7 +36,7 @@ test.describe('Widget Loading', () => {
     await page.waitForTimeout(500);
 
     // Access button inside shadow DOM
-    const button = page.locator('#feedback-widget-host').locator('css=.fw-trigger');
+    const button = page.locator('#bugdrop-host').locator('css=.bd-trigger');
     await expect(button).toBeVisible();
   });
 });
@@ -46,14 +46,14 @@ test.describe('Widget Interaction', () => {
     await page.goto('/test/');
 
     // Wait for widget to be ready
-    const button = page.locator('#feedback-widget-host').locator('css=.fw-trigger');
+    const button = page.locator('#bugdrop-host').locator('css=.bd-trigger');
     await expect(button).toBeVisible({ timeout: 5000 });
 
     // Click the trigger button
     await button.click();
 
     // Modal should appear (or installation prompt if not installed)
-    const modal = page.locator('#feedback-widget-host').locator('css=.fw-modal');
+    const modal = page.locator('#bugdrop-host').locator('css=.bd-modal');
     await expect(modal).toBeVisible({ timeout: 5000 });
   });
 });

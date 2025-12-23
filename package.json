@@ -1,7 +1,7 @@
 {
-  "name": "feedback-widget",
+  "name": "bugdrop",
   "version": "1.0.0",
-  "description": "Lightweight embeddable feedback widget that creates GitHub Issues",
+  "description": "Ship bugs to GitHub in 2 clicks. Screenshots, element picker, the works.",
   "type": "module",
   "scripts": {
     "dev": "wrangler dev --port 8787",
