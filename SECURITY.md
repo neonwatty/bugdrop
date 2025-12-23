@@ -22,7 +22,7 @@ If you discover a security vulnerability, please report it responsibly:
 This policy covers:
 - The Cloudflare Worker (`src/`)
 - The client widget (`src/widget/`)
-- The hosted instance at `feedback-widget.neonwatty.workers.dev`
+- The hosted instance at `bugdrop.neonwatty.workers.dev`
 
 ## Out of Scope
 

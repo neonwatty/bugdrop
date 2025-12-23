@@ -36,7 +36,7 @@ const config: WidgetConfig = {
 
 // Validate config
 if (!config.repo) {
-  console.error('[FeedbackWidget] Missing data-repo attribute');
+  console.error('[BugDrop] Missing data-repo attribute');
 } else {
   initWidget(config);
 }
@@ -44,7 +44,7 @@ if (!config.repo) {
 function initWidget(config: WidgetConfig) {
   // Create Shadow DOM for style isolation
   const host = document.createElement('div');
-  host.id = 'feedback-widget-host';
+  host.id = 'bugdrop-host';
   document.body.appendChild(host);
 
   const shadow = host.attachShadow({ mode: 'open' });
@@ -54,7 +54,7 @@ function initWidget(config: WidgetConfig) {
   _widgetRoot = root;
 
   const trigger = document.createElement('button');
-  trigger.className = 'fw-trigger';
+  trigger.className = 'bd-trigger';
   trigger.innerHTML = '🐛';
   trigger.setAttribute('aria-label', 'Report a bug or send feedback');
   root.appendChild(trigger);
@@ -115,8 +115,8 @@ async function captureWithLoading(
     'Capturing...',
     `
       <div style="display: flex; flex-direction: column; align-items: center; padding: 20px;">
-        <div class="fw-spinner fw-spinner--lg"></div>
-        <p class="fw-loading-text" style="margin-top: 12px;">Capturing screenshot...</p>
+        <div class="bd-spinner bd-spinner--lg"></div>
+        <p class="bd-loading-text" style="margin-top: 12px;">Capturing screenshot...</p>
       </div>
     `
   );
@@ -134,20 +134,20 @@ async function captureWithLoading(
         root,
         'Capture Failed',
         `
-          <div class="fw-error-message">
-            <svg class="fw-error-message__icon" viewBox="0 0 16 16" fill="currentColor">
+          <div class="bd-error-message">
+            <svg class="bd-error-message__icon" viewBox="0 0 16 16" fill="currentColor">
               <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-9.5a.75.75 0 0 0-.75.75v2.5a.75.75 0 0 0 1.5 0v-2.5A.75.75 0 0 0 8 5.5zm0 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
             </svg>
-            <span class="fw-error-message__text">Failed to capture screenshot. This might be due to browser restrictions.</span>
+            <span class="bd-error-message__text">Failed to capture screenshot. This might be due to browser restrictions.</span>
           </div>
-          <div class="fw-actions">
-            <button class="fw-btn fw-btn-secondary" data-action="skip">Skip Screenshot</button>
-            <button class="fw-btn fw-btn-primary" data-action="retry">Try Again</button>
+          <div class="bd-actions">
+            <button class="bd-btn bd-btn-secondary" data-action="skip">Skip Screenshot</button>
+            <button class="bd-btn bd-btn-primary" data-action="retry">Try Again</button>
           </div>
         `
       );
 
-      const closeBtn = errorModal.querySelector('.fw-close') as HTMLElement;
+      const closeBtn = errorModal.querySelector('.bd-close') as HTMLElement;
       const skipBtn = errorModal.querySelector('[data-action="skip"]') as HTMLElement;
       const retryBtn = errorModal.querySelector('[data-action="retry"]') as HTMLElement;
 
@@ -185,15 +185,15 @@ function showInstallPrompt(root: HTMLElement, _config: WidgetConfig) {
     root,
     'Install Required',
     `
-      <p style="margin: 0 0 16px; color: var(--fw-text-secondary);">This feedback widget requires GitHub App installation.</p>
-      <div class="fw-actions">
-        <button class="fw-btn fw-btn-secondary" data-action="cancel">Cancel</button>
-        <a href="https://github.com/apps/YOUR_APP_NAME/installations/new" target="_blank" class="fw-btn fw-btn-primary" style="text-decoration: none;">Install App</a>
+      <p style="margin: 0 0 16px; color: var(--bd-text-secondary);">BugDrop requires GitHub App installation to create issues.</p>
+      <div class="bd-actions">
+        <button class="bd-btn bd-btn-secondary" data-action="cancel">Cancel</button>
+        <a href="https://github.com/apps/YOUR_APP_NAME/installations/new" target="_blank" class="bd-btn bd-btn-primary" style="text-decoration: none;">Install App</a>
       </div>
     `
   );
 
-  const closeBtn = modal.querySelector('.fw-close') as HTMLElement;
+  const closeBtn = modal.querySelector('.bd-close') as HTMLElement;
   const cancelBtn = modal.querySelector('[data-action="cancel"]') as HTMLElement;
 
   closeBtn?.addEventListener('click', () => modal.remove());
@@ -206,16 +206,16 @@ function showScreenshotOptions(root: HTMLElement): Promise<'skip' | 'capture' | 
       root,
       'Capture Screenshot',
       `
-        <p style="margin: 0 0 16px; color: var(--fw-text-secondary);">Would you like to include a screenshot with your feedback?</p>
-        <div class="fw-actions">
-          <button class="fw-btn fw-btn-secondary" data-action="skip">Skip</button>
-          <button class="fw-btn fw-btn-secondary" data-action="element">Select Element</button>
-          <button class="fw-btn fw-btn-primary" data-action="capture">Full Page</button>
+        <p style="margin: 0 0 16px; color: var(--bd-text-secondary);">Would you like to include a screenshot with your feedback?</p>
+        <div class="bd-actions">
+          <button class="bd-btn bd-btn-secondary" data-action="skip">Skip</button>
+          <button class="bd-btn bd-btn-secondary" data-action="element">Select Element</button>
+          <button class="bd-btn bd-btn-primary" data-action="capture">Full Page</button>
         </div>
       `
     );
 
-    const closeBtn = modal.querySelector('.fw-close') as HTMLElement;
+    const closeBtn = modal.querySelector('.bd-close') as HTMLElement;
     const skipBtn = modal.querySelector('[data-action="skip"]') as HTMLElement;
     const elementBtn = modal.querySelector('[data-action="element"]') as HTMLElement;
     const captureBtn = modal.querySelector('[data-action="capture"]') as HTMLElement;
@@ -248,16 +248,16 @@ function showAnnotationStep(root: HTMLElement, screenshot: string): Promise<stri
       root,
       'Annotate Screenshot',
       `
-        <div class="fw-tools">
-          <button class="fw-tool active" data-tool="draw">✏️ Draw</button>
-          <button class="fw-tool" data-tool="arrow">➡️ Arrow</button>
-          <button class="fw-tool" data-tool="rect">▢ Rectangle</button>
-          <button class="fw-tool" data-action="undo">↶ Undo</button>
+        <div class="bd-tools">
+          <button class="bd-tool active" data-tool="draw">✏️ Draw</button>
+          <button class="bd-tool" data-tool="arrow">➡️ Arrow</button>
+          <button class="bd-tool" data-tool="rect">▢ Rectangle</button>
+          <button class="bd-tool" data-action="undo">↶ Undo</button>
         </div>
         <div id="annotation-canvas"></div>
-        <div class="fw-actions">
-          <button class="fw-btn fw-btn-secondary" data-action="skip">Skip Annotations</button>
-          <button class="fw-btn fw-btn-primary" data-action="done">Done</button>
+        <div class="bd-actions">
+          <button class="bd-btn bd-btn-secondary" data-action="skip">Skip Annotations</button>
+          <button class="bd-btn bd-btn-primary" data-action="done">Done</button>
         </div>
       `
     );
@@ -283,7 +283,7 @@ function showAnnotationStep(root: HTMLElement, screenshot: string): Promise<stri
     });
 
     // Action buttons
-    const closeBtn = modal.querySelector('.fw-close') as HTMLElement;
+    const closeBtn = modal.querySelector('.bd-close') as HTMLElement;
     const skipBtn = modal.querySelector('[data-action="skip"]') as HTMLElement;
     const doneBtn = modal.querySelector('[data-action="done"]') as HTMLElement;
 
@@ -314,7 +314,7 @@ function showFeedbackForm(
 ): Promise<{ title: string; description: string } | null> {
   return new Promise((resolve) => {
     const previewHtml = screenshot
-      ? `<div class="fw-preview"><img src="${screenshot}" alt="Screenshot preview" /></div>`
+      ? `<div class="bd-preview"><img src="${screenshot}" alt="Screenshot preview" /></div>`
       : '';
 
     const modal = createModal(
@@ -323,17 +323,17 @@ function showFeedbackForm(
       `
         ${previewHtml}
         <form id="feedback-form">
-          <div class="fw-form-group">
-            <label class="fw-label" for="title">Title *</label>
-            <input type="text" id="title" class="fw-input" required placeholder="Brief description of the issue" />
+          <div class="bd-form-group">
+            <label class="bd-label" for="title">Title *</label>
+            <input type="text" id="title" class="bd-input" required placeholder="Brief description of the issue" />
           </div>
-          <div class="fw-form-group">
-            <label class="fw-label" for="description">Description</label>
-            <textarea id="description" class="fw-textarea" placeholder="Additional details..."></textarea>
+          <div class="bd-form-group">
+            <label class="bd-label" for="description">Description</label>
+            <textarea id="description" class="bd-textarea" placeholder="Additional details..."></textarea>
           </div>
-          <div class="fw-actions">
-            <button type="button" class="fw-btn fw-btn-secondary" data-action="cancel">Cancel</button>
-            <button type="submit" class="fw-btn fw-btn-primary" id="submit-btn">Submit</button>
+          <div class="bd-actions">
+            <button type="button" class="bd-btn bd-btn-secondary" data-action="cancel">Cancel</button>
+            <button type="submit" class="bd-btn bd-btn-primary" id="submit-btn">Submit</button>
           </div>
         </form>
       `
@@ -342,13 +342,13 @@ function showFeedbackForm(
     const form = modal.querySelector('#feedback-form') as HTMLFormElement;
     const titleInput = modal.querySelector('#title') as HTMLInputElement;
     const descriptionInput = modal.querySelector('#description') as HTMLTextAreaElement;
-    const closeBtn = modal.querySelector('.fw-close') as HTMLElement;
+    const closeBtn = modal.querySelector('.bd-close') as HTMLElement;
     const cancelBtn = modal.querySelector('[data-action="cancel"]') as HTMLElement;
 
     // Clear validation errors on input
     titleInput?.addEventListener('input', () => {
-      titleInput.classList.remove('fw-input--error');
-      const errorHint = form.querySelector('.fw-field-error');
+      titleInput.classList.remove('bd-input--error');
+      const errorHint = form.querySelector('.bd-field-error');
       if (errorHint) errorHint.remove();
     });
 
@@ -368,11 +368,11 @@ function showFeedbackForm(
       // Validate
       const title = titleInput.value.trim();
       if (!title) {
-        titleInput.classList.add('fw-input--error');
-        const existingError = form.querySelector('.fw-field-error');
+        titleInput.classList.add('bd-input--error');
+        const existingError = form.querySelector('.bd-field-error');
         if (!existingError) {
           const errorHint = document.createElement('div');
-          errorHint.className = 'fw-field-error';
+          errorHint.className = 'bd-field-error';
           errorHint.textContent = 'Title is required';
           titleInput.parentElement?.appendChild(errorHint);
         }
@@ -400,8 +400,8 @@ async function submitFeedback(
     'Submitting...',
     `
       <div style="display: flex; flex-direction: column; align-items: center; padding: 20px;">
-        <div class="fw-spinner fw-spinner--lg"></div>
-        <p class="fw-loading-text" style="margin-top: 12px;">Creating issue...</p>
+        <div class="bd-spinner bd-spinner--lg"></div>
+        <p class="bd-loading-text" style="margin-top: 12px;">Creating issue...</p>
       </div>
     `
   );
@@ -452,20 +452,20 @@ function showSubmitError(
     root,
     'Submission Failed',
     `
-      <div class="fw-error-message">
-        <svg class="fw-error-message__icon" viewBox="0 0 16 16" fill="currentColor">
+      <div class="bd-error-message">
+        <svg class="bd-error-message__icon" viewBox="0 0 16 16" fill="currentColor">
           <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0-9.5a.75.75 0 0 0-.75.75v2.5a.75.75 0 0 0 1.5 0v-2.5A.75.75 0 0 0 8 5.5zm0 6a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
         </svg>
-        <span class="fw-error-message__text">${errorMessage}</span>
+        <span class="bd-error-message__text">${errorMessage}</span>
       </div>
-      <div class="fw-actions">
-        <button class="fw-btn fw-btn-secondary" data-action="cancel">Cancel</button>
-        <button class="fw-btn fw-btn-primary" data-action="retry">Try Again</button>
+      <div class="bd-actions">
+        <button class="bd-btn bd-btn-secondary" data-action="cancel">Cancel</button>
+        <button class="bd-btn bd-btn-primary" data-action="retry">Try Again</button>
       </div>
     `
   );
 
-  const closeBtn = modal.querySelector('.fw-close') as HTMLElement;
+  const closeBtn = modal.querySelector('.bd-close') as HTMLElement;
   const cancelBtn = modal.querySelector('[data-action="cancel"]') as HTMLElement;
   const retryBtn = modal.querySelector('[data-action="retry"]') as HTMLElement;
 

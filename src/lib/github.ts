@@ -7,7 +7,7 @@ const headers = (token: string) => ({
   Authorization: `Bearer ${token}`,
   Accept: 'application/vnd.github+json',
   'Content-Type': 'application/json',
-  'User-Agent': 'FeedbackWidget/1.0',
+  'User-Agent': 'BugDrop/1.0',
   'X-GitHub-Api-Version': '2022-11-28',
 });
 
@@ -108,7 +108,7 @@ export async function uploadScreenshotAsAsset(
 
   // Generate unique filename with timestamp
   const timestamp = Date.now();
-  const filename = `.feedback/screenshots/${timestamp}.png`;
+  const filename = `.bugdrop/screenshots/${timestamp}.png`;
 
   const response = await fetch(
     `${GITHUB_API}/repos/${owner}/${repo}/contents/${filename}`,
@@ -116,7 +116,7 @@ export async function uploadScreenshotAsAsset(
       method: 'PUT',
       headers: headers(token),
       body: JSON.stringify({
-        message: `Add feedback screenshot ${timestamp}`,
+        message: `Add BugDrop screenshot ${timestamp}`,
         content: content,
       }),
     }

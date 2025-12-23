@@ -26,7 +26,7 @@ describe('API Routes', () => {
     GITHUB_PRIVATE_KEY: 'test-private-key',
     ENVIRONMENT: 'test',
     ALLOWED_ORIGINS: '*',
-    GITHUB_APP_NAME: 'test-feedback-app',
+    GITHUB_APP_NAME: 'test-bugdrop-app',
     MAX_SCREENSHOT_SIZE_MB: '5',
     ASSETS: {} as Fetcher,
   };
@@ -160,7 +160,7 @@ describe('API Routes', () => {
         'testrepo',
         'Test feedback',
         expect.stringContaining('This is a test feedback'),
-        ['feedback', 'widget']
+        ['bug', 'bugdrop']
       );
     });
 
@@ -250,7 +250,7 @@ describe('API Routes', () => {
 
       expect(res.status).toBe(403);
       expect(data.error).toContain('not installed');
-      expect(data.installUrl).toBe('https://github.com/apps/test-feedback-app/installations/new');
+      expect(data.installUrl).toBe('https://github.com/apps/test-bugdrop-app/installations/new');
     });
 
     it('should upload screenshot and include URL in issue body', async () => {
@@ -288,7 +288,7 @@ describe('API Routes', () => {
         'testrepo',
         'Test feedback',
         expect.stringContaining(uploadedUrl),
-        ['feedback', 'widget']
+        ['bug', 'bugdrop']
       );
     });
 
@@ -405,7 +405,7 @@ describe('API Routes', () => {
       expect(issueBody).toContain('http://localhost:3000');
       expect(issueBody).toContain('1920 x 1080');
       expect(issueBody).toContain('#submit-button');
-      expect(issueBody).toContain('Submitted via Feedback Widget');
+      expect(issueBody).toContain('Submitted via');
     });
   });
 

@@ -1,6 +1,6 @@
 # Self-Hosting Guide
 
-Run your own instance of the Feedback Widget with your own GitHub App.
+Run your own instance of BugDrop with your own GitHub App.
 
 ## Prerequisites
 
@@ -13,7 +13,7 @@ Run your own instance of the Feedback Widget with your own GitHub App.
 1. Go to [github.com/settings/apps/new](https://github.com/settings/apps/new)
 2. Configure:
    - **Name**: Choose a unique name (becomes your app's URL slug)
-   - **Homepage URL**: Your worker URL (e.g., `https://feedback-widget.you.workers.dev`)
+   - **Homepage URL**: Your worker URL (e.g., `https://bugdrop.you.workers.dev`)
    - **Webhook**: Uncheck "Active" (not needed)
 3. Set permissions:
    - **Repository > Issues**: Read & Write
@@ -26,8 +26,8 @@ Run your own instance of the Feedback Widget with your own GitHub App.
 
 ```bash
 # Clone and install
-git clone https://github.com/YOUR_USERNAME/feedback-widget
-cd feedback-widget
+git clone https://github.com/YOUR_USERNAME/bugdrop
+cd bugdrop
 make install
 
 # Configure environment
@@ -81,7 +81,7 @@ make deploy
 [vars]
 ENVIRONMENT = "production"
 ALLOWED_ORIGINS = "https://mysite.com,https://app.mysite.com"
-GITHUB_APP_NAME = "my-feedback-app"
+GITHUB_APP_NAME = "my-bugdrop-app"
 ```
 
 ## Commands

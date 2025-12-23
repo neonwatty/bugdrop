@@ -25,64 +25,64 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
 
     :host {
       /* Typography */
-      --fw-font: 'Space Grotesk', system-ui, sans-serif;
+      --bd-font: 'Space Grotesk', system-ui, sans-serif;
 
       /* Radius */
-      --fw-radius-sm: 6px;
-      --fw-radius-md: 10px;
-      --fw-radius-lg: 14px;
+      --bd-radius-sm: 6px;
+      --bd-radius-md: 10px;
+      --bd-radius-lg: 14px;
 
       /* Transitions */
-      --fw-transition: 0.15s ease;
-      --fw-transition-slow: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      --bd-transition: 0.15s ease;
+      --bd-transition-slow: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     /* Light Theme (Default) */
-    .fw-root {
-      --fw-bg-primary: #fafaf9;
-      --fw-bg-secondary: #f5f5f4;
-      --fw-bg-tertiary: #e7e5e4;
-      --fw-text-primary: #1c1917;
-      --fw-text-secondary: #57534e;
-      --fw-text-muted: #a8a29e;
-      --fw-border: #e7e5e4;
-      --fw-border-focus: #14b8a6;
-      --fw-primary: #14b8a6;
-      --fw-primary-hover: #0d9488;
-      --fw-primary-text: #ffffff;
-      --fw-overlay-bg: rgba(0, 0, 0, 0.4);
-      --fw-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-      --fw-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-      --fw-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
-      --fw-shadow-glow: none;
-      --fw-success: #22c55e;
-      --fw-error: #ef4444;
+    .bd-root {
+      --bd-bg-primary: #fafaf9;
+      --bd-bg-secondary: #f5f5f4;
+      --bd-bg-tertiary: #e7e5e4;
+      --bd-text-primary: #1c1917;
+      --bd-text-secondary: #57534e;
+      --bd-text-muted: #a8a29e;
+      --bd-border: #e7e5e4;
+      --bd-border-focus: #14b8a6;
+      --bd-primary: #14b8a6;
+      --bd-primary-hover: #0d9488;
+      --bd-primary-text: #ffffff;
+      --bd-overlay-bg: rgba(0, 0, 0, 0.4);
+      --bd-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --bd-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --bd-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+      --bd-shadow-glow: none;
+      --bd-success: #22c55e;
+      --bd-error: #ef4444;
     }
 
     /* Dark Theme */
-    .fw-root.fw-dark {
-      --fw-bg-primary: #0f172a;
-      --fw-bg-secondary: #1e293b;
-      --fw-bg-tertiary: #334155;
-      --fw-text-primary: #f1f5f9;
-      --fw-text-secondary: #94a3b8;
-      --fw-text-muted: #64748b;
-      --fw-border: #334155;
-      --fw-border-focus: #22d3ee;
-      --fw-primary: #22d3ee;
-      --fw-primary-hover: #06b6d4;
-      --fw-primary-text: #0f172a;
-      --fw-overlay-bg: rgba(0, 0, 0, 0.6);
-      --fw-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
-      --fw-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
-      --fw-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.4);
-      --fw-shadow-glow: 0 0 40px rgba(34, 211, 238, 0.15);
-      --fw-success: #34d399;
-      --fw-error: #f87171;
+    .bd-root.bd-dark {
+      --bd-bg-primary: #0f172a;
+      --bd-bg-secondary: #1e293b;
+      --bd-bg-tertiary: #334155;
+      --bd-text-primary: #f1f5f9;
+      --bd-text-secondary: #94a3b8;
+      --bd-text-muted: #64748b;
+      --bd-border: #334155;
+      --bd-border-focus: #22d3ee;
+      --bd-primary: #22d3ee;
+      --bd-primary-hover: #06b6d4;
+      --bd-primary-text: #0f172a;
+      --bd-overlay-bg: rgba(0, 0, 0, 0.6);
+      --bd-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+      --bd-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+      --bd-shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.4);
+      --bd-shadow-glow: 0 0 40px rgba(34, 211, 238, 0.15);
+      --bd-success: #34d399;
+      --bd-error: #f87171;
     }
 
-    .fw-root {
-      font-family: var(--fw-font);
+    .bd-root {
+      font-family: var(--bd-font);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
@@ -93,7 +93,7 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
     }
 
     /* Trigger Button */
-    .fw-trigger {
+    .bd-trigger {
       position: fixed;
       bottom: 20px;
       ${pos};
@@ -101,75 +101,75 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       height: 56px;
       border-radius: 50%;
       border: none;
-      background: var(--fw-primary);
-      color: var(--fw-primary-text);
+      background: var(--bd-primary);
+      color: var(--bd-primary-text);
       font-size: 24px;
       cursor: pointer;
       box-shadow:
-        var(--fw-shadow-md),
-        0 0 0 0 var(--fw-primary);
+        var(--bd-shadow-md),
+        0 0 0 0 var(--bd-primary);
       z-index: 999999;
-      transition: transform var(--fw-transition), box-shadow var(--fw-transition);
+      transition: transform var(--bd-transition), box-shadow var(--bd-transition);
     }
 
-    .fw-trigger:hover {
+    .bd-trigger:hover {
       transform: scale(1.08);
       box-shadow:
-        var(--fw-shadow-lg),
+        var(--bd-shadow-lg),
         0 0 20px rgba(20, 184, 166, 0.3);
     }
 
-    .fw-trigger:active {
+    .bd-trigger:active {
       transform: scale(0.96);
     }
 
     /* Modal Overlay */
-    .fw-overlay {
+    .bd-overlay {
       position: fixed;
       inset: 0;
-      background: var(--fw-overlay-bg);
+      background: var(--bd-overlay-bg);
       z-index: 1000000;
       display: flex;
       align-items: center;
       justify-content: center;
-      animation: fw-fadeIn 0.2s ease;
+      animation: bd-fadeIn 0.2s ease;
     }
 
     /* Modal */
-    .fw-modal {
-      background: var(--fw-bg-primary);
-      border-radius: var(--fw-radius-lg);
-      border: 1px solid var(--fw-border);
-      box-shadow: var(--fw-shadow-lg), var(--fw-shadow-glow);
+    .bd-modal {
+      background: var(--bd-bg-primary);
+      border-radius: var(--bd-radius-lg);
+      border: 1px solid var(--bd-border);
+      box-shadow: var(--bd-shadow-lg), var(--bd-shadow-glow);
       max-width: 600px;
       width: 90%;
       max-height: 90vh;
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      animation: fw-slideUp var(--fw-transition-slow);
+      animation: bd-slideUp var(--bd-transition-slow);
     }
 
     /* Modal Header */
-    .fw-header {
+    .bd-header {
       padding: 16px 20px;
-      border-bottom: 1px solid var(--fw-border);
+      border-bottom: 1px solid var(--bd-border);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: var(--fw-bg-primary);
-      animation: fw-fadeIn 0.2s ease 0.05s both;
+      background: var(--bd-bg-primary);
+      animation: bd-fadeIn 0.2s ease 0.05s both;
     }
 
-    .fw-title {
+    .bd-title {
       margin: 0;
       font-size: 18px;
       font-weight: 600;
       letter-spacing: -0.02em;
-      color: var(--fw-text-primary);
+      color: var(--bd-text-primary);
     }
 
-    .fw-close {
+    .bd-close {
       width: 32px;
       height: 32px;
       display: flex;
@@ -177,126 +177,126 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       justify-content: center;
       background: transparent;
       border: none;
-      border-radius: var(--fw-radius-sm);
+      border-radius: var(--bd-radius-sm);
       font-size: 24px;
       cursor: pointer;
-      color: var(--fw-text-secondary);
+      color: var(--bd-text-secondary);
       padding: 0;
       line-height: 1;
-      transition: background var(--fw-transition), color var(--fw-transition);
+      transition: background var(--bd-transition), color var(--bd-transition);
     }
 
-    .fw-close:hover {
-      background: var(--fw-bg-secondary);
-      color: var(--fw-text-primary);
+    .bd-close:hover {
+      background: var(--bd-bg-secondary);
+      color: var(--bd-text-primary);
     }
 
     /* Modal Body with staggered animation */
-    .fw-body {
+    .bd-body {
       padding: 20px;
       overflow-y: auto;
       flex: 1;
     }
 
-    .fw-body > *:nth-child(1) { animation: fw-fadeIn 0.2s ease 0.1s both; }
-    .fw-body > *:nth-child(2) { animation: fw-fadeIn 0.2s ease 0.15s both; }
-    .fw-body > *:nth-child(3) { animation: fw-fadeIn 0.2s ease 0.2s both; }
-    .fw-body > *:nth-child(4) { animation: fw-fadeIn 0.2s ease 0.25s both; }
-    .fw-body > *:nth-child(5) { animation: fw-fadeIn 0.2s ease 0.3s both; }
+    .bd-body > *:nth-child(1) { animation: bd-fadeIn 0.2s ease 0.1s both; }
+    .bd-body > *:nth-child(2) { animation: bd-fadeIn 0.2s ease 0.15s both; }
+    .bd-body > *:nth-child(3) { animation: bd-fadeIn 0.2s ease 0.2s both; }
+    .bd-body > *:nth-child(4) { animation: bd-fadeIn 0.2s ease 0.25s both; }
+    .bd-body > *:nth-child(5) { animation: bd-fadeIn 0.2s ease 0.3s both; }
 
     /* Form Elements */
-    .fw-form-group {
+    .bd-form-group {
       margin-bottom: 16px;
     }
 
-    .fw-label {
+    .bd-label {
       display: block;
       margin-bottom: 6px;
       font-weight: 500;
       font-size: 13px;
-      color: var(--fw-text-secondary);
+      color: var(--bd-text-secondary);
       letter-spacing: 0.01em;
     }
 
-    .fw-input, .fw-textarea {
+    .bd-input, .bd-textarea {
       width: 100%;
       padding: 12px 14px;
-      background: var(--fw-bg-primary);
-      border: 1px solid var(--fw-border);
-      border-radius: var(--fw-radius-sm);
+      background: var(--bd-bg-primary);
+      border: 1px solid var(--bd-border);
+      border-radius: var(--bd-radius-sm);
       font-size: 14px;
-      color: var(--fw-text-primary);
-      transition: border-color var(--fw-transition), box-shadow var(--fw-transition);
+      color: var(--bd-text-primary);
+      transition: border-color var(--bd-transition), box-shadow var(--bd-transition);
     }
 
-    .fw-input::placeholder, .fw-textarea::placeholder {
-      color: var(--fw-text-muted);
+    .bd-input::placeholder, .bd-textarea::placeholder {
+      color: var(--bd-text-muted);
     }
 
-    .fw-input:focus, .fw-textarea:focus {
+    .bd-input:focus, .bd-textarea:focus {
       outline: none;
-      border-color: var(--fw-border-focus);
+      border-color: var(--bd-border-focus);
       box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
     }
 
-    .fw-dark .fw-input:focus, .fw-dark .fw-textarea:focus {
+    .bd-dark .bd-input:focus, .bd-dark .bd-textarea:focus {
       box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15);
     }
 
-    .fw-textarea {
+    .bd-textarea {
       min-height: 100px;
       resize: vertical;
     }
 
     /* Buttons */
-    .fw-btn {
+    .bd-btn {
       padding: 11px 20px;
-      border-radius: var(--fw-radius-sm);
+      border-radius: var(--bd-radius-sm);
       font-size: 14px;
       font-weight: 500;
       cursor: pointer;
-      transition: all var(--fw-transition);
+      transition: all var(--bd-transition);
       position: relative;
     }
 
-    .fw-btn-primary {
-      background: var(--fw-primary);
-      color: var(--fw-primary-text);
+    .bd-btn-primary {
+      background: var(--bd-primary);
+      color: var(--bd-primary-text);
       border: none;
-      box-shadow: var(--fw-shadow-sm);
+      box-shadow: var(--bd-shadow-sm);
     }
 
-    .fw-btn-primary:hover {
-      background: var(--fw-primary-hover);
-      box-shadow: var(--fw-shadow-md);
+    .bd-btn-primary:hover {
+      background: var(--bd-primary-hover);
+      box-shadow: var(--bd-shadow-md);
     }
 
-    .fw-dark .fw-btn-primary:hover {
-      box-shadow: var(--fw-shadow-md), 0 0 20px rgba(34, 211, 238, 0.2);
+    .bd-dark .bd-btn-primary:hover {
+      box-shadow: var(--bd-shadow-md), 0 0 20px rgba(34, 211, 238, 0.2);
     }
 
-    .fw-btn-secondary {
-      background: var(--fw-bg-primary);
-      border: 1px solid var(--fw-border);
-      color: var(--fw-text-primary);
+    .bd-btn-secondary {
+      background: var(--bd-bg-primary);
+      border: 1px solid var(--bd-border);
+      color: var(--bd-text-primary);
     }
 
-    .fw-btn-secondary:hover {
-      background: var(--fw-bg-secondary);
+    .bd-btn-secondary:hover {
+      background: var(--bd-bg-secondary);
     }
 
-    .fw-btn:disabled {
+    .bd-btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
 
     /* Loading States */
-    .fw-btn--loading {
+    .bd-btn--loading {
       color: transparent !important;
       pointer-events: none;
     }
 
-    .fw-btn--loading::after {
+    .bd-btn--loading::after {
       content: '';
       position: absolute;
       width: 16px;
@@ -305,30 +305,30 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       left: 50%;
       margin: -8px 0 0 -8px;
       border: 2px solid currentColor;
-      border-color: var(--fw-primary-text) transparent var(--fw-primary-text) transparent;
+      border-color: var(--bd-primary-text) transparent var(--bd-primary-text) transparent;
       border-radius: 50%;
-      animation: fw-spin 0.8s linear infinite;
+      animation: bd-spin 0.8s linear infinite;
     }
 
-    .fw-spinner {
+    .bd-spinner {
       width: 20px;
       height: 20px;
-      border: 2px solid var(--fw-border);
-      border-top-color: var(--fw-primary);
+      border: 2px solid var(--bd-border);
+      border-top-color: var(--bd-primary);
       border-radius: 50%;
-      animation: fw-spin 0.8s linear infinite;
+      animation: bd-spin 0.8s linear infinite;
     }
 
-    .fw-spinner--lg {
+    .bd-spinner--lg {
       width: 32px;
       height: 32px;
       border-width: 3px;
     }
 
-    .fw-loading-overlay {
+    .bd-loading-overlay {
       position: absolute;
       inset: 0;
-      background: var(--fw-bg-primary);
+      background: var(--bd-bg-primary);
       opacity: 0.95;
       display: flex;
       flex-direction: column;
@@ -336,58 +336,58 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       justify-content: center;
       gap: 12px;
       z-index: 10;
-      border-radius: var(--fw-radius-lg);
+      border-radius: var(--bd-radius-lg);
     }
 
-    .fw-loading-text {
+    .bd-loading-text {
       font-size: 14px;
-      color: var(--fw-text-secondary);
+      color: var(--bd-text-secondary);
       font-weight: 500;
     }
 
-    .fw-skeleton {
+    .bd-skeleton {
       background: linear-gradient(
         90deg,
-        var(--fw-bg-secondary) 0%,
-        var(--fw-bg-tertiary) 50%,
-        var(--fw-bg-secondary) 100%
+        var(--bd-bg-secondary) 0%,
+        var(--bd-bg-tertiary) 50%,
+        var(--bd-bg-secondary) 100%
       );
       background-size: 200% 100%;
-      animation: fw-shimmer 1.5s ease-in-out infinite;
-      border-radius: var(--fw-radius-sm);
+      animation: bd-shimmer 1.5s ease-in-out infinite;
+      border-radius: var(--bd-radius-sm);
     }
 
     /* Error States */
-    .fw-error-message {
+    .bd-error-message {
       display: flex;
       align-items: flex-start;
       gap: 10px;
       padding: 12px 14px;
       background: rgba(239, 68, 68, 0.1);
       border: 1px solid rgba(239, 68, 68, 0.2);
-      border-radius: var(--fw-radius-sm);
-      color: var(--fw-error);
+      border-radius: var(--bd-radius-sm);
+      color: var(--bd-error);
       font-size: 13px;
       margin-bottom: 16px;
     }
 
-    .fw-dark .fw-error-message {
+    .bd-dark .bd-error-message {
       background: rgba(248, 113, 113, 0.1);
       border-color: rgba(248, 113, 113, 0.2);
     }
 
-    .fw-error-message__icon {
+    .bd-error-message__icon {
       flex-shrink: 0;
       width: 16px;
       height: 16px;
     }
 
-    .fw-error-message__text {
+    .bd-error-message__text {
       flex: 1;
       line-height: 1.4;
     }
 
-    .fw-error-message__retry {
+    .bd-error-message__retry {
       background: none;
       border: none;
       color: inherit;
@@ -398,22 +398,22 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       font-size: 13px;
     }
 
-    .fw-input--error, .fw-textarea--error {
-      border-color: var(--fw-error) !important;
+    .bd-input--error, .bd-textarea--error {
+      border-color: var(--bd-error) !important;
     }
 
-    .fw-input--error:focus, .fw-textarea--error:focus {
+    .bd-input--error:focus, .bd-textarea--error:focus {
       box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
     }
 
-    .fw-field-error {
-      color: var(--fw-error);
+    .bd-field-error {
+      color: var(--bd-error);
       font-size: 12px;
       margin-top: 4px;
     }
 
     /* Actions */
-    .fw-actions {
+    .bd-actions {
       display: flex;
       gap: 12px;
       justify-content: flex-end;
@@ -421,55 +421,55 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
     }
 
     /* Tools Toolbar */
-    .fw-tools {
+    .bd-tools {
       display: flex;
       gap: 6px;
       padding: 8px;
-      background: var(--fw-bg-secondary);
-      border: 1px solid var(--fw-border);
-      border-radius: var(--fw-radius-md);
+      background: var(--bd-bg-secondary);
+      border: 1px solid var(--bd-border);
+      border-radius: var(--bd-radius-md);
       margin-bottom: 12px;
     }
 
-    .fw-tool {
+    .bd-tool {
       padding: 8px 14px;
       background: transparent;
       border: none;
-      border-radius: var(--fw-radius-sm);
+      border-radius: var(--bd-radius-sm);
       font-size: 13px;
       font-weight: 500;
-      color: var(--fw-text-secondary);
+      color: var(--bd-text-secondary);
       cursor: pointer;
-      transition: all var(--fw-transition);
+      transition: all var(--bd-transition);
     }
 
-    .fw-tool:hover {
-      background: var(--fw-bg-tertiary);
-      color: var(--fw-text-primary);
+    .bd-tool:hover {
+      background: var(--bd-bg-tertiary);
+      color: var(--bd-text-primary);
     }
 
-    .fw-tool.active {
-      background: var(--fw-bg-primary);
-      color: var(--fw-primary);
-      box-shadow: var(--fw-shadow-sm);
+    .bd-tool.active {
+      background: var(--bd-bg-primary);
+      color: var(--bd-primary);
+      box-shadow: var(--bd-shadow-sm);
     }
 
     /* Preview */
-    .fw-preview {
-      border: 1px solid var(--fw-border);
-      border-radius: var(--fw-radius-md);
+    .bd-preview {
+      border: 1px solid var(--bd-border);
+      border-radius: var(--bd-radius-md);
       overflow: hidden;
       margin-bottom: 16px;
-      box-shadow: var(--fw-shadow-sm);
+      box-shadow: var(--bd-shadow-sm);
     }
 
-    .fw-preview img {
+    .bd-preview img {
       width: 100%;
       display: block;
     }
 
     /* Toast Notifications */
-    .fw-toast {
+    .bd-toast {
       position: fixed;
       bottom: 100px;
       right: 20px;
@@ -477,117 +477,117 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       align-items: center;
       gap: 10px;
       padding: 14px 18px;
-      border-radius: var(--fw-radius-md);
+      border-radius: var(--bd-radius-md);
       color: white;
       font-size: 14px;
       font-weight: 500;
       z-index: 1000001;
-      box-shadow: var(--fw-shadow-lg);
-      animation: fw-slideIn 0.3s ease;
+      box-shadow: var(--bd-shadow-lg);
+      animation: bd-slideIn 0.3s ease;
     }
 
-    .fw-toast.success {
-      background: var(--fw-success);
+    .bd-toast.success {
+      background: var(--bd-success);
     }
 
-    .fw-toast.error {
-      background: var(--fw-error);
+    .bd-toast.error {
+      background: var(--bd-error);
     }
 
     /* Animations */
-    @keyframes fw-fadeIn {
+    @keyframes bd-fadeIn {
       from { opacity: 0; transform: translateY(8px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    @keyframes fw-slideUp {
+    @keyframes bd-slideUp {
       from { opacity: 0; transform: translateY(24px) scale(0.96); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    @keyframes fw-slideIn {
+    @keyframes bd-slideIn {
       from { transform: translateX(100%); opacity: 0; }
       to { transform: translateX(0); opacity: 1; }
     }
 
-    @keyframes fw-spin {
+    @keyframes bd-spin {
       to { transform: rotate(360deg); }
     }
 
-    @keyframes fw-shimmer {
+    @keyframes bd-shimmer {
       0% { background-position: 200% 0; }
       100% { background-position: -200% 0; }
     }
 
     /* Mobile Responsiveness */
     @media (max-width: 640px) {
-      .fw-trigger {
+      .bd-trigger {
         width: 52px;
         height: 52px;
         bottom: 16px;
         font-size: 22px;
       }
 
-      .fw-overlay {
+      .bd-overlay {
         align-items: flex-end;
       }
 
-      .fw-modal {
+      .bd-modal {
         width: 100%;
         max-width: 100%;
         max-height: 95vh;
-        border-radius: var(--fw-radius-lg) var(--fw-radius-lg) 0 0;
-        animation: fw-slideUpMobile var(--fw-transition-slow);
+        border-radius: var(--bd-radius-lg) var(--bd-radius-lg) 0 0;
+        animation: bd-slideUpMobile var(--bd-transition-slow);
       }
 
-      .fw-header {
+      .bd-header {
         padding: 16px;
         position: sticky;
         top: 0;
         z-index: 1;
       }
 
-      .fw-close {
+      .bd-close {
         width: 44px;
         height: 44px;
         font-size: 28px;
       }
 
-      .fw-body {
+      .bd-body {
         padding: 16px;
         padding-bottom: 32px;
       }
 
-      .fw-btn {
+      .bd-btn {
         padding: 14px 24px;
         font-size: 16px;
         min-height: 48px;
       }
 
-      .fw-input, .fw-textarea {
+      .bd-input, .bd-textarea {
         padding: 14px;
         font-size: 16px;
         min-height: 48px;
       }
 
-      .fw-textarea {
+      .bd-textarea {
         min-height: 120px;
       }
 
-      .fw-actions {
+      .bd-actions {
         flex-direction: column-reverse;
         gap: 8px;
       }
 
-      .fw-actions .fw-btn {
+      .bd-actions .bd-btn {
         width: 100%;
       }
 
-      .fw-tools {
+      .bd-tools {
         flex-wrap: wrap;
       }
 
-      .fw-tool {
+      .bd-tool {
         flex: 1;
         min-width: calc(50% - 4px);
         justify-content: center;
@@ -595,7 +595,7 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
         text-align: center;
       }
 
-      .fw-toast {
+      .bd-toast {
         left: 16px;
         right: 16px;
         bottom: 80px;
@@ -603,46 +603,46 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       }
     }
 
-    @keyframes fw-slideUpMobile {
+    @keyframes bd-slideUpMobile {
       from { opacity: 0; transform: translateY(100%); }
       to { opacity: 1; transform: translateY(0); }
     }
 
     /* Touch-friendly hover states */
     @media (hover: none) {
-      .fw-trigger:hover {
+      .bd-trigger:hover {
         transform: none;
-        box-shadow: var(--fw-shadow-md);
+        box-shadow: var(--bd-shadow-md);
       }
 
-      .fw-trigger:active {
+      .bd-trigger:active {
         transform: scale(0.95);
       }
 
-      .fw-btn:hover {
+      .bd-btn:hover {
         background: inherit;
       }
 
-      .fw-btn-primary:hover {
-        background: var(--fw-primary);
+      .bd-btn-primary:hover {
+        background: var(--bd-primary);
       }
 
-      .fw-btn-primary:active {
-        background: var(--fw-primary-hover);
+      .bd-btn-primary:active {
+        background: var(--bd-primary-hover);
       }
 
-      .fw-btn-secondary:hover {
-        background: var(--fw-bg-primary);
+      .bd-btn-secondary:hover {
+        background: var(--bd-bg-primary);
       }
 
-      .fw-btn-secondary:active {
-        background: var(--fw-bg-secondary);
+      .bd-btn-secondary:active {
+        background: var(--bd-bg-secondary);
       }
     }
 
     /* Safe area support for notched devices */
     @supports (padding-bottom: env(safe-area-inset-bottom)) {
-      .fw-modal {
+      .bd-modal {
         padding-bottom: env(safe-area-inset-bottom);
       }
     }

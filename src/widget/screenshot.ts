@@ -28,7 +28,7 @@ export async function captureScreenshot(element?: Element): Promise<string> {
     pixelRatio: window.devicePixelRatio || 1,
     filter: (node: HTMLElement) => {
       // Exclude our widget from screenshot
-      return node.id !== 'feedback-widget-host';
+      return node.id !== 'bugdrop-host';
     },
   });
 
