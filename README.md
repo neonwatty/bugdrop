@@ -7,6 +7,8 @@ Ship bugs to GitHub in 2 clicks. Screenshots, element picker, the works.
 
 ## Quick Start
 
+> Works with both public and private repositories!
+
 **1. Install the GitHub App** on your repository:
 
 https://github.com/apps/neonwatty-bugdrop/installations/new
@@ -34,6 +36,10 @@ That's it! Users can now click the bug button to submit feedback as GitHub Issue
         data-theme="dark"
         data-position="bottom-left"></script>
 ```
+
+## Live Demo
+
+Try it on [WienerMatch](https://neonwatty.github.io/feedback-widget-test/) — click the bug button in the bottom right corner.
 
 ## How It Works
 
