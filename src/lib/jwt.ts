@@ -72,7 +72,7 @@ async function importPrivateKey(pem: string): Promise<CryptoKey> {
   // Import key
   return crypto.subtle.importKey(
     'pkcs8',
-    pkcs8Bytes.buffer,
+    pkcs8Bytes.buffer as ArrayBuffer,
     { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
     false,
     ['sign']
