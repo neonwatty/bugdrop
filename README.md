@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/neonwatty/bugdrop/actions/workflows/ci.yml/badge.svg)](https://github.com/neonwatty/bugdrop/actions/workflows/ci.yml)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](./SECURITY.md)
+[![Live Demo](https://img.shields.io/badge/Demo-Try_It_Live-ff9e64)](https://neonwatty.github.io/feedback-widget-test/)
 
 Ship bugs to GitHub in 2 clicks. Screenshots, element picker, the works.
 
