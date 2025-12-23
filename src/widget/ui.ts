@@ -661,7 +661,7 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
 
   // Create root wrapper with theme class
   const root = document.createElement('div');
-  root.className = `fw-root${isDark ? ' fw-dark' : ''}`;
+  root.className = `bd-root${isDark ? ' bd-dark' : ''}`;
   shadow.appendChild(root);
 
   return root;
@@ -673,14 +673,14 @@ export function createModal(
   content: string
 ): HTMLElement {
   const overlay = document.createElement('div');
-  overlay.className = 'fw-overlay';
+  overlay.className = 'bd-overlay';
   overlay.innerHTML = `
-    <div class="fw-modal">
-      <div class="fw-header">
-        <h2 class="fw-title">${title}</h2>
-        <button class="fw-close">&times;</button>
+    <div class="bd-modal">
+      <div class="bd-header">
+        <h2 class="bd-title">${title}</h2>
+        <button class="bd-close">&times;</button>
       </div>
-      <div class="fw-body">
+      <div class="bd-body">
         ${content}
       </div>
     </div>
@@ -696,7 +696,7 @@ export function showToast(
   type: 'success' | 'error'
 ) {
   const toast = document.createElement('div');
-  toast.className = `fw-toast ${type}`;
+  toast.className = `bd-toast ${type}`;
   toast.textContent = message;
   container.appendChild(toast);
 
