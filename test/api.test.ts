@@ -412,6 +412,78 @@ describe('API Routes', () => {
       expect(issueBody).toContain('#submit-button');
       expect(issueBody).toContain('Submitted via');
     });
+
+    it('should include submitter info in issue body when provided', async () => {
+      mockGetInstallationToken.mockResolvedValue('test-token');
+      mockCreateIssue.mockResolvedValue({
+        number: 42,
+        html_url: 'https://github.com/testowner/testrepo/issues/42',
+      });
+
+      const payloadWithSubmitter = {
+        ...validPayload,
+        submitter: {
+          name: 'John Doe',
+          email: 'john@example.com',
+        },
+      };
+
+      const req = new Request('http://localhost/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payloadWithSubmitter),
+      });
+      await app.fetch(req, mockEnv);
+
+      const issueBody = mockCreateIssue.mock.calls[0][4];
+      expect(issueBody).toContain('## Submitted by');
+      expect(issueBody).toContain('**John Doe**');
+      expect(issueBody).toContain('(john@example.com)');
+    });
+
+    it('should handle submitter with only name', async () => {
+      mockGetInstallationToken.mockResolvedValue('test-token');
+      mockCreateIssue.mockResolvedValue({
+        number: 42,
+        html_url: 'https://github.com/testowner/testrepo/issues/42',
+      });
+
+      const payloadWithName = {
+        ...validPayload,
+        submitter: { name: 'Jane Doe' },
+      };
+
+      const req = new Request('http://localhost/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payloadWithName),
+      });
+      await app.fetch(req, mockEnv);
+
+      const issueBody = mockCreateIssue.mock.calls[0][4];
+      expect(issueBody).toContain('## Submitted by');
+      expect(issueBody).toContain('**Jane Doe**');
+      // Should not contain email format (email in parentheses after name)
+      expect(issueBody).not.toMatch(/\*\*Jane Doe\*\*.*\(/);
+    });
+
+    it('should not include submitter section when not provided', async () => {
+      mockGetInstallationToken.mockResolvedValue('test-token');
+      mockCreateIssue.mockResolvedValue({
+        number: 42,
+        html_url: 'https://github.com/testowner/testrepo/issues/42',
+      });
+
+      const req = new Request('http://localhost/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(validPayload),
+      });
+      await app.fetch(req, mockEnv);
+
+      const issueBody = mockCreateIssue.mock.calls[0][4];
+      expect(issueBody).not.toContain('## Submitted by');
+    });
   });
 
   describe('OPTIONS preflight requests', () => {

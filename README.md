@@ -30,6 +30,10 @@ That's it! Users can now click the bug button to submit feedback as GitHub Issue
 | `data-repo` | `owner/repo` | required |
 | `data-theme` | `light`, `dark`, `auto` | `auto` |
 | `data-position` | `bottom-right`, `bottom-left` | `bottom-right` |
+| `data-show-name` | `true`, `false` | `false` |
+| `data-require-name` | `true`, `false` | `false` |
+| `data-show-email` | `true`, `false` | `false` |
+| `data-require-email` | `true`, `false` | `false` |
 
 ```html
 <script src="https://bugdrop.neonwatty.workers.dev/widget.js"
@@ -37,6 +41,21 @@ That's it! Users can now click the bug button to submit feedback as GitHub Issue
         data-theme="dark"
         data-position="bottom-left"></script>
 ```
+
+### Collecting Submitter Info
+
+By default, BugDrop only asks for a title and description. You can optionally collect user name and email:
+
+```html
+<!-- Require name, optional email -->
+<script src="https://bugdrop.neonwatty.workers.dev/widget.js"
+        data-repo="owner/repo"
+        data-show-name="true"
+        data-require-name="true"
+        data-show-email="true"></script>
+```
+
+When provided, submitter info appears at the top of the GitHub issue.
 
 ## Live Demo
 
