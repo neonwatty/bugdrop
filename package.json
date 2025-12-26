@@ -1,7 +1,7 @@
 {
   "name": "bugdrop",
   "version": "1.0.0",
-  "description": "Ship bugs to GitHub in 2 clicks. Screenshots, element picker, the works.",
+  "description": "In-app feedback → GitHub Issues. Screenshots, annotations, the works.",
   "type": "module",
   "scripts": {
     "dev": "wrangler dev --port 8787",
