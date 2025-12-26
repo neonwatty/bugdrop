@@ -567,7 +567,11 @@ function getElementSelector(element: Element): string {
     }
 
     if (current.className) {
-      const classes = current.className.split(' ').filter(c => c).slice(0, 2);
+      // Handle SVG elements where className is SVGAnimatedString, not a string
+      const classNameStr = typeof current.className === 'string'
+        ? current.className
+        : (current.className as SVGAnimatedString).baseVal || '';
+      const classes = classNameStr.split(' ').filter(c => c).slice(0, 2);
       if (classes.length) {
         selector += `.${classes.join('.')}`;
       }
