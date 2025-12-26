@@ -56,6 +56,68 @@ test.describe('Widget Interaction', () => {
     const modal = page.locator('#bugdrop-host').locator('css=.bd-modal');
     await expect(modal).toBeVisible({ timeout: 5000 });
   });
+
+  test('element picker handles SVG elements without errors', async ({ page }) => {
+    // Track console errors - specifically looking for className.split errors
+    const errors: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') {
+        errors.push(msg.text());
+      }
+    });
+    page.on('pageerror', (err) => {
+      errors.push(err.message);
+    });
+
+    // Mock the installation check to return installed: true
+    await page.route('**/api/check/**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ installed: true }),
+      });
+    });
+
+    await page.goto('/test/');
+
+    // Wait for widget to be ready
+    const button = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(button).toBeVisible({ timeout: 5000 });
+
+    // Click the trigger button to open modal
+    await button.click();
+
+    const modal = page.locator('#bugdrop-host').locator('css=.bd-modal');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+
+    // Click "Select Element" option
+    const selectElementBtn = page.locator('#bugdrop-host').locator('css=[data-action="element"]');
+    await expect(selectElementBtn).toBeVisible({ timeout: 5000 });
+    await selectElementBtn.click();
+
+    // Wait for element picker mode to be active
+    await page.waitForTimeout(500);
+
+    // Click on the SVG element - this previously caused className.split error
+    const svgElement = page.locator('#test-svg');
+    await expect(svgElement).toBeVisible();
+    await svgElement.click();
+
+    // Wait for screenshot capture and annotation modal
+    await page.waitForTimeout(1000);
+
+    // Check for the className.split error that was previously occurring
+    const classNameErrors = errors.filter(e =>
+      e.includes('className.split') ||
+      e.includes('split is not a function')
+    );
+
+    expect(classNameErrors).toHaveLength(0);
+
+    // Annotation canvas should appear (indicating flow continued successfully to annotation step)
+    const annotationCanvas = page.locator('#bugdrop-host').locator('css=#annotation-canvas');
+    await expect(annotationCanvas).toBeVisible({ timeout: 5000 });
+  });
 });
 
 test.describe('API Endpoints', () => {

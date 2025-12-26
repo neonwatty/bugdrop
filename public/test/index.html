@@ -549,6 +549,11 @@
         <button class="btn btn-secondary" id="test-button-2">Secondary Action</button>
         <input type="text" class="test-input" placeholder="Test input field..." id="test-input">
       </div>
+      <!-- SVG element for testing element picker with SVG className (SVGAnimatedString) -->
+      <svg id="test-svg" class="test-svg-element" width="120" height="40" viewBox="0 0 120 40" style="margin-top: 1rem;">
+        <rect class="svg-rect" x="2" y="2" width="116" height="36" rx="8" fill="none" stroke="var(--accent-cyan)" stroke-width="2"/>
+        <text class="svg-text" x="60" y="25" text-anchor="middle" fill="var(--accent-cyan)" font-size="12">SVG Element</text>
+      </svg>
       <div class="code-block" id="test-code">
         <span class="keyword">const</span> <span class="variable">widget</span> = <span class="keyword">new</span> <span class="function">FeedbackWidget</span>();
       </div>
