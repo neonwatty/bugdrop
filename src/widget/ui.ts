@@ -745,23 +745,6 @@ export function createModal(
   return overlay;
 }
 
-export function showToast(
-  container: HTMLElement,
-  message: string,
-  type: 'success' | 'error'
-) {
-  const toast = document.createElement('div');
-  toast.className = `bd-toast ${type}`;
-  toast.textContent = message;
-  container.appendChild(toast);
-
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transition = 'opacity 0.3s';
-    setTimeout(() => toast.remove(), 300);
-  }, 3000);
-}
-
 export function showSuccessModal(
   container: HTMLElement,
   issueNumber: number,
