@@ -40,7 +40,7 @@ That's it! Users can now click the bug button to submit feedback as GitHub Issue
 
 ## Live Demo
 
-Try it on [WienerMatch](https://neonwatty.github.io/feedback-widget-test/) — click the bug button in the bottom right corner.
+See BugDrop integrated into [WienerMatch](https://neonwatty.github.io/feedback-widget-test/), a sample web app. Click the 🐛 button in the bottom-right corner to submit a test bug report!
 
 ## How It Works
 
