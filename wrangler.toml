@@ -14,6 +14,11 @@ ALLOWED_ORIGINS = "*"  # "*" for dev, comma-separated URLs for production
 GITHUB_APP_NAME = "neonwatty-bugdrop"  # Your GitHub App's URL slug
 MAX_SCREENSHOT_SIZE_MB = "5"  # Maximum screenshot size in MB
 
+# Production configuration example (uncomment and customize for deployment)
+# [env.production.vars]
+# ENVIRONMENT = "production"
+# ALLOWED_ORIGINS = "https://yourdomain.com,https://app.yourdomain.com"
+
 # Secrets (set with: wrangler secret put GITHUB_APP_ID)
 # GITHUB_APP_ID
 # GITHUB_PRIVATE_KEY
