@@ -402,6 +402,61 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       border-color: var(--bd-error) !important;
     }
 
+    /* Success Modal */
+    .bd-success-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 8px 0 16px;
+    }
+
+    .bd-success-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--bd-success);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .bd-success-icon svg {
+      width: 28px;
+      height: 28px;
+      color: white;
+    }
+
+    .bd-success-issue {
+      margin: 0 0 12px;
+      color: var(--bd-text-primary);
+      font-size: 15px;
+    }
+
+    .bd-issue-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--bd-primary);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 14px;
+      padding: 8px 16px;
+      border-radius: var(--bd-radius-sm);
+      background: var(--bd-bg-secondary);
+      transition: background var(--bd-transition), color var(--bd-transition);
+    }
+
+    .bd-issue-link:hover {
+      background: var(--bd-bg-tertiary);
+      color: var(--bd-primary-hover);
+    }
+
+    .bd-issue-link svg {
+      flex-shrink: 0;
+    }
+
     .bd-input--error:focus, .bd-textarea--error:focus {
       box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
     }
@@ -705,5 +760,56 @@ export function showToast(
     toast.style.transition = 'opacity 0.3s';
     setTimeout(() => toast.remove(), 300);
   }, 3000);
+}
+
+export function showSuccessModal(
+  container: HTMLElement,
+  issueNumber: number,
+  issueUrl: string,
+  isPublic: boolean
+): Promise<void> {
+  return new Promise((resolve) => {
+    const issueInfo = isPublic
+      ? `
+        <p class="bd-success-issue">Issue <strong>#${issueNumber}</strong> has been created.</p>
+        <a href="${issueUrl}" target="_blank" rel="noopener noreferrer" class="bd-issue-link">
+          <svg viewBox="0 0 16 16" fill="currentColor" width="16" height="16">
+            <path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/>
+          </svg>
+          View on GitHub
+        </a>
+      `
+      : `<p class="bd-success-issue">Your feedback has been submitted successfully.</p>`;
+
+    const modal = createModal(
+      container,
+      'Feedback Submitted!',
+      `
+        <div class="bd-success-content">
+          <div class="bd-success-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+              <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+          </div>
+          ${issueInfo}
+        </div>
+        <div class="bd-actions">
+          <button class="bd-btn bd-btn-primary" data-action="done">Done</button>
+        </div>
+      `
+    );
+
+    const closeBtn = modal.querySelector('.bd-close') as HTMLElement;
+    const doneBtn = modal.querySelector('[data-action="done"]') as HTMLElement;
+
+    const closeModal = () => {
+      modal.remove();
+      resolve();
+    };
+
+    closeBtn?.addEventListener('click', closeModal);
+    doneBtn?.addEventListener('click', closeModal);
+  });
 }
 

@@ -94,6 +94,31 @@ export async function createIssue(
 }
 
 /**
+ * Check if a repository is public
+ */
+export async function isRepoPublic(
+  token: string,
+  owner: string,
+  repo: string
+): Promise<boolean> {
+  try {
+    const response = await fetch(
+      `${GITHUB_API}/repos/${owner}/${repo}`,
+      { headers: headers(token) }
+    );
+
+    if (!response.ok) {
+      return false;
+    }
+
+    const data = await response.json() as { private: boolean };
+    return !data.private;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Upload screenshot to repo and return the raw URL for embedding in issues
  * Requires Contents:write permission on the GitHub App
  */

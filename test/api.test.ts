@@ -6,11 +6,13 @@ import type { Env, FeedbackPayload } from '../src/types';
 const mockGetInstallationToken = vi.fn();
 const mockCreateIssue = vi.fn();
 const mockUploadScreenshotAsAsset = vi.fn();
+const mockIsRepoPublic = vi.fn();
 
 vi.mock('../src/lib/github', () => ({
   getInstallationToken: (...args: unknown[]) => mockGetInstallationToken(...args),
   createIssue: (...args: unknown[]) => mockCreateIssue(...args),
   uploadScreenshotAsAsset: (...args: unknown[]) => mockUploadScreenshotAsAsset(...args),
+  isRepoPublic: (...args: unknown[]) => mockIsRepoPublic(...args),
 }));
 
 // Import API routes after mocking
@@ -33,6 +35,8 @@ describe('API Routes', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
+    // Set default mock return values
+    mockIsRepoPublic.mockResolvedValue(true);
     app = await createApiRoutes();
   });
 
@@ -153,6 +157,7 @@ describe('API Routes', () => {
         success: true,
         issueNumber: 42,
         issueUrl: 'https://github.com/testowner/testrepo/issues/42',
+        isPublic: true,
       });
       expect(mockCreateIssue).toHaveBeenCalledWith(
         'test-token',
