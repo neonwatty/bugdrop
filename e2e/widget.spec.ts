@@ -118,6 +118,70 @@ test.describe('Widget Interaction', () => {
     const annotationCanvas = page.locator('#bugdrop-host').locator('css=#annotation-canvas');
     await expect(annotationCanvas).toBeVisible({ timeout: 5000 });
   });
+
+  test('element picker handles nested SVG child elements without errors', async ({ page }) => {
+    // Track console errors - the fix must handle nested SVG elements too
+    // since getElementSelector walks up the DOM tree
+    const errors: string[] = [];
+    page.on('console', (msg) => {
+      if (msg.type() === 'error') {
+        errors.push(msg.text());
+      }
+    });
+    page.on('pageerror', (err) => {
+      errors.push(err.message);
+    });
+
+    // Mock the installation check to return installed: true
+    await page.route('**/api/check/**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ installed: true }),
+      });
+    });
+
+    await page.goto('/test/');
+
+    // Wait for widget to be ready
+    const button = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(button).toBeVisible({ timeout: 5000 });
+
+    // Click the trigger button to open modal
+    await button.click();
+
+    const modal = page.locator('#bugdrop-host').locator('css=.bd-modal');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+
+    // Click "Select Element" option
+    const selectElementBtn = page.locator('#bugdrop-host').locator('css=[data-action="element"]');
+    await expect(selectElementBtn).toBeVisible({ timeout: 5000 });
+    await selectElementBtn.click();
+
+    // Wait for element picker mode to be active
+    await page.waitForTimeout(500);
+
+    // Click on nested SVG child element (text inside SVG)
+    // This tests that getElementSelector handles SVG elements when walking up the tree
+    const svgText = page.locator('#test-svg text');
+    await expect(svgText).toBeVisible();
+    await svgText.click();
+
+    // Wait for screenshot capture and annotation modal
+    await page.waitForTimeout(1000);
+
+    // Check for the className.split error
+    const classNameErrors = errors.filter(e =>
+      e.includes('className.split') ||
+      e.includes('split is not a function')
+    );
+
+    expect(classNameErrors).toHaveLength(0);
+
+    // Annotation canvas should appear
+    const annotationCanvas = page.locator('#bugdrop-host').locator('css=#annotation-canvas');
+    await expect(annotationCanvas).toBeVisible({ timeout: 5000 });
+  });
 });
 
 test.describe('API Endpoints', () => {
