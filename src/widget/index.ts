@@ -4,7 +4,7 @@ import { createAnnotator } from './annotator';
 import {
   injectStyles,
   createModal,
-  showToast,
+  showSuccessModal,
 } from './ui';
 
 interface WidgetConfig {
@@ -432,7 +432,12 @@ async function submitFeedback(
     modal.remove();
 
     if (result.success) {
-      showToast(root, `Issue #${result.issueNumber} created!`, 'success');
+      await showSuccessModal(
+        root,
+        result.issueNumber,
+        result.issueUrl,
+        result.isPublic ?? false
+      );
     } else {
       showSubmitError(root, config, data, result.error || 'Failed to submit');
     }

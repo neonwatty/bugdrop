@@ -5,6 +5,7 @@ import {
   getInstallationToken,
   createIssue,
   uploadScreenshotAsAsset,
+  isRepoPublic,
 } from '../lib/github';
 
 const api = new Hono<{ Bindings: Env }>();
@@ -123,6 +124,9 @@ api.post('/feedback', async (c) => {
     // Build issue body
     const body = formatIssueBody(payload, screenshotUrl);
 
+    // Check repo visibility (for UI to decide whether to show issue link)
+    const isPublic = await isRepoPublic(token, owner, repo);
+
     // Create issue
     const issue = await createIssue(
       token,
@@ -137,6 +141,7 @@ api.post('/feedback', async (c) => {
       success: true,
       issueNumber: issue.number,
       issueUrl: issue.html_url,
+      isPublic,
     });
 
   } catch (error) {
