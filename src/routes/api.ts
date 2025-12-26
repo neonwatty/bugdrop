@@ -161,6 +161,20 @@ function formatIssueBody(
 ): string {
   const sections: string[] = [];
 
+  // Submitter info (if provided)
+  if (payload.submitter?.name || payload.submitter?.email) {
+    sections.push('## Submitted by');
+    const parts: string[] = [];
+    if (payload.submitter.name) {
+      parts.push(`**${payload.submitter.name}**`);
+    }
+    if (payload.submitter.email) {
+      parts.push(`(${payload.submitter.email})`);
+    }
+    sections.push(parts.join(' '));
+    sections.push('');
+  }
+
   // Description
   sections.push('## Description');
   sections.push(payload.description);

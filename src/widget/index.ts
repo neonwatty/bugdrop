@@ -12,6 +12,11 @@ interface WidgetConfig {
   apiUrl: string;
   position: 'bottom-right' | 'bottom-left';
   theme: 'light' | 'dark' | 'auto';
+  // Name/email field configuration
+  showName: boolean;
+  requireName: boolean;
+  showEmail: boolean;
+  requireEmail: boolean;
 }
 
 interface FeedbackData {
@@ -19,6 +24,8 @@ interface FeedbackData {
   description: string;
   screenshot: string | null;
   elementSelector: string | null;
+  name?: string;
+  email?: string;
 }
 
 // Store root element for potential global access
@@ -32,6 +39,11 @@ const config: WidgetConfig = {
   apiUrl: script?.src.replace('/widget.js', '/api') || '',
   position: (script?.dataset.position as WidgetConfig['position']) || 'bottom-right',
   theme: rawTheme || 'auto', // Default to auto-detection
+  // Name/email field configuration (all default to false for backwards compatibility)
+  showName: script?.dataset.showName === 'true',
+  requireName: script?.dataset.requireName === 'true',
+  showEmail: script?.dataset.showEmail === 'true',
+  requireEmail: script?.dataset.requireEmail === 'true',
 };
 
 // Validate config
@@ -94,7 +106,7 @@ async function openFeedbackFlow(root: HTMLElement, config: WidgetConfig) {
   }
 
   // Step 3: Feedback form
-  const formData = await showFeedbackForm(root, annotatedScreenshot);
+  const formData = await showFeedbackForm(root, annotatedScreenshot, config);
   if (!formData) return; // User cancelled
 
   // Submit
@@ -310,11 +322,32 @@ function showAnnotationStep(root: HTMLElement, screenshot: string): Promise<stri
 
 function showFeedbackForm(
   root: HTMLElement,
-  screenshot: string | null
-): Promise<{ title: string; description: string } | null> {
+  screenshot: string | null,
+  config: WidgetConfig
+): Promise<{ title: string; description: string; name?: string; email?: string } | null> {
   return new Promise((resolve) => {
     const previewHtml = screenshot
       ? `<div class="bd-preview"><img src="${screenshot}" alt="Screenshot preview" /></div>`
+      : '';
+
+    // Build optional name field
+    const nameFieldHtml = config.showName
+      ? `
+          <div class="bd-form-group">
+            <label class="bd-label" for="name">Name${config.requireName ? ' *' : ''}</label>
+            <input type="text" id="name" class="bd-input" ${config.requireName ? 'required' : ''} placeholder="Your name" />
+          </div>
+        `
+      : '';
+
+    // Build optional email field
+    const emailFieldHtml = config.showEmail
+      ? `
+          <div class="bd-form-group">
+            <label class="bd-label" for="email">Email${config.requireEmail ? ' *' : ''}</label>
+            <input type="email" id="email" class="bd-input" ${config.requireEmail ? 'required' : ''} placeholder="your@email.com" />
+          </div>
+        `
       : '';
 
     const modal = createModal(
@@ -323,6 +356,8 @@ function showFeedbackForm(
       `
         ${previewHtml}
         <form id="feedback-form">
+          ${nameFieldHtml}
+          ${emailFieldHtml}
           <div class="bd-form-group">
             <label class="bd-label" for="title">Title *</label>
             <input type="text" id="title" class="bd-input" required placeholder="Brief description of the issue" />
@@ -340,17 +375,23 @@ function showFeedbackForm(
     );
 
     const form = modal.querySelector('#feedback-form') as HTMLFormElement;
+    const nameInput = modal.querySelector('#name') as HTMLInputElement | null;
+    const emailInput = modal.querySelector('#email') as HTMLInputElement | null;
     const titleInput = modal.querySelector('#title') as HTMLInputElement;
     const descriptionInput = modal.querySelector('#description') as HTMLTextAreaElement;
     const closeBtn = modal.querySelector('.bd-close') as HTMLElement;
     const cancelBtn = modal.querySelector('[data-action="cancel"]') as HTMLElement;
 
     // Clear validation errors on input
-    titleInput?.addEventListener('input', () => {
-      titleInput.classList.remove('bd-input--error');
-      const errorHint = form.querySelector('.bd-field-error');
+    const clearError = (input: HTMLInputElement) => {
+      input.classList.remove('bd-input--error');
+      const errorHint = input.parentElement?.querySelector('.bd-field-error');
       if (errorHint) errorHint.remove();
-    });
+    };
+
+    titleInput?.addEventListener('input', () => clearError(titleInput));
+    nameInput?.addEventListener('input', () => clearError(nameInput));
+    emailInput?.addEventListener('input', () => clearError(emailInput));
 
     closeBtn?.addEventListener('click', () => {
       modal.remove();
@@ -365,25 +406,48 @@ function showFeedbackForm(
     form?.addEventListener('submit', (e) => {
       e.preventDefault();
 
-      // Validate
-      const title = titleInput.value.trim();
-      if (!title) {
-        titleInput.classList.add('bd-input--error');
-        const existingError = form.querySelector('.bd-field-error');
+      // Validate required fields
+      let hasError = false;
+
+      const showError = (input: HTMLInputElement, message: string) => {
+        input.classList.add('bd-input--error');
+        const existingError = input.parentElement?.querySelector('.bd-field-error');
         if (!existingError) {
           const errorHint = document.createElement('div');
           errorHint.className = 'bd-field-error';
-          errorHint.textContent = 'Title is required';
-          titleInput.parentElement?.appendChild(errorHint);
+          errorHint.textContent = message;
+          input.parentElement?.appendChild(errorHint);
         }
-        titleInput.focus();
-        return;
+        if (!hasError) {
+          input.focus();
+          hasError = true;
+        }
+      };
+
+      // Validate name if required
+      if (config.requireName && nameInput && !nameInput.value.trim()) {
+        showError(nameInput, 'Name is required');
       }
+
+      // Validate email if required
+      if (config.requireEmail && emailInput && !emailInput.value.trim()) {
+        showError(emailInput, 'Email is required');
+      }
+
+      // Validate title (always required)
+      const title = titleInput.value.trim();
+      if (!title) {
+        showError(titleInput, 'Title is required');
+      }
+
+      if (hasError) return;
 
       modal.remove();
       resolve({
         title,
         description: descriptionInput.value.trim(),
+        name: nameInput?.value.trim() || undefined,
+        email: emailInput?.value.trim() || undefined,
       });
     });
   });
@@ -407,6 +471,11 @@ async function submitFeedback(
   );
 
   try {
+    // Build submitter info if provided
+    const submitter = (data.name || data.email)
+      ? { name: data.name, email: data.email }
+      : undefined;
+
     const response = await fetch(`${config.apiUrl}/feedback`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -415,6 +484,7 @@ async function submitFeedback(
         title: data.title,
         description: data.description,
         screenshot: data.screenshot,
+        submitter,
         metadata: {
           url: window.location.href,
           userAgent: navigator.userAgent,
