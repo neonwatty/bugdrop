@@ -6,6 +6,8 @@
 
 In-app feedback → GitHub Issues. Screenshots, annotations, the works.
 
+![bugdrop-demo-small](https://github.com/user-attachments/assets/22d234fa-aa0f-4d01-bc4f-4c3e8f107165)
+
 ## Quick Start
 
 > Works with both public and private repositories!
