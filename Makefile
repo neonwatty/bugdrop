@@ -58,7 +58,7 @@ ci: check test build-all test-e2e
 
 # Utilities
 clean:
-	rm -rf dist node_modules/.cache playwright-report test-results .wrangler/tmp public/widget.js
+	rm -rf dist node_modules/.cache playwright-report test-results .wrangler/tmp public/widget*.js public/versions.json
 
 install:
 	npm ci

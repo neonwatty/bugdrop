@@ -54,6 +54,8 @@ Visit http://localhost:8787/test/ to try the widget.
 
 ## 4. Deploy to Cloudflare
 
+### Manual Deploy
+
 ```bash
 # Set production secrets
 wrangler secret put GITHUB_APP_ID
@@ -62,6 +64,34 @@ wrangler secret put GITHUB_PRIVATE_KEY
 # Deploy
 make deploy
 ```
+
+### Auto-Deploy via GitHub Releases
+
+The CI workflow automatically deploys to Cloudflare when you publish a GitHub Release. This gives you explicit control over when updates go to production.
+
+**Setup (one-time):**
+
+1. Get your Cloudflare credentials:
+   - Go to [Cloudflare Dashboard](https://dash.cloudflare.com) → Profile → API Tokens
+   - Create a token with **Workers Scripts: Edit** permission
+   - Note your **Account ID** from the Workers overview page
+
+2. Add secrets to your GitHub repository:
+   - Go to your repo → Settings → Secrets and variables → Actions
+   - Add these repository secrets:
+     - `CLOUDFLARE_API_TOKEN` - Your Cloudflare API token
+     - `CLOUDFLARE_ACCOUNT_ID` - Your Cloudflare account ID
+
+**To deploy a new version:**
+
+1. Merge your PRs to `main` (tests run, but no deploy)
+2. Go to your repo → Releases → **Create a new release**
+3. Create a new tag (e.g., `v1.2.0`) following semver
+4. Add release notes describing changes
+5. Click **Publish release**
+6. CI will automatically build and deploy to Cloudflare
+
+The release tag (e.g., `v1.2.0`) becomes the version number for the widget files.
 
 ## Configuration
 

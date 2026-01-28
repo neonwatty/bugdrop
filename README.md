@@ -1,6 +1,7 @@
 # BugDrop 🐛
 
 [![CI](https://github.com/neonwatty/bugdrop/actions/workflows/ci.yml/badge.svg)](https://github.com/neonwatty/bugdrop/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/badge/version-1.1.0-14b8a6)](./CHANGELOG.md)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](./SECURITY.md)
 [![Live Demo](https://img.shields.io/badge/Demo-Try_It_Live-ff9e64)](https://neonwatty.github.io/feedback-widget-test/)
 
@@ -25,6 +26,25 @@ https://github.com/apps/neonwatty-bugdrop/installations/new
 
 That's it! Users can now click the bug button to submit feedback as GitHub Issues.
 
+## Version Pinning
+
+By default, `/widget.js` always serves the latest version. For production stability, pin to a specific version:
+
+```html
+<!-- Recommended for production: pin to major version -->
+<script src="https://bugdrop.neonwatty.workers.dev/widget.v1.js"
+        data-repo="owner/repo"></script>
+```
+
+| URL | Updates | Best For |
+|-----|---------|----------|
+| `/widget.js` | Always latest | Development |
+| `/widget.v1.js` | Bug fixes only | Production (recommended) |
+| `/widget.v1.1.js` | Patch fixes only | Strict stability |
+| `/widget.v1.1.0.js` | Never | Maximum control |
+
+See [CHANGELOG.md](./CHANGELOG.md) for version history and migration guides.
+
 ## Widget Options
 
 | Attribute | Values | Default |
@@ -36,6 +56,7 @@ That's it! Users can now click the bug button to submit feedback as GitHub Issue
 | `data-require-name` | `true`, `false` | `false` |
 | `data-show-email` | `true`, `false` | `false` |
 | `data-require-email` | `true`, `false` | `false` |
+| `data-button-dismissible` | `true`, `false` | `false` |
 
 ```html
 <script src="https://bugdrop.neonwatty.workers.dev/widget.js"
@@ -58,6 +79,18 @@ By default, BugDrop only asks for a title and description. You can optionally co
 ```
 
 When provided, submitter info appears at the top of the GitHub issue.
+
+### Dismissible Button
+
+Allow users to hide the floating button if they don't want it:
+
+```html
+<script src="https://bugdrop.neonwatty.workers.dev/widget.js"
+        data-repo="owner/repo"
+        data-button-dismissible="true"></script>
+```
+
+When enabled, hovering over the button reveals an X icon. Clicking it hides the button and saves the preference to localStorage (`bugdrop_dismissed`). The button stays hidden on subsequent page loads.
 
 ## Live Demo
 
@@ -83,6 +116,10 @@ User clicks bug button → Widget captures screenshot → Worker authenticates v
 ## Self-Hosting
 
 Want to run your own instance? See [SELF_HOSTING.md](./SELF_HOSTING.md).
+
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for version history, new features, and upgrade guides.
 
 ## License
 
