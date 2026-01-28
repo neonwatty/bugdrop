@@ -530,7 +530,7 @@ test.describe('Dismissible Button', () => {
     }
   });
 
-  test('localStorage key is set correctly on dismiss', async ({ page }) => {
+  test('localStorage key is set correctly on dismiss (timestamp format)', async ({ page }) => {
     await page.goto('/test/dismissible.html');
     await page.evaluate(() => localStorage.removeItem('bugdrop_dismissed'));
     await page.reload();
@@ -548,13 +548,93 @@ test.describe('Dismissible Button', () => {
     const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
     await closeBtn.click();
 
-    // Verify localStorage key is set to exactly 'true'
+    // Verify localStorage key is set to a timestamp (number)
     const afterDismiss = await page.evaluate(() => localStorage.getItem('bugdrop_dismissed'));
-    expect(afterDismiss).toBe('true');
+    expect(afterDismiss).not.toBeNull();
+    const timestamp = parseInt(afterDismiss!, 10);
+    expect(isNaN(timestamp)).toBe(false);
+    // Timestamp should be recent (within last minute)
+    expect(Date.now() - timestamp).toBeLessThan(60000);
 
     // Verify only our key was set (no other bugdrop keys)
     const allKeys = await page.evaluate(() => Object.keys(localStorage).filter(k => k.includes('bugdrop')));
     expect(allKeys).toEqual(['bugdrop_dismissed']);
+  });
+
+  test('legacy "true" localStorage value still works (permanent dismiss)', async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+    // Set legacy 'true' value
+    await page.evaluate(() => localStorage.setItem('bugdrop_dismissed', 'true'));
+    await page.reload();
+    await page.waitForTimeout(500);
+
+    // Button should be hidden
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).not.toBeAttached();
+  });
+
+  test('BugDrop.show() brings back dismissed button', async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+    await page.evaluate(() => localStorage.removeItem('bugdrop_dismissed'));
+    await page.reload();
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Dismiss the button
+    await trigger.hover();
+    await page.waitForTimeout(200);
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await closeBtn.click();
+
+    // Verify button is gone
+    await expect(trigger).not.toBeAttached();
+
+    // Verify localStorage is set
+    const dismissed = await page.evaluate(() => localStorage.getItem('bugdrop_dismissed'));
+    expect(dismissed).not.toBeNull();
+
+    // Call BugDrop.show() to bring button back
+    await page.evaluate(() => window.BugDrop?.show());
+    await page.waitForTimeout(300);
+
+    // Button should be visible again
+    const triggerAfterShow = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(triggerAfterShow).toBeVisible();
+
+    // localStorage should be cleared
+    const dismissedAfterShow = await page.evaluate(() => localStorage.getItem('bugdrop_dismissed'));
+    expect(dismissedAfterShow).toBeNull();
+  });
+
+  test('BugDrop.show() works even after page reload when dismissed', async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+    await page.evaluate(() => localStorage.removeItem('bugdrop_dismissed'));
+    await page.reload();
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Dismiss the button
+    await trigger.hover();
+    await page.waitForTimeout(200);
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await closeBtn.click();
+    await expect(trigger).not.toBeAttached();
+
+    // Reload the page - button should still be hidden
+    await page.reload();
+    await page.waitForTimeout(500);
+    const triggerAfterReload = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(triggerAfterReload).not.toBeAttached();
+
+    // Call BugDrop.show() to bring button back
+    await page.evaluate(() => window.BugDrop?.show());
+    await page.waitForTimeout(300);
+
+    // Button should be visible
+    const triggerAfterShow = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(triggerAfterShow).toBeVisible();
   });
 
   test('clearing localStorage restores the button', async ({ page }) => {
@@ -671,6 +751,85 @@ test.describe('Dismissible Button', () => {
 
     // No errors should occur
     expect(errors).toHaveLength(0);
+  });
+});
+
+test.describe('Dismiss Duration', () => {
+  test.beforeEach(async ({ page }) => {
+    // Clear localStorage before each test
+    await page.goto('/test/dismissible-duration.html');
+    await page.evaluate(() => localStorage.removeItem('bugdrop_dismissed'));
+  });
+
+  test('button reappears when dismiss duration has passed', async ({ page }) => {
+    await page.goto('/test/dismissible-duration.html');
+
+    // Set an old timestamp (8 days ago, duration is 7 days)
+    const eightDaysAgo = Date.now() - 8 * 24 * 60 * 60 * 1000;
+    await page.evaluate((ts) => localStorage.setItem('bugdrop_dismissed', ts.toString()), eightDaysAgo);
+
+    // Reload the page
+    await page.reload();
+    await page.waitForTimeout(500);
+
+    // Button should be visible again (8 days > 7 day duration)
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+  });
+
+  test('button stays hidden when dismiss duration has not passed', async ({ page }) => {
+    await page.goto('/test/dismissible-duration.html');
+
+    // Set a recent timestamp (3 days ago, duration is 7 days)
+    const threeDaysAgo = Date.now() - 3 * 24 * 60 * 60 * 1000;
+    await page.evaluate((ts) => localStorage.setItem('bugdrop_dismissed', ts.toString()), threeDaysAgo);
+
+    // Reload the page
+    await page.reload();
+    await page.waitForTimeout(500);
+
+    // Button should still be hidden (3 days < 7 day duration)
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).not.toBeAttached();
+  });
+
+  test('button hidden immediately after dismissing', async ({ page }) => {
+    await page.goto('/test/dismissible-duration.html');
+    await page.evaluate(() => localStorage.removeItem('bugdrop_dismissed'));
+    await page.reload();
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Dismiss the button
+    await trigger.hover();
+    await page.waitForTimeout(200);
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await closeBtn.click();
+
+    // Button should be hidden
+    await expect(trigger).not.toBeAttached();
+
+    // Reload and verify still hidden
+    await page.reload();
+    await page.waitForTimeout(500);
+    const triggerAfterReload = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(triggerAfterReload).not.toBeAttached();
+  });
+
+  test('dismiss duration is ignored when button is not dismissible', async ({ page }) => {
+    // Use regular test page (no dismissible flag)
+    await page.goto('/test/');
+
+    // Set an old timestamp
+    const oldTimestamp = Date.now() - 100 * 24 * 60 * 60 * 1000;
+    await page.evaluate((ts) => localStorage.setItem('bugdrop_dismissed', ts.toString()), oldTimestamp);
+    await page.reload();
+    await page.waitForTimeout(500);
+
+    // Button should be visible because dismissible is not enabled
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
   });
 });
 

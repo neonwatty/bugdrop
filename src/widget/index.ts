@@ -19,6 +19,7 @@ interface WidgetConfig {
   requireEmail: boolean;
   // Dismissible button configuration
   buttonDismissible: boolean;
+  dismissDuration?: number; // Days before dismissed button reappears (undefined = forever)
   // Button visibility (false = API-only mode)
   showButton: boolean;
 }
@@ -59,9 +60,23 @@ let _isModalOpen = false;
 let _widgetConfig: WidgetConfig | null = null;
 
 // Helper to check if button was dismissed
-function isButtonDismissed(): boolean {
+function isButtonDismissed(dismissDuration?: number): boolean {
   try {
-    return localStorage.getItem(BUGDROP_DISMISSED_KEY) === 'true';
+    const dismissedAt = localStorage.getItem(BUGDROP_DISMISSED_KEY);
+    if (!dismissedAt) return false;
+
+    // Legacy support: if stored value is 'true', treat as permanently dismissed
+    if (dismissedAt === 'true') return true;
+
+    const timestamp = parseInt(dismissedAt, 10);
+    if (isNaN(timestamp)) return false;
+
+    // If no duration set, dismissed forever
+    if (dismissDuration === undefined) return true;
+
+    // Check if duration has passed (duration is in days)
+    const durationMs = dismissDuration * 24 * 60 * 60 * 1000;
+    return Date.now() - timestamp < durationMs;
   } catch {
     // localStorage may be blocked in some contexts
     return false;
@@ -71,7 +86,7 @@ function isButtonDismissed(): boolean {
 // Helper to dismiss the button
 function dismissButton(): void {
   try {
-    localStorage.setItem(BUGDROP_DISMISSED_KEY, 'true');
+    localStorage.setItem(BUGDROP_DISMISSED_KEY, Date.now().toString());
   } catch {
     // localStorage may be blocked in some contexts
   }
@@ -92,6 +107,9 @@ const config: WidgetConfig = {
   requireEmail: script?.dataset.requireEmail === 'true',
   // Dismissible button configuration
   buttonDismissible: script?.dataset.buttonDismissible === 'true',
+  dismissDuration: script?.dataset.dismissDuration
+    ? parseInt(script.dataset.dismissDuration, 10)
+    : undefined,
   // Button visibility (default true, set to false for API-only mode)
   showButton: script?.dataset.button !== 'false',
 };
@@ -120,7 +138,7 @@ function initWidget(config: WidgetConfig) {
 
   // Determine if button should be rendered
   const shouldShowButton = config.showButton &&
-    !(config.buttonDismissible && isButtonDismissed());
+    !(config.buttonDismissible && isButtonDismissed(config.dismissDuration));
 
   if (shouldShowButton) {
     const trigger = document.createElement('button');
@@ -188,12 +206,19 @@ function exposeBugDropAPI(root: HTMLElement, config: WidgetConfig) {
       }
     },
 
-    // Show the floating button
+    // Show the floating button (clears dismissed state when called)
     show: () => {
+      // Clear dismissed state when explicitly called
+      try {
+        localStorage.removeItem(BUGDROP_DISMISSED_KEY);
+      } catch {
+        // localStorage may be blocked
+      }
+
       if (_triggerButton) {
         _triggerButton.style.display = '';
-      } else if (config.showButton && !isButtonDismissed()) {
-        // Recreate button if it was removed but config allows it
+      } else if (config.showButton) {
+        // Recreate button if it was removed
         createTriggerButton(root, config);
       }
     },
