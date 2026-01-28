@@ -57,6 +57,7 @@ See [CHANGELOG.md](./CHANGELOG.md) for version history and migration guides.
 | `data-show-email` | `true`, `false` | `false` |
 | `data-require-email` | `true`, `false` | `false` |
 | `data-button-dismissible` | `true`, `false` | `false` |
+| `data-dismiss-duration` | Number (days) | (forever) |
 | `data-button` | `true`, `false` | `true` |
 
 ```html
@@ -93,6 +94,17 @@ Allow users to hide the floating button if they don't want it:
 
 When enabled, hovering over the button reveals an X icon. Clicking it hides the button and saves the preference to localStorage (`bugdrop_dismissed`). The button stays hidden on subsequent page loads.
 
+**Auto-reappear after duration** — Let the button come back after a number of days:
+
+```html
+<script src="https://bugdrop.neonwatty.workers.dev/widget.js"
+        data-repo="owner/repo"
+        data-button-dismissible="true"
+        data-dismiss-duration="7"></script>
+```
+
+With `data-dismiss-duration="7"`, users who dismiss the button will see it again after 7 days. Without this attribute, the button stays hidden forever (until localStorage is cleared).
+
 ### JavaScript API
 
 BugDrop exposes a JavaScript API for programmatic control, useful when you want to trigger feedback from your own UI instead of (or in addition to) the floating button.
@@ -102,7 +114,7 @@ window.BugDrop = {
   open(),           // Open the feedback modal
   close(),          // Close the modal
   hide(),           // Hide the floating button
-  show(),           // Show the floating button
+  show(),           // Show the floating button (clears dismissed state)
   isOpen(),         // Returns true if modal is open
   isButtonVisible() // Returns true if button is visible
 };

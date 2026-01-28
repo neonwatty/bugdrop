@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BugDrop Dismiss Duration Test</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      padding: 2rem;
+      background: #1a1b26;
+      color: #c0caf5;
+    }
+    h1 { margin-bottom: 1rem; }
+    p { color: #787c99; margin-bottom: 1rem; }
+    .info {
+      background: rgba(125, 207, 255, 0.1);
+      border: 1px solid rgba(125, 207, 255, 0.2);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    button {
+      background: #ff9e64;
+      color: #1a1b26;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-right: 0.5rem;
+    }
+    button:hover {
+      background: #f7768e;
+    }
+  </style>
+</head>
+<body>
+  <h1>Dismiss Duration Test</h1>
+  <div class="info">
+    <p><strong>Test Instructions:</strong> The bug button has <code>data-dismiss-duration="7"</code> (7 days). After dismissing, the button will reappear after 7 days.</p>
+  </div>
+  <p>For testing, we can manually set an old timestamp in localStorage to simulate time passing.</p>
+  <button id="clear-storage" onclick="localStorage.removeItem('bugdrop_dismissed'); location.reload();">
+    Clear localStorage &amp; Reload
+  </button>
+  <button id="set-old-timestamp" onclick="localStorage.setItem('bugdrop_dismissed', (Date.now() - 8 * 24 * 60 * 60 * 1000).toString()); location.reload();">
+    Set 8-day-old timestamp &amp; Reload
+  </button>
+
+  <!-- Load BugDrop with dismissible button and 7-day duration -->
+  <script src="/widget.js" data-repo="neonwatty/feedback-widget-test" data-theme="dark" data-button-dismissible="true" data-dismiss-duration="7"></script>
+</body>
+</html>
