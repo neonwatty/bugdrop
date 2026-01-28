@@ -58,6 +58,7 @@ See [CHANGELOG.md](./CHANGELOG.md) for version history and migration guides.
 | `data-require-email` | `true`, `false` | `false` |
 | `data-button-dismissible` | `true`, `false` | `false` |
 | `data-dismiss-duration` | Number (days) | (forever) |
+| `data-show-restore` | `true`, `false` | `true` |
 | `data-button` | `true`, `false` | `true` |
 
 ```html
@@ -92,7 +93,16 @@ Allow users to hide the floating button if they don't want it:
         data-button-dismissible="true"></script>
 ```
 
-When enabled, hovering over the button reveals an X icon. Clicking it hides the button and saves the preference to localStorage (`bugdrop_dismissed`). The button stays hidden on subsequent page loads.
+When enabled, hovering over the button reveals an X icon. Clicking it hides the button and shows a subtle "🐛 Feedback" pill in its place. Users can click the pill to restore the full button. The dismissed state is saved to localStorage (`bugdrop_dismissed`).
+
+**Disable the restore pill** — if you don't want the restore pill to appear:
+
+```html
+<script src="https://bugdrop.neonwatty.workers.dev/widget.js"
+        data-repo="owner/repo"
+        data-button-dismissible="true"
+        data-show-restore="false"></script>
+```
 
 **Auto-reappear after duration** — Let the button come back after a number of days:
 

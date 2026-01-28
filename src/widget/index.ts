@@ -20,6 +20,7 @@ interface WidgetConfig {
   // Dismissible button configuration
   buttonDismissible: boolean;
   dismissDuration?: number; // Days before dismissed button reappears (undefined = forever)
+  showRestore: boolean; // Show a restore pill after dismissing (default true when dismissible)
   // Button visibility (false = API-only mode)
   showButton: boolean;
 }
@@ -56,6 +57,7 @@ const BUGDROP_DISMISSED_KEY = 'bugdrop_dismissed';
 // Store widget state for API access
 let _widgetRoot: HTMLElement | null = null;
 let _triggerButton: HTMLElement | null = null;
+let _restorePill: HTMLElement | null = null;
 let _isModalOpen = false;
 let _widgetConfig: WidgetConfig | null = null;
 
@@ -110,6 +112,8 @@ const config: WidgetConfig = {
   dismissDuration: script?.dataset.dismissDuration
     ? parseInt(script.dataset.dismissDuration, 10)
     : undefined,
+  // Show restore pill after dismissing (default true when dismissible, unless explicitly false)
+  showRestore: script?.dataset.showRestore !== 'false',
   // Button visibility (default true, set to false for API-only mode)
   showButton: script?.dataset.button !== 'false',
 };
@@ -119,6 +123,34 @@ if (!config.repo) {
   console.error('[BugDrop] Missing data-repo attribute');
 } else {
   initWidget(config);
+}
+
+// Create the restore pill shown after dismissing the button
+function createRestorePill(root: HTMLElement, config: WidgetConfig): HTMLElement {
+  const pill = document.createElement('button');
+  pill.className = 'bd-restore-pill';
+  pill.innerHTML = '🐛 Feedback';
+  pill.setAttribute('aria-label', 'Show feedback button');
+
+  pill.addEventListener('click', () => {
+    // Clear dismissed state
+    try {
+      localStorage.removeItem(BUGDROP_DISMISSED_KEY);
+    } catch {
+      // localStorage may be blocked
+    }
+
+    // Remove the pill
+    pill.remove();
+    _restorePill = null;
+
+    // Recreate the trigger button
+    createTriggerButton(root, config);
+  });
+
+  root.appendChild(pill);
+  _restorePill = pill;
+  return pill;
 }
 
 function initWidget(config: WidgetConfig) {
@@ -160,6 +192,11 @@ function initWidget(config: WidgetConfig) {
         dismissButton();
         trigger.remove();
         _triggerButton = null;
+
+        // Show restore pill if enabled
+        if (config.showRestore) {
+          createRestorePill(root, config);
+        }
       });
     }
 
@@ -168,6 +205,9 @@ function initWidget(config: WidgetConfig) {
 
     // Handle trigger click
     trigger.addEventListener('click', () => openFeedbackFlow(root, config));
+  } else if (config.showButton && config.buttonDismissible && config.showRestore && isButtonDismissed(config.dismissDuration)) {
+    // Button was previously dismissed - show restore pill
+    createRestorePill(root, config);
   }
 
   // Expose the BugDrop API
@@ -213,6 +253,12 @@ function exposeBugDropAPI(root: HTMLElement, config: WidgetConfig) {
         localStorage.removeItem(BUGDROP_DISMISSED_KEY);
       } catch {
         // localStorage may be blocked
+      }
+
+      // Remove restore pill if present
+      if (_restorePill) {
+        _restorePill.remove();
+        _restorePill = null;
       }
 
       if (_triggerButton) {
