@@ -1,0 +1,11 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "src/index.ts",
+    "src/widget/index.ts",
+    "scripts/build-widget.js"
+  ],
+  "project": ["src/**/*.ts", "scripts/**/*.js"],
+  "ignore": [],
+  "ignoreDependencies": ["esbuild"]
+}
