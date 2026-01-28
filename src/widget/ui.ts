@@ -123,6 +123,47 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       transform: scale(0.96);
     }
 
+    /* Restore pill (shown after dismissal) */
+    .bd-restore-pill {
+      position: fixed;
+      bottom: 20px;
+      ${pos};
+      padding: 8px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--bd-border);
+      background: var(--bd-bg-primary);
+      color: var(--bd-text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      box-shadow: var(--bd-shadow-sm);
+      z-index: 999999;
+      transition: all var(--bd-transition);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0.7;
+    }
+
+    .bd-restore-pill:hover {
+      opacity: 1;
+      background: var(--bd-bg-secondary);
+      color: var(--bd-text-primary);
+      box-shadow: var(--bd-shadow-md);
+    }
+
+    .bd-restore-pill:active {
+      transform: scale(0.96);
+    }
+
+    @media (max-width: 640px) {
+      .bd-restore-pill {
+        bottom: 16px;
+        padding: 6px 12px;
+        font-size: 11px;
+      }
+    }
+
     /* Dismissible close button */
     .bd-trigger-close {
       position: absolute;

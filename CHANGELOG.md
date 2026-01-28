@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **API-only mode**: Set `data-button="false"` to hide the floating button and trigger feedback only via the JavaScript API
 - **Ready event**: `bugdrop:ready` event fires when the API is available
 - **Dismiss duration**: Set `data-dismiss-duration="7"` to have the dismissed button reappear after 7 days. Without this, dismissed buttons stay hidden forever.
+- **Restore pill**: After dismissing the button, a subtle "🐛 Feedback" pill appears so users can easily restore the full button. Disable with `data-show-restore="false"`.
 
 ### Changed
 - `show()` API method now clears the dismissed state, allowing you to programmatically bring back a button that was dismissed by the user
