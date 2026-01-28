@@ -601,7 +601,7 @@ test.describe('Dismissible Button', () => {
     // Override localStorage to throw errors
     await page.evaluate(() => {
       const originalSetItem = localStorage.setItem.bind(localStorage);
-      const originalGetItem = localStorage.getItem.bind(localStorage);
+      const _originalGetItem = localStorage.getItem.bind(localStorage);
 
       Object.defineProperty(window, 'localStorage', {
         value: {
