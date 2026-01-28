@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BugDrop Dismissible Button Test - Light Theme</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      padding: 2rem;
+      background: #fafaf9;
+      color: #1c1917;
+    }
+    h1 { margin-bottom: 1rem; }
+    p { color: #57534e; margin-bottom: 1rem; }
+    .info {
+      background: rgba(20, 184, 166, 0.1);
+      border: 1px solid rgba(20, 184, 166, 0.2);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    code {
+      background: #e7e5e4;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Dismissible Button Test - Light Theme</h1>
+  <div class="info">
+    <p>This page tests the dismissible button with <code>data-theme="light"</code>.</p>
+  </div>
+  <p>Hover over the bug button to see the close icon, then click X to dismiss.</p>
+
+  <!-- Load BugDrop with light theme and dismissible button -->
+  <script src="/widget.js" data-repo="neonwatty/feedback-widget-test" data-theme="light" data-button-dismissible="true"></script>
+</body>
+</html>

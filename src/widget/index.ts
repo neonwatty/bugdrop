@@ -17,6 +17,8 @@ interface WidgetConfig {
   requireName: boolean;
   showEmail: boolean;
   requireEmail: boolean;
+  // Dismissible button configuration
+  buttonDismissible: boolean;
 }
 
 interface FeedbackData {
@@ -28,8 +30,30 @@ interface FeedbackData {
   email?: string;
 }
 
+// localStorage key for dismissed state
+const BUGDROP_DISMISSED_KEY = 'bugdrop_dismissed';
+
 // Store root element for potential global access
 let _widgetRoot: HTMLElement | null = null;
+
+// Helper to check if button was dismissed
+function isButtonDismissed(): boolean {
+  try {
+    return localStorage.getItem(BUGDROP_DISMISSED_KEY) === 'true';
+  } catch {
+    // localStorage may be blocked in some contexts
+    return false;
+  }
+}
+
+// Helper to dismiss the button
+function dismissButton(): void {
+  try {
+    localStorage.setItem(BUGDROP_DISMISSED_KEY, 'true');
+  } catch {
+    // localStorage may be blocked in some contexts
+  }
+}
 
 // Read config from script tag
 const script = document.currentScript as HTMLScriptElement;
@@ -44,6 +68,8 @@ const config: WidgetConfig = {
   requireName: script?.dataset.requireName === 'true',
   showEmail: script?.dataset.showEmail === 'true',
   requireEmail: script?.dataset.requireEmail === 'true',
+  // Dismissible button configuration
+  buttonDismissible: script?.dataset.buttonDismissible === 'true',
 };
 
 // Validate config
@@ -65,10 +91,32 @@ function initWidget(config: WidgetConfig) {
   const root = injectStyles(shadow, config);
   _widgetRoot = root;
 
+  // Skip rendering button if dismissible and previously dismissed
+  if (config.buttonDismissible && isButtonDismissed()) {
+    return;
+  }
+
   const trigger = document.createElement('button');
   trigger.className = 'bd-trigger';
   trigger.innerHTML = '🐛';
   trigger.setAttribute('aria-label', 'Report a bug or send feedback');
+
+  // Add close button if dismissible
+  if (config.buttonDismissible) {
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'bd-trigger-close';
+    closeBtn.innerHTML = '×';
+    closeBtn.setAttribute('aria-label', 'Dismiss feedback button');
+    trigger.appendChild(closeBtn);
+
+    // Handle close button click
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation(); // Don't trigger the main button
+      dismissButton();
+      trigger.remove();
+    });
+  }
+
   root.appendChild(trigger);
 
   // Handle trigger click

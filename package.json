@@ -1,12 +1,12 @@
 {
   "name": "bugdrop",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "In-app feedback → GitHub Issues. Screenshots, annotations, the works.",
   "type": "module",
   "scripts": {
     "dev": "wrangler dev --port 8787",
     "build": "tsc",
-    "build:widget": "esbuild src/widget/index.ts --bundle --minify --format=iife --outfile=public/widget.js",
+    "build:widget": "node scripts/build-widget.js",
     "deploy": "wrangler deploy",
     "test": "vitest run",
     "test:watch": "vitest",

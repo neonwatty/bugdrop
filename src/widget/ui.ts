@@ -123,6 +123,41 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       transform: scale(0.96);
     }
 
+    /* Dismissible close button */
+    .bd-trigger-close {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: none;
+      background: var(--bd-text-primary);
+      color: var(--bd-bg-primary);
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1;
+      cursor: pointer;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: opacity var(--bd-transition), transform var(--bd-transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      box-shadow: var(--bd-shadow-sm);
+    }
+
+    .bd-trigger:hover .bd-trigger-close {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .bd-trigger-close:hover {
+      background: var(--bd-error);
+      color: white;
+    }
+
     /* Modal Overlay */
     .bd-overlay {
       position: fixed;
@@ -672,6 +707,12 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
 
       .bd-trigger:active {
         transform: scale(0.95);
+      }
+
+      /* Always show close button on touch devices */
+      .bd-trigger-close {
+        opacity: 1;
+        transform: scale(1);
       }
 
       .bd-btn:hover {

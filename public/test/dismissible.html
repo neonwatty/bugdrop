@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BugDrop Dismissible Button Test</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      padding: 2rem;
+      background: #1a1b26;
+      color: #c0caf5;
+    }
+    h1 { margin-bottom: 1rem; }
+    p { color: #787c99; margin-bottom: 1rem; }
+    .info {
+      background: rgba(125, 207, 255, 0.1);
+      border: 1px solid rgba(125, 207, 255, 0.2);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    button {
+      background: #ff9e64;
+      color: #1a1b26;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+    button:hover {
+      background: #f7768e;
+    }
+  </style>
+</head>
+<body>
+  <h1>Dismissible Button Test</h1>
+  <div class="info">
+    <p><strong>Test Instructions:</strong> The bug button has <code>data-button-dismissible="true"</code>. Hover over it to see the close icon, then click the X to dismiss it.</p>
+  </div>
+  <p>After dismissing, reload the page to verify the button stays hidden (localStorage persistence).</p>
+  <button id="clear-storage" onclick="localStorage.removeItem('bugdrop_dismissed'); location.reload();">
+    Clear localStorage &amp; Reload
+  </button>
+
+  <!-- Load BugDrop with dismissible button enabled -->
+  <script src="/widget.js" data-repo="neonwatty/feedback-widget-test" data-theme="dark" data-button-dismissible="true"></script>
+</body>
+</html>

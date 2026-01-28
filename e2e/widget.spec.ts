@@ -240,6 +240,440 @@ test.describe('API Endpoints', () => {
   });
 });
 
+test.describe('Dismissible Button', () => {
+  test.beforeEach(async ({ page }) => {
+    // Clear localStorage before each test
+    await page.goto('/test/dismissible.html');
+    await page.evaluate(() => localStorage.removeItem('bugdrop_dismissed'));
+  });
+
+  test('close icon appears on hover when dismissible is enabled', async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Close button should exist but be hidden initially
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await expect(closeBtn).toBeAttached();
+
+    // Check that close button has opacity 0 initially (hidden)
+    const initialOpacity = await closeBtn.evaluate(el => getComputedStyle(el).opacity);
+    expect(parseFloat(initialOpacity)).toBeLessThan(0.5);
+
+    // Hover over the trigger button
+    await trigger.hover();
+
+    // Wait for transition and check opacity is now 1 (visible)
+    await page.waitForTimeout(200);
+    const hoverOpacity = await closeBtn.evaluate(el => getComputedStyle(el).opacity);
+    expect(parseFloat(hoverOpacity)).toBeGreaterThan(0.5);
+  });
+
+  test('clicking close icon hides the button', async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Hover to reveal close button
+    await trigger.hover();
+    await page.waitForTimeout(200);
+
+    // Click the close button
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await closeBtn.click();
+
+    // Trigger should no longer exist
+    await expect(trigger).not.toBeAttached();
+  });
+
+  test('clicking close icon does not open feedback modal', async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Hover to reveal close button
+    await trigger.hover();
+    await page.waitForTimeout(200);
+
+    // Click the close button
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await closeBtn.click();
+
+    // Modal should not appear
+    const modal = page.locator('#bugdrop-host').locator('css=.bd-modal');
+    await expect(modal).not.toBeVisible();
+  });
+
+  test('button stays hidden after page reload (localStorage persistence)', async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Hover and click close button
+    await trigger.hover();
+    await page.waitForTimeout(200);
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await closeBtn.click();
+
+    // Verify button is gone
+    await expect(trigger).not.toBeAttached();
+
+    // Reload the page
+    await page.reload();
+    await page.waitForTimeout(500);
+
+    // Button should still be hidden
+    const triggerAfterReload = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(triggerAfterReload).not.toBeAttached();
+  });
+
+  test('button appears normally when dismissible is not enabled', async ({ page }) => {
+    // Use the regular test page (no dismissible attribute)
+    await page.goto('/test/');
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Close button should NOT exist
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await expect(closeBtn).not.toBeAttached();
+  });
+
+  test('localStorage dismissed state is ignored when dismissible is false', async ({ page }) => {
+    // Set localStorage as if button was dismissed
+    await page.goto('/test/');
+    await page.evaluate(() => localStorage.setItem('bugdrop_dismissed', 'true'));
+
+    // Reload page (regular test page without dismissible)
+    await page.reload();
+    await page.waitForTimeout(500);
+
+    // Button should still be visible because dismissible is not enabled
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+  });
+
+  // === Edge Case Tests ===
+
+  test('dismissible button works in light theme', async ({ page }) => {
+    await page.goto('/test/dismissible-light.html');
+    await page.evaluate(() => localStorage.removeItem('bugdrop_dismissed'));
+    await page.reload();
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Close button should exist
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await expect(closeBtn).toBeAttached();
+
+    // Hover to reveal close button
+    await trigger.hover();
+    await page.waitForTimeout(200);
+
+    // Verify close button is visible
+    const hoverOpacity = await closeBtn.evaluate(el => getComputedStyle(el).opacity);
+    expect(parseFloat(hoverOpacity)).toBeGreaterThan(0.5);
+
+    // Click close and verify dismiss works
+    await closeBtn.click();
+    await expect(trigger).not.toBeAttached();
+
+    // Verify persistence
+    await page.reload();
+    await page.waitForTimeout(500);
+    await expect(page.locator('#bugdrop-host').locator('css=.bd-trigger')).not.toBeAttached();
+  });
+
+  test('dismissible button works with bottom-left position', async ({ page }) => {
+    await page.goto('/test/dismissible-left.html');
+    await page.evaluate(() => localStorage.removeItem('bugdrop_dismissed'));
+    await page.reload();
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Verify button is on the left side
+    const buttonBox = await trigger.boundingBox();
+    expect(buttonBox).not.toBeNull();
+    if (buttonBox) {
+      // Button should be closer to left edge than right edge
+      const viewportWidth = await page.evaluate(() => window.innerWidth);
+      expect(buttonBox.x).toBeLessThan(viewportWidth / 2);
+    }
+
+    // Close button should exist and work
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await expect(closeBtn).toBeAttached();
+
+    // Hover and dismiss
+    await trigger.hover();
+    await page.waitForTimeout(200);
+    await closeBtn.click();
+    await expect(trigger).not.toBeAttached();
+  });
+
+  test('close icon is always visible on touch devices', async ({ browser }) => {
+    // Create a context with touch device emulation
+    const context = await browser.newContext({
+      hasTouch: true,
+      isMobile: true,
+      viewport: { width: 390, height: 844 }, // iPhone 14 Pro dimensions
+    });
+    const page = await context.newPage();
+
+    await page.goto('/test/dismissible.html');
+    await page.evaluate(() => localStorage.removeItem('bugdrop_dismissed'));
+    await page.reload();
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await expect(closeBtn).toBeAttached();
+
+    // On touch devices, close button should be visible without hover
+    // due to @media (hover: none) CSS rule
+    const opacity = await closeBtn.evaluate(el => getComputedStyle(el).opacity);
+    expect(parseFloat(opacity)).toBe(1);
+
+    // Tap to dismiss should work
+    await closeBtn.tap();
+    await expect(trigger).not.toBeAttached();
+
+    await context.close();
+  });
+
+  test('keyboard accessibility - dismiss with Enter key', async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+    await page.evaluate(() => localStorage.removeItem('bugdrop_dismissed'));
+    await page.reload();
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Hover to reveal close button
+    await trigger.hover();
+    await page.waitForTimeout(200);
+
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+
+    // Focus the close button and press Enter
+    await closeBtn.focus();
+    await page.keyboard.press('Enter');
+
+    // Button should be dismissed
+    await expect(trigger).not.toBeAttached();
+  });
+
+  test('keyboard accessibility - dismiss with Space key', async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+    await page.evaluate(() => localStorage.removeItem('bugdrop_dismissed'));
+    await page.reload();
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Hover to reveal close button
+    await trigger.hover();
+    await page.waitForTimeout(200);
+
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+
+    // Focus the close button and press Space
+    await closeBtn.focus();
+    await page.keyboard.press('Space');
+
+    // Button should be dismissed
+    await expect(trigger).not.toBeAttached();
+  });
+
+  test('close icon changes to red/error color on direct hover', async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+    await page.evaluate(() => localStorage.removeItem('bugdrop_dismissed'));
+    await page.reload();
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+
+    // Hover over trigger first to reveal close button
+    await trigger.hover();
+    await page.waitForTimeout(200);
+
+    // Get initial background color
+    const initialBg = await closeBtn.evaluate(el => getComputedStyle(el).backgroundColor);
+
+    // Now hover directly on close button
+    await closeBtn.hover();
+    await page.waitForTimeout(100);
+
+    // Get hovered background color
+    const hoveredBg = await closeBtn.evaluate(el => getComputedStyle(el).backgroundColor);
+
+    // Colors should be different (close button turns red on hover)
+    expect(hoveredBg).not.toBe(initialBg);
+
+    // Verify it's a reddish color (error color)
+    // Parse RGB and check red channel is dominant
+    const rgbMatch = hoveredBg.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+    if (rgbMatch) {
+      const [, r, g, b] = rgbMatch.map(Number);
+      expect(r).toBeGreaterThan(200); // High red
+      expect(r).toBeGreaterThan(g); // Red > Green
+      expect(r).toBeGreaterThan(b); // Red > Blue
+    }
+  });
+
+  test('localStorage key is set correctly on dismiss', async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+    await page.evaluate(() => localStorage.removeItem('bugdrop_dismissed'));
+    await page.reload();
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Verify localStorage is empty before dismiss
+    const beforeDismiss = await page.evaluate(() => localStorage.getItem('bugdrop_dismissed'));
+    expect(beforeDismiss).toBeNull();
+
+    // Dismiss the button
+    await trigger.hover();
+    await page.waitForTimeout(200);
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await closeBtn.click();
+
+    // Verify localStorage key is set to exactly 'true'
+    const afterDismiss = await page.evaluate(() => localStorage.getItem('bugdrop_dismissed'));
+    expect(afterDismiss).toBe('true');
+
+    // Verify only our key was set (no other bugdrop keys)
+    const allKeys = await page.evaluate(() => Object.keys(localStorage).filter(k => k.includes('bugdrop')));
+    expect(allKeys).toEqual(['bugdrop_dismissed']);
+  });
+
+  test('clearing localStorage restores the button', async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+
+    // First dismiss the button
+    await page.evaluate(() => localStorage.removeItem('bugdrop_dismissed'));
+    await page.reload();
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    await trigger.hover();
+    await page.waitForTimeout(200);
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await closeBtn.click();
+    await expect(trigger).not.toBeAttached();
+
+    // Now clear localStorage and reload
+    await page.evaluate(() => localStorage.removeItem('bugdrop_dismissed'));
+    await page.reload();
+    await page.waitForTimeout(500);
+
+    // Button should be visible again
+    const triggerRestored = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(triggerRestored).toBeVisible({ timeout: 5000 });
+  });
+
+  test('widget handles localStorage errors gracefully', async ({ page }) => {
+    // Track console errors
+    const errors: string[] = [];
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        errors.push(msg.text());
+      }
+    });
+    page.on('pageerror', err => {
+      errors.push(err.message);
+    });
+
+    await page.goto('/test/dismissible.html');
+    await page.evaluate(() => localStorage.removeItem('bugdrop_dismissed'));
+
+    // Override localStorage to throw errors
+    await page.evaluate(() => {
+      const originalSetItem = localStorage.setItem.bind(localStorage);
+      const originalGetItem = localStorage.getItem.bind(localStorage);
+
+      Object.defineProperty(window, 'localStorage', {
+        value: {
+          getItem: () => { throw new Error('localStorage blocked'); },
+          setItem: () => { throw new Error('localStorage blocked'); },
+          removeItem: originalSetItem,
+          clear: () => {},
+          key: () => null,
+          length: 0,
+        },
+        writable: true,
+      });
+    });
+
+    // Reload with broken localStorage
+    await page.reload();
+    await page.waitForTimeout(500);
+
+    // Widget should still load (graceful degradation)
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Dismiss should still work visually (even if not persisted)
+    await trigger.hover();
+    await page.waitForTimeout(200);
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await closeBtn.click();
+
+    // Button should be hidden
+    await expect(trigger).not.toBeAttached();
+
+    // No uncaught errors related to localStorage
+    const localStorageErrors = errors.filter(e => e.includes('localStorage'));
+    expect(localStorageErrors).toHaveLength(0);
+  });
+
+  test('rapid double-click on close button does not cause errors', async ({ page }) => {
+    // Track console errors
+    const errors: string[] = [];
+    page.on('console', msg => {
+      if (msg.type() === 'error') {
+        errors.push(msg.text());
+      }
+    });
+    page.on('pageerror', err => {
+      errors.push(err.message);
+    });
+
+    await page.goto('/test/dismissible.html');
+    await page.evaluate(() => localStorage.removeItem('bugdrop_dismissed'));
+    await page.reload();
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Hover to reveal close button
+    await trigger.hover();
+    await page.waitForTimeout(200);
+
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+
+    // Double-click rapidly
+    await closeBtn.dblclick();
+
+    // Button should be removed
+    await expect(trigger).not.toBeAttached();
+
+    // No errors should occur
+    expect(errors).toHaveLength(0);
+  });
+});
+
 test.describe('Widget Build', () => {
   test('widget.js is accessible', async ({ request }) => {
     const response = await request.get('/widget.js');

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BugDrop Dismissible Button Test - Bottom Left</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      padding: 2rem;
+      background: #1a1b26;
+      color: #c0caf5;
+    }
+    h1 { margin-bottom: 1rem; }
+    p { color: #787c99; margin-bottom: 1rem; }
+    .info {
+      background: rgba(125, 207, 255, 0.1);
+      border: 1px solid rgba(125, 207, 255, 0.2);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    code {
+      background: #24283b;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Dismissible Button Test - Bottom Left</h1>
+  <div class="info">
+    <p>This page tests the dismissible button with <code>data-position="bottom-left"</code>.</p>
+  </div>
+  <p>The bug button should appear in the bottom-left corner. Hover to see the close icon.</p>
+
+  <!-- Load BugDrop with bottom-left position and dismissible button -->
+  <script src="/widget.js" data-repo="neonwatty/feedback-widget-test" data-theme="dark" data-position="bottom-left" data-button-dismissible="true"></script>
+</body>
+</html>
