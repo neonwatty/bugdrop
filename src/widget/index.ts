@@ -19,6 +19,25 @@ interface WidgetConfig {
   requireEmail: boolean;
   // Dismissible button configuration
   buttonDismissible: boolean;
+  // Button visibility (false = API-only mode)
+  showButton: boolean;
+}
+
+// BugDrop JavaScript API interface
+interface BugDropAPI {
+  open: () => void;
+  close: () => void;
+  hide: () => void;
+  show: () => void;
+  isOpen: () => boolean;
+  isButtonVisible: () => boolean;
+}
+
+// Declare global BugDrop API
+declare global {
+  interface Window {
+    BugDrop?: BugDropAPI;
+  }
 }
 
 interface FeedbackData {
@@ -33,8 +52,11 @@ interface FeedbackData {
 // localStorage key for dismissed state
 const BUGDROP_DISMISSED_KEY = 'bugdrop_dismissed';
 
-// Store root element for potential global access
+// Store widget state for API access
 let _widgetRoot: HTMLElement | null = null;
+let _triggerButton: HTMLElement | null = null;
+let _isModalOpen = false;
+let _widgetConfig: WidgetConfig | null = null;
 
 // Helper to check if button was dismissed
 function isButtonDismissed(): boolean {
@@ -70,6 +92,8 @@ const config: WidgetConfig = {
   requireEmail: script?.dataset.requireEmail === 'true',
   // Dismissible button configuration
   buttonDismissible: script?.dataset.buttonDismissible === 'true',
+  // Button visibility (default true, set to false for API-only mode)
+  showButton: script?.dataset.button !== 'false',
 };
 
 // Validate config
@@ -80,6 +104,9 @@ if (!config.repo) {
 }
 
 function initWidget(config: WidgetConfig) {
+  // Store config for API access
+  _widgetConfig = config;
+
   // Create Shadow DOM for style isolation
   const host = document.createElement('div');
   host.id = 'bugdrop-host';
@@ -91,17 +118,104 @@ function initWidget(config: WidgetConfig) {
   const root = injectStyles(shadow, config);
   _widgetRoot = root;
 
-  // Skip rendering button if dismissible and previously dismissed
-  if (config.buttonDismissible && isButtonDismissed()) {
-    return;
+  // Determine if button should be rendered
+  const shouldShowButton = config.showButton &&
+    !(config.buttonDismissible && isButtonDismissed());
+
+  if (shouldShowButton) {
+    const trigger = document.createElement('button');
+    trigger.className = 'bd-trigger';
+    trigger.innerHTML = '🐛';
+    trigger.setAttribute('aria-label', 'Report a bug or send feedback');
+
+    // Add close button if dismissible
+    if (config.buttonDismissible) {
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'bd-trigger-close';
+      closeBtn.innerHTML = '×';
+      closeBtn.setAttribute('aria-label', 'Dismiss feedback button');
+      trigger.appendChild(closeBtn);
+
+      // Handle close button click
+      closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation(); // Don't trigger the main button
+        dismissButton();
+        trigger.remove();
+        _triggerButton = null;
+      });
+    }
+
+    root.appendChild(trigger);
+    _triggerButton = trigger;
+
+    // Handle trigger click
+    trigger.addEventListener('click', () => openFeedbackFlow(root, config));
   }
 
+  // Expose the BugDrop API
+  exposeBugDropAPI(root, config);
+
+  // Dispatch ready event
+  window.dispatchEvent(new CustomEvent('bugdrop:ready'));
+}
+
+// Create and expose the BugDrop JavaScript API
+function exposeBugDropAPI(root: HTMLElement, config: WidgetConfig) {
+  window.BugDrop = {
+    // Open the feedback modal programmatically
+    open: () => {
+      if (!_isModalOpen) {
+        openFeedbackFlow(root, config);
+      }
+    },
+
+    // Close the current modal
+    close: () => {
+      if (_isModalOpen) {
+        // Find and remove any open modal
+        const modal = root.querySelector('.bd-modal');
+        if (modal) {
+          modal.remove();
+        }
+        _isModalOpen = false;
+      }
+    },
+
+    // Hide the floating button
+    hide: () => {
+      if (_triggerButton) {
+        _triggerButton.style.display = 'none';
+      }
+    },
+
+    // Show the floating button
+    show: () => {
+      if (_triggerButton) {
+        _triggerButton.style.display = '';
+      } else if (config.showButton && !isButtonDismissed()) {
+        // Recreate button if it was removed but config allows it
+        createTriggerButton(root, config);
+      }
+    },
+
+    // Check if modal is currently open
+    isOpen: () => _isModalOpen,
+
+    // Check if floating button is visible
+    isButtonVisible: () => {
+      return _triggerButton !== null &&
+        _triggerButton.style.display !== 'none';
+    },
+  };
+}
+
+// Helper to create the trigger button (used by show() API)
+function createTriggerButton(root: HTMLElement, config: WidgetConfig) {
   const trigger = document.createElement('button');
   trigger.className = 'bd-trigger';
   trigger.innerHTML = '🐛';
   trigger.setAttribute('aria-label', 'Report a bug or send feedback');
 
-  // Add close button if dismissible
   if (config.buttonDismissible) {
     const closeBtn = document.createElement('button');
     closeBtn.className = 'bd-trigger-close';
@@ -109,21 +223,24 @@ function initWidget(config: WidgetConfig) {
     closeBtn.setAttribute('aria-label', 'Dismiss feedback button');
     trigger.appendChild(closeBtn);
 
-    // Handle close button click
     closeBtn.addEventListener('click', (e) => {
-      e.stopPropagation(); // Don't trigger the main button
+      e.stopPropagation();
       dismissButton();
       trigger.remove();
+      _triggerButton = null;
     });
   }
 
   root.appendChild(trigger);
+  _triggerButton = trigger;
 
-  // Handle trigger click
   trigger.addEventListener('click', () => openFeedbackFlow(root, config));
 }
 
 async function openFeedbackFlow(root: HTMLElement, config: WidgetConfig) {
+  // Mark modal as open
+  _isModalOpen = true;
+
   // Check if app is installed
   const installed = await checkInstallation(config);
   if (!installed) {
@@ -155,7 +272,11 @@ async function openFeedbackFlow(root: HTMLElement, config: WidgetConfig) {
 
   // Step 3: Feedback form
   const formData = await showFeedbackForm(root, annotatedScreenshot, config);
-  if (!formData) return; // User cancelled
+  if (!formData) {
+    // User cancelled
+    _isModalOpen = false;
+    return;
+  }
 
   // Submit
   await submitFeedback(root, config, {
@@ -163,6 +284,9 @@ async function openFeedbackFlow(root: HTMLElement, config: WidgetConfig) {
     screenshot: annotatedScreenshot,
     elementSelector,
   });
+
+  // Flow complete
+  _isModalOpen = false;
 }
 
 async function captureWithLoading(
@@ -256,8 +380,14 @@ function showInstallPrompt(root: HTMLElement, _config: WidgetConfig) {
   const closeBtn = modal.querySelector('.bd-close') as HTMLElement;
   const cancelBtn = modal.querySelector('[data-action="cancel"]') as HTMLElement;
 
-  closeBtn?.addEventListener('click', () => modal.remove());
-  cancelBtn?.addEventListener('click', () => modal.remove());
+  closeBtn?.addEventListener('click', () => {
+    modal.remove();
+    _isModalOpen = false;
+  });
+  cancelBtn?.addEventListener('click', () => {
+    modal.remove();
+    _isModalOpen = false;
+  });
 }
 
 function showScreenshotOptions(root: HTMLElement): Promise<'skip' | 'capture' | 'element'> {

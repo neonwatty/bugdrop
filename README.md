@@ -57,6 +57,7 @@ See [CHANGELOG.md](./CHANGELOG.md) for version history and migration guides.
 | `data-show-email` | `true`, `false` | `false` |
 | `data-require-email` | `true`, `false` | `false` |
 | `data-button-dismissible` | `true`, `false` | `false` |
+| `data-button` | `true`, `false` | `true` |
 
 ```html
 <script src="https://bugdrop.neonwatty.workers.dev/widget.js"
@@ -91,6 +92,49 @@ Allow users to hide the floating button if they don't want it:
 ```
 
 When enabled, hovering over the button reveals an X icon. Clicking it hides the button and saves the preference to localStorage (`bugdrop_dismissed`). The button stays hidden on subsequent page loads.
+
+### JavaScript API
+
+BugDrop exposes a JavaScript API for programmatic control, useful when you want to trigger feedback from your own UI instead of (or in addition to) the floating button.
+
+```javascript
+window.BugDrop = {
+  open(),           // Open the feedback modal
+  close(),          // Close the modal
+  hide(),           // Hide the floating button
+  show(),           // Show the floating button
+  isOpen(),         // Returns true if modal is open
+  isButtonVisible() // Returns true if button is visible
+};
+```
+
+**API-only mode** — hide the floating button entirely and trigger feedback from your own UI:
+
+```html
+<script src="https://bugdrop.neonwatty.workers.dev/widget.js"
+        data-repo="owner/repo"
+        data-button="false"></script>
+```
+
+**Example: Menu item integration**
+
+```html
+<nav>
+  <a href="#">Home</a>
+  <a href="#">Products</a>
+  <span id="report-bug">Report Bug</span>
+</nav>
+
+<script>
+  window.addEventListener('bugdrop:ready', () => {
+    document.getElementById('report-bug').addEventListener('click', () => {
+      window.BugDrop.open();
+    });
+  });
+</script>
+```
+
+The `bugdrop:ready` event fires when the API is available. You can also check `if (window.BugDrop)` for synchronous initialization.
 
 ## Live Demo
 

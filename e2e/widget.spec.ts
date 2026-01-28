@@ -691,3 +691,231 @@ test.describe('Widget Build', () => {
     expect(content).toMatch(/^\s*["']use strict["'];?\s*\(\s*\(\s*\)\s*=>\s*\{/);
   });
 });
+
+test.describe('JavaScript API', () => {
+  test('window.BugDrop exists after widget loads', async ({ page }) => {
+    await page.goto('/test/');
+    await page.waitForTimeout(500);
+
+    const hasBugDrop = await page.evaluate(() => {
+      return typeof window.BugDrop === 'object' && window.BugDrop !== null;
+    });
+    expect(hasBugDrop).toBeTruthy();
+  });
+
+  test('BugDrop API has all expected methods', async ({ page }) => {
+    await page.goto('/test/');
+    await page.waitForTimeout(500);
+
+    const apiMethods = await page.evaluate(() => {
+      if (!window.BugDrop) return [];
+      return Object.keys(window.BugDrop);
+    });
+
+    expect(apiMethods).toContain('open');
+    expect(apiMethods).toContain('close');
+    expect(apiMethods).toContain('hide');
+    expect(apiMethods).toContain('show');
+    expect(apiMethods).toContain('isOpen');
+    expect(apiMethods).toContain('isButtonVisible');
+  });
+
+  test('bugdrop:ready event fires after initialization', async ({ page }) => {
+    // Use the api-only test page which sets up a listener for the event
+    await page.goto('/test/api-only.html');
+
+    // Wait for the status to update (indicating bugdrop:ready was received)
+    await page.waitForFunction(() => {
+      const status = document.getElementById('status');
+      return status?.textContent?.includes('BugDrop ready');
+    }, { timeout: 5000 });
+
+    // Verify the event was received
+    const statusText = await page.locator('#status').textContent();
+    expect(statusText).toContain('BugDrop ready');
+  });
+
+  test('BugDrop.open() opens the modal', async ({ page }) => {
+    await page.goto('/test/');
+    await page.waitForTimeout(500);
+
+    // Modal should not be visible initially
+    const modalBefore = page.locator('#bugdrop-host').locator('css=.bd-modal');
+    await expect(modalBefore).not.toBeVisible();
+
+    // Call open API
+    await page.evaluate(() => window.BugDrop?.open());
+    await page.waitForTimeout(300);
+
+    // Modal should now be visible
+    const modalAfter = page.locator('#bugdrop-host').locator('css=.bd-modal');
+    await expect(modalAfter).toBeVisible();
+  });
+
+  test('BugDrop.close() closes the modal', async ({ page }) => {
+    await page.goto('/test/');
+    await page.waitForTimeout(500);
+
+    // Open modal first
+    await page.evaluate(() => window.BugDrop?.open());
+    await page.waitForTimeout(300);
+
+    const modal = page.locator('#bugdrop-host').locator('css=.bd-modal');
+    await expect(modal).toBeVisible();
+
+    // Close via API
+    await page.evaluate(() => window.BugDrop?.close());
+    await page.waitForTimeout(300);
+
+    // Modal should be gone
+    await expect(modal).not.toBeVisible();
+  });
+
+  test('BugDrop.isOpen() returns correct state', async ({ page }) => {
+    await page.goto('/test/');
+    await page.waitForTimeout(500);
+
+    // Should be false initially
+    const isOpenBefore = await page.evaluate(() => window.BugDrop?.isOpen());
+    expect(isOpenBefore).toBeFalsy();
+
+    // Open modal
+    await page.evaluate(() => window.BugDrop?.open());
+    await page.waitForTimeout(300);
+
+    // Should be true now
+    const isOpenAfter = await page.evaluate(() => window.BugDrop?.isOpen());
+    expect(isOpenAfter).toBeTruthy();
+
+    // Close modal
+    await page.evaluate(() => window.BugDrop?.close());
+    await page.waitForTimeout(300);
+
+    // Should be false again
+    const isOpenFinal = await page.evaluate(() => window.BugDrop?.isOpen());
+    expect(isOpenFinal).toBeFalsy();
+  });
+
+  test('BugDrop.hide() hides the floating button', async ({ page }) => {
+    await page.goto('/test/');
+    await page.waitForTimeout(500);
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible();
+
+    // Hide button
+    await page.evaluate(() => window.BugDrop?.hide());
+
+    // Button should be hidden
+    await expect(trigger).not.toBeVisible();
+  });
+
+  test('BugDrop.show() shows the hidden button', async ({ page }) => {
+    await page.goto('/test/');
+    await page.waitForTimeout(500);
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+
+    // Hide then show
+    await page.evaluate(() => window.BugDrop?.hide());
+    await expect(trigger).not.toBeVisible();
+
+    await page.evaluate(() => window.BugDrop?.show());
+    await expect(trigger).toBeVisible();
+  });
+
+  test('BugDrop.isButtonVisible() returns correct state', async ({ page }) => {
+    await page.goto('/test/');
+    await page.waitForTimeout(500);
+
+    // Should be true initially
+    const isVisibleBefore = await page.evaluate(() => window.BugDrop?.isButtonVisible());
+    expect(isVisibleBefore).toBeTruthy();
+
+    // Hide button
+    await page.evaluate(() => window.BugDrop?.hide());
+
+    // Should be false now
+    const isVisibleAfter = await page.evaluate(() => window.BugDrop?.isButtonVisible());
+    expect(isVisibleAfter).toBeFalsy();
+
+    // Show button
+    await page.evaluate(() => window.BugDrop?.show());
+
+    // Should be true again
+    const isVisibleFinal = await page.evaluate(() => window.BugDrop?.isButtonVisible());
+    expect(isVisibleFinal).toBeTruthy();
+  });
+});
+
+test.describe('API-Only Mode (data-button="false")', () => {
+  test('floating button is not rendered when data-button="false"', async ({ page }) => {
+    await page.goto('/test/api-only.html');
+    await page.waitForTimeout(500);
+
+    // Button should not exist
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).not.toBeAttached();
+  });
+
+  test('BugDrop API is still available in API-only mode', async ({ page }) => {
+    await page.goto('/test/api-only.html');
+    await page.waitForTimeout(500);
+
+    const hasBugDrop = await page.evaluate(() => {
+      return typeof window.BugDrop === 'object' && window.BugDrop !== null;
+    });
+    expect(hasBugDrop).toBeTruthy();
+  });
+
+  test('BugDrop.open() works in API-only mode', async ({ page }) => {
+    await page.goto('/test/api-only.html');
+    await page.waitForTimeout(500);
+
+    // Open modal via API
+    await page.evaluate(() => window.BugDrop?.open());
+    await page.waitForTimeout(300);
+
+    // Modal should be visible
+    const modal = page.locator('#bugdrop-host').locator('css=.bd-modal');
+    await expect(modal).toBeVisible();
+  });
+
+  test('BugDrop.isButtonVisible() returns false in API-only mode', async ({ page }) => {
+    await page.goto('/test/api-only.html');
+    await page.waitForTimeout(500);
+
+    const isVisible = await page.evaluate(() => window.BugDrop?.isButtonVisible());
+    expect(isVisible).toBeFalsy();
+  });
+
+  test('custom button can trigger BugDrop.open()', async ({ page }) => {
+    await page.goto('/test/api-only.html');
+
+    // Wait for BugDrop to be ready
+    await page.waitForFunction(() => {
+      const status = document.getElementById('status');
+      return status?.textContent?.includes('BugDrop ready');
+    }, { timeout: 5000 });
+
+    // Click the "Report Bug" link in the nav
+    await page.click('#nav-report-bug');
+    await page.waitForTimeout(500);
+
+    // Modal should open
+    const modal = page.locator('#bugdrop-host').locator('css=.bd-modal');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+  });
+
+  test('BugDrop.show() does nothing in API-only mode (no button to show)', async ({ page }) => {
+    await page.goto('/test/api-only.html');
+    await page.waitForTimeout(500);
+
+    // Try to show button (should do nothing, no errors)
+    await page.evaluate(() => window.BugDrop?.show());
+
+    // Button should still not exist
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).not.toBeAttached();
+  });
+});

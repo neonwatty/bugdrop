@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BugDrop API-Only Test</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background: #f5f5f5;
+    }
+    h1 { color: #333; }
+    .card {
+      background: white;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-right: 8px;
+      margin-bottom: 8px;
+    }
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+    }
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+    .btn-secondary:hover { background: #d1d5db; }
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+    .btn-danger:hover { background: #dc2626; }
+    .status {
+      margin-top: 16px;
+      padding: 12px;
+      background: #f3f4f6;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    code {
+      background: #e5e7eb;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 13px;
+    }
+    .nav-menu {
+      background: #1f2937;
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+    }
+    .nav-menu a {
+      color: #9ca3af;
+      text-decoration: none;
+      margin-right: 20px;
+    }
+    .nav-menu a:hover { color: white; }
+    .nav-menu .report-bug {
+      color: #fbbf24;
+      cursor: pointer;
+    }
+    .nav-menu .report-bug:hover { color: #fcd34d; }
+  </style>
+</head>
+<body>
+  <h1>BugDrop API-Only Mode Test</h1>
+
+  <p>This page demonstrates using BugDrop without the floating button, using only the JavaScript API.</p>
+
+  <!-- Simulated app navigation with "Report Bug" menu item -->
+  <nav class="nav-menu">
+    <a href="#">Home</a>
+    <a href="#">Products</a>
+    <a href="#">About</a>
+    <span class="report-bug" id="nav-report-bug">Report Bug</span>
+  </nav>
+
+  <div class="card">
+    <h2>API Controls</h2>
+    <p>Use these buttons to test the BugDrop JavaScript API:</p>
+
+    <button class="btn btn-primary" id="open-btn">BugDrop.open()</button>
+    <button class="btn btn-danger" id="close-btn">BugDrop.close()</button>
+
+    <br><br>
+
+    <button class="btn btn-secondary" id="hide-btn">BugDrop.hide()</button>
+    <button class="btn btn-secondary" id="show-btn">BugDrop.show()</button>
+
+    <div class="status" id="status">
+      Waiting for BugDrop to initialize...
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>State Queries</h2>
+    <p>Check the current state of the widget:</p>
+
+    <button class="btn btn-secondary" id="check-open">Check isOpen()</button>
+    <button class="btn btn-secondary" id="check-visible">Check isButtonVisible()</button>
+
+    <div class="status" id="state-status">
+      Click a button to check state
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Usage Example</h2>
+    <p>This page uses <code>data-button="false"</code> to hide the floating button:</p>
+    <pre style="background: #1f2937; color: #e5e7eb; padding: 16px; border-radius: 6px; overflow-x: auto;"><code>&lt;script src="/widget.js"
+        data-repo="owner/repo"
+        data-button="false"&gt;&lt;/script&gt;</code></pre>
+
+    <p style="margin-top: 16px;">Then trigger the modal from your own UI:</p>
+    <pre style="background: #1f2937; color: #e5e7eb; padding: 16px; border-radius: 6px; overflow-x: auto;"><code>// Wait for BugDrop to be ready
+window.addEventListener('bugdrop:ready', () => {
+  document.getElementById('my-btn')
+    .addEventListener('click', () => {
+      window.BugDrop.open();
+    });
+});</code></pre>
+  </div>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const stateStatusEl = document.getElementById('state-status');
+
+    function updateStatus(msg) {
+      statusEl.textContent = new Date().toLocaleTimeString() + ' - ' + msg;
+    }
+
+    function updateStateStatus(msg) {
+      stateStatusEl.textContent = msg;
+    }
+
+    function onBugDropReady() {
+      updateStatus('BugDrop ready! API available at window.BugDrop');
+
+      // Nav menu "Report Bug" link
+      document.getElementById('nav-report-bug').addEventListener('click', () => {
+        window.BugDrop.open();
+      });
+
+      // API control buttons
+      document.getElementById('open-btn').addEventListener('click', () => {
+        window.BugDrop.open();
+        updateStatus('Called BugDrop.open()');
+      });
+
+      document.getElementById('close-btn').addEventListener('click', () => {
+        window.BugDrop.close();
+        updateStatus('Called BugDrop.close()');
+      });
+
+      document.getElementById('hide-btn').addEventListener('click', () => {
+        window.BugDrop.hide();
+        updateStatus('Called BugDrop.hide()');
+      });
+
+      document.getElementById('show-btn').addEventListener('click', () => {
+        window.BugDrop.show();
+        updateStatus('Called BugDrop.show()');
+      });
+
+      // State query buttons
+      document.getElementById('check-open').addEventListener('click', () => {
+        const isOpen = window.BugDrop.isOpen();
+        updateStateStatus('isOpen() = ' + isOpen);
+      });
+
+      document.getElementById('check-visible').addEventListener('click', () => {
+        const isVisible = window.BugDrop.isButtonVisible();
+        updateStateStatus('isButtonVisible() = ' + isVisible);
+      });
+    }
+
+    // Listen for bugdrop:ready event (in case it hasn't fired yet)
+    window.addEventListener('bugdrop:ready', onBugDropReady);
+  </script>
+
+  <!-- BugDrop widget in API-only mode (no floating button) -->
+  <script src="/widget.js" data-repo="test/repo" data-button="false"></script>
+
+  <script>
+    // Check if BugDrop already initialized (in case the event fired before our listener)
+    if (window.BugDrop) {
+      onBugDropReady();
+    }
+  </script>
+</body>
+</html>
