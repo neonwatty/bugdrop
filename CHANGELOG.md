@@ -15,9 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **API-only mode**: Set `data-button="false"` to hide the floating button and trigger feedback only via the JavaScript API
 - **Ready event**: `bugdrop:ready` event fires when the API is available
 - **Dismiss duration**: Set `data-dismiss-duration="7"` to have the dismissed button reappear after 7 days. Without this, dismissed buttons stay hidden forever.
-- **Restore pill**: After dismissing the button, a subtle "🐛 Feedback" pill appears so users can easily restore the full button. Disable with `data-show-restore="false"`.
+- **Pull tab restore**: After dismissing the button, a subtle pull tab appears on the screen edge so users can easily restore the full button. Disable with `data-show-restore="false"`.
 
 ### Changed
+- **Feedback pill design**: The trigger button is now a pill showing "🐛 Feedback" instead of a circular icon, making it clearer what the button does.
 - **Improved feedback flow**: The widget now shows a welcome screen first, explaining what the feedback tool does. Users then fill out their feedback with an optional checkbox to include a screenshot. This makes the flow more intuitive and allows text-only feedback without the screenshot step.
 - `show()` API method now clears the dismissed state, allowing you to programmatically bring back a button that was dismissed by the user
 - Dismissed state now stores a timestamp instead of a boolean, enabling the new duration feature. Legacy `'true'` values are still honored for backwards compatibility.

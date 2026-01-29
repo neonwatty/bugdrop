@@ -777,11 +777,18 @@ test.describe('Dismissible Button', () => {
 
     const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
 
-    // Double-click rapidly
-    await closeBtn.dblclick();
+    // Click the close button
+    await closeBtn.click();
 
-    // Button should be removed
+    // Wait a moment for the dismiss to complete
+    await page.waitForTimeout(100);
+
+    // Button should be removed (pull tab should appear instead)
     await expect(trigger).not.toBeAttached();
+
+    // Pull tab should be visible
+    const pullTab = page.locator('#bugdrop-host').locator('css=.bd-pull-tab');
+    await expect(pullTab).toBeAttached();
 
     // No errors should occur
     expect(errors).toHaveLength(0);

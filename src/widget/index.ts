@@ -20,7 +20,7 @@ interface WidgetConfig {
   // Dismissible button configuration
   buttonDismissible: boolean;
   dismissDuration?: number; // Days before dismissed button reappears (undefined = forever)
-  showRestore: boolean; // Show a restore pill after dismissing (default true when dismissible)
+  showRestore: boolean; // Show a pull tab after dismissing (default true when dismissible)
   // Button visibility (false = API-only mode)
   showButton: boolean;
 }
@@ -57,7 +57,7 @@ const BUGDROP_DISMISSED_KEY = 'bugdrop_dismissed';
 // Store widget state for API access
 let _widgetRoot: HTMLElement | null = null;
 let _triggerButton: HTMLElement | null = null;
-let _restorePill: HTMLElement | null = null;
+let _pullTab: HTMLElement | null = null;
 let _isModalOpen = false;
 let _widgetConfig: WidgetConfig | null = null;
 
@@ -125,14 +125,16 @@ if (!config.repo) {
   initWidget(config);
 }
 
-// Create the restore pill shown after dismissing the button
-function createRestorePill(root: HTMLElement, config: WidgetConfig): HTMLElement {
-  const pill = document.createElement('button');
-  pill.className = 'bd-restore-pill';
-  pill.innerHTML = '🐛 Feedback';
-  pill.setAttribute('aria-label', 'Show feedback button');
+// Create the pull tab shown after dismissing the button
+function createPullTab(root: HTMLElement, config: WidgetConfig): HTMLElement {
+  const tab = document.createElement('div');
+  tab.className = config.position === 'bottom-left' ? 'bd-pull-tab bd-pull-tab--left' : 'bd-pull-tab';
+  tab.innerHTML = '<span class="bd-pull-tab-chevron">‹</span>';
+  tab.setAttribute('role', 'button');
+  tab.setAttribute('tabindex', '0');
+  tab.setAttribute('aria-label', 'Show feedback button');
 
-  pill.addEventListener('click', () => {
+  const handleRestore = () => {
     // Clear dismissed state
     try {
       localStorage.removeItem(BUGDROP_DISMISSED_KEY);
@@ -140,17 +142,25 @@ function createRestorePill(root: HTMLElement, config: WidgetConfig): HTMLElement
       // localStorage may be blocked
     }
 
-    // Remove the pill
-    pill.remove();
-    _restorePill = null;
+    // Remove the pull tab
+    tab.remove();
+    _pullTab = null;
 
     // Recreate the trigger button
     createTriggerButton(root, config);
+  };
+
+  tab.addEventListener('click', handleRestore);
+  tab.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      handleRestore();
+    }
   });
 
-  root.appendChild(pill);
-  _restorePill = pill;
-  return pill;
+  root.appendChild(tab);
+  _pullTab = tab;
+  return tab;
 }
 
 function initWidget(config: WidgetConfig) {
@@ -175,7 +185,7 @@ function initWidget(config: WidgetConfig) {
   if (shouldShowButton) {
     const trigger = document.createElement('button');
     trigger.className = 'bd-trigger';
-    trigger.innerHTML = '🐛';
+    trigger.innerHTML = '<span class="bd-trigger-icon">🐛</span><span class="bd-trigger-label">Feedback</span>';
     trigger.setAttribute('aria-label', 'Report a bug or send feedback');
 
     // Add close button if dismissible
@@ -193,9 +203,9 @@ function initWidget(config: WidgetConfig) {
         trigger.remove();
         _triggerButton = null;
 
-        // Show restore pill if enabled
+        // Show pull tab if enabled
         if (config.showRestore) {
-          createRestorePill(root, config);
+          createPullTab(root, config);
         }
       });
     }
@@ -206,8 +216,8 @@ function initWidget(config: WidgetConfig) {
     // Handle trigger click
     trigger.addEventListener('click', () => openFeedbackFlow(root, config));
   } else if (config.showButton && config.buttonDismissible && config.showRestore && isButtonDismissed(config.dismissDuration)) {
-    // Button was previously dismissed - show restore pill
-    createRestorePill(root, config);
+    // Button was previously dismissed - show pull tab
+    createPullTab(root, config);
   }
 
   // Expose the BugDrop API
@@ -255,10 +265,10 @@ function exposeBugDropAPI(root: HTMLElement, config: WidgetConfig) {
         // localStorage may be blocked
       }
 
-      // Remove restore pill if present
-      if (_restorePill) {
-        _restorePill.remove();
-        _restorePill = null;
+      // Remove pull tab if present
+      if (_pullTab) {
+        _pullTab.remove();
+        _pullTab = null;
       }
 
       if (_triggerButton) {
@@ -284,7 +294,7 @@ function exposeBugDropAPI(root: HTMLElement, config: WidgetConfig) {
 function createTriggerButton(root: HTMLElement, config: WidgetConfig) {
   const trigger = document.createElement('button');
   trigger.className = 'bd-trigger';
-  trigger.innerHTML = '🐛';
+  trigger.innerHTML = '<span class="bd-trigger-icon">🐛</span><span class="bd-trigger-label">Feedback</span>';
   trigger.setAttribute('aria-label', 'Report a bug or send feedback');
 
   if (config.buttonDismissible) {
@@ -299,6 +309,11 @@ function createTriggerButton(root: HTMLElement, config: WidgetConfig) {
       dismissButton();
       trigger.remove();
       _triggerButton = null;
+
+      // Show pull tab if enabled
+      if (config.showRestore) {
+        createPullTab(root, config);
+      }
     });
   }
 
