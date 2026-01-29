@@ -150,8 +150,8 @@ function createPullTab(root: HTMLElement, config: WidgetConfig): HTMLElement {
     tab.remove();
     _pullTab = null;
 
-    // Recreate the trigger button
-    createTriggerButton(root, config);
+    // Recreate the trigger button with restore animation
+    createTriggerButton(root, config, true);
   };
 
   tab.addEventListener('click', handleRestore);
@@ -214,13 +214,20 @@ function initWidget(config: WidgetConfig) {
       closeBtn.addEventListener('click', (e) => {
         e.stopPropagation(); // Don't trigger the main button
         dismissButton();
-        trigger.remove();
-        _triggerButton = null;
 
-        // Show pull tab if enabled
-        if (config.showRestore) {
-          createPullTab(root, config);
-        }
+        // Add dismiss animation
+        trigger.classList.add('bd-trigger--dismissing');
+
+        // Wait for animation to finish before removing
+        trigger.addEventListener('animationend', () => {
+          trigger.remove();
+          _triggerButton = null;
+
+          // Show pull tab if enabled
+          if (config.showRestore) {
+            createPullTab(root, config);
+          }
+        }, { once: true });
       });
     }
 
@@ -304,10 +311,10 @@ function exposeBugDropAPI(root: HTMLElement, config: WidgetConfig) {
   };
 }
 
-// Helper to create the trigger button (used by show() API)
-function createTriggerButton(root: HTMLElement, config: WidgetConfig) {
+// Helper to create the trigger button (used by show() API and pull tab restore)
+function createTriggerButton(root: HTMLElement, config: WidgetConfig, isRestoring = false) {
   const trigger = document.createElement('button');
-  trigger.className = 'bd-trigger';
+  trigger.className = isRestoring ? 'bd-trigger bd-trigger--restoring' : 'bd-trigger';
   trigger.innerHTML = '<span class="bd-trigger-icon">🐛</span><span class="bd-trigger-label">Feedback</span>';
   trigger.setAttribute('aria-label', 'Report a bug or send feedback');
 
@@ -321,13 +328,20 @@ function createTriggerButton(root: HTMLElement, config: WidgetConfig) {
     closeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       dismissButton();
-      trigger.remove();
-      _triggerButton = null;
 
-      // Show pull tab if enabled
-      if (config.showRestore) {
-        createPullTab(root, config);
-      }
+      // Add dismiss animation
+      trigger.classList.add('bd-trigger--dismissing');
+
+      // Wait for animation to finish before removing
+      trigger.addEventListener('animationend', () => {
+        trigger.remove();
+        _triggerButton = null;
+
+        // Show pull tab if enabled
+        if (config.showRestore) {
+          createPullTab(root, config);
+        }
+      }, { once: true });
     });
   }
 

@@ -706,6 +706,37 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       to { transform: translateX(0); opacity: 1; }
     }
 
+    /* Directional animations for dismiss/restore */
+    @keyframes bd-triggerSlideInFromRight {
+      from {
+        opacity: 0;
+        transform: translateX(100px) scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+    }
+
+    @keyframes bd-triggerSlideOutToRight {
+      from {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(100px) scale(0.8);
+      }
+    }
+
+    .bd-trigger--dismissing {
+      animation: bd-triggerSlideOutToRight 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
+    }
+
+    .bd-trigger--restoring {
+      animation: bd-triggerSlideInFromRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
     @keyframes bd-spin {
       to { transform: rotate(360deg); }
     }
