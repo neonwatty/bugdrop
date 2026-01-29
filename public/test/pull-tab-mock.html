@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pull Tab Mock - BugDrop</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px;
+      color: #333;
+    }
+    .demo-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    h1 { color: white; margin-bottom: 20px; }
+    .description { color: rgba(255,255,255,0.9); margin-bottom: 40px; line-height: 1.6; }
+
+    .mock-app {
+      background: white;
+      border-radius: 16px;
+      height: 450px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+    }
+    .mock-header {
+      background: #f8f9fa;
+      padding: 16px 24px;
+      border-bottom: 1px solid #e9ecef;
+      font-weight: 600;
+      color: #495057;
+    }
+    .mock-content {
+      padding: 24px;
+      color: #6c757d;
+    }
+
+    /* Feedback Pill - Full State */
+    .bug-button {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      height: 44px;
+      padding: 0 16px;
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(249, 115, 22, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 100;
+    }
+    .bug-button:hover {
+      transform: scale(1.03);
+      box-shadow: 0 6px 20px rgba(249, 115, 22, 0.5);
+    }
+    .bug-button .icon { font-size: 18px; }
+    .bug-button .label {
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .bug-button .close-x {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      width: 20px;
+      height: 20px;
+      background: #dc2626;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: white;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .bug-button:hover .close-x { opacity: 1; }
+
+    /* Pull Tab - Minimized State */
+    .pull-tab {
+      position: absolute;
+      bottom: 24px;
+      right: 0;
+      width: 24px;
+      height: 48px;
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      border-radius: 8px 0 0 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: -2px 4px 12px rgba(249, 115, 22, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 100;
+    }
+    .pull-tab:hover {
+      width: 32px;
+      box-shadow: -4px 6px 16px rgba(249, 115, 22, 0.4);
+    }
+    .pull-tab .chevron {
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      transition: transform 0.2s;
+    }
+    .pull-tab:hover .chevron {
+      transform: translateX(-2px);
+    }
+
+    .hidden { display: none !important; }
+
+    .controls {
+      margin-top: 24px;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: white;
+      color: #7c3aed;
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+
+    .state-label {
+      position: absolute;
+      bottom: 90px;
+      right: 24px;
+      background: rgba(0,0,0,0.75);
+      color: white;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 32px;
+    }
+    .comparison-card {
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .comparison-card h3 {
+      color: white;
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+    .comparison-card .preview {
+      background: white;
+      border-radius: 8px;
+      height: 120px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Static previews */
+    .preview .static-pill {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      height: 32px;
+      padding: 0 12px;
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(249, 115, 22, 0.4);
+    }
+    .preview .static-pill .emoji { font-size: 14px; }
+    .preview .static-tab {
+      position: absolute;
+      bottom: 12px;
+      right: 0;
+      width: 18px;
+      height: 36px;
+      background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+      border-radius: 6px 0 0 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <h1>🐛 Pull Tab Concept</h1>
+    <p class="description">
+      The full state shows a "🐛 Feedback" pill so users know exactly what it does.
+      When dismissed, it collapses to a subtle pull tab on the right edge. Clicking the tab restores the full pill.
+    </p>
+
+    <div class="mock-app">
+      <div class="mock-header">Your Application</div>
+      <div class="mock-content">
+        <p style="font-size: 15px; line-height: 1.7;">This is a mock of your app content. The feedback pill is in the bottom-right corner.</p>
+        <br>
+        <p style="font-size: 15px; line-height: 1.7;"><strong>Try it:</strong> Hover over the pill and click the X to minimize it. Then click the pull tab to restore.</p>
+      </div>
+
+      <div class="state-label" id="state-label">✓ Feedback Pill</div>
+
+      <!-- Full Feedback Pill -->
+      <div class="bug-button" id="bug-button">
+        <span class="icon">🐛</span>
+        <span class="label">Feedback</span>
+        <div class="close-x" id="close-btn">✕</div>
+      </div>
+
+      <!-- Minimized Pull Tab -->
+      <div class="pull-tab hidden" id="pull-tab">
+        <span class="chevron">‹</span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn btn-primary" id="toggle-btn">Toggle State</button>
+    </div>
+
+    <div class="comparison">
+      <div class="comparison-card">
+        <h3>Feedback Pill (Full)</h3>
+        <div class="preview">
+          <div class="static-pill"><span class="emoji">🐛</span> Feedback</div>
+        </div>
+      </div>
+      <div class="comparison-card">
+        <h3>Minimized (Pull Tab)</h3>
+        <div class="preview">
+          <div class="static-tab">‹</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const bugButton = document.getElementById('bug-button');
+    const pullTab = document.getElementById('pull-tab');
+    const closeBtn = document.getElementById('close-btn');
+    const toggleBtn = document.getElementById('toggle-btn');
+    const stateLabel = document.getElementById('state-label');
+
+    let isMinimized = false;
+
+    function minimize() {
+      isMinimized = true;
+      bugButton.classList.add('hidden');
+      pullTab.classList.remove('hidden');
+      stateLabel.textContent = '→ Minimized (Pull Tab)';
+    }
+
+    function restore() {
+      isMinimized = false;
+      pullTab.classList.add('hidden');
+      bugButton.classList.remove('hidden');
+      stateLabel.textContent = '✓ Feedback Pill';
+    }
+
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      minimize();
+    });
+
+    pullTab.addEventListener('click', restore);
+
+    toggleBtn.addEventListener('click', () => {
+      if (isMinimized) restore();
+      else minimize();
+    });
+
+    bugButton.addEventListener('click', (e) => {
+      if (e.target !== closeBtn && !closeBtn.contains(e.target)) {
+        alert('Feedback modal would open here!');
+      }
+    });
+  </script>
+</body>
+</html>

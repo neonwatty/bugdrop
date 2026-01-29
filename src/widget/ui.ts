@@ -92,75 +92,125 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       font-family: inherit;
     }
 
-    /* Trigger Button */
+    /* Trigger Button (Pill) */
     .bd-trigger {
       position: fixed;
       bottom: 20px;
       ${pos};
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
+      height: 44px;
+      padding: 0 16px;
+      border-radius: 22px;
       border: none;
       background: var(--bd-primary);
       color: var(--bd-primary-text);
-      font-size: 24px;
       cursor: pointer;
       box-shadow:
         var(--bd-shadow-md),
         0 0 0 0 var(--bd-primary);
       z-index: 999999;
       transition: transform var(--bd-transition), box-shadow var(--bd-transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .bd-trigger:hover {
-      transform: scale(1.08);
+      transform: scale(1.03);
       box-shadow:
         var(--bd-shadow-lg),
         0 0 20px rgba(20, 184, 166, 0.3);
     }
 
     .bd-trigger:active {
-      transform: scale(0.96);
+      transform: scale(0.97);
     }
 
-    /* Restore pill (shown after dismissal) */
-    .bd-restore-pill {
+    .bd-trigger-icon {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .bd-trigger-label {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    /* Pull Tab (shown after dismissal) */
+    .bd-pull-tab {
       position: fixed;
       bottom: 20px;
-      ${pos};
-      padding: 8px 14px;
-      border-radius: 20px;
-      border: 1px solid var(--bd-border);
-      background: var(--bd-bg-primary);
-      color: var(--bd-text-secondary);
-      font-size: 12px;
-      font-weight: 500;
+      right: 0;
+      width: 24px;
+      height: 48px;
+      border-radius: 8px 0 0 8px;
+      border: none;
+      background: var(--bd-primary);
+      color: var(--bd-primary-text);
       cursor: pointer;
-      box-shadow: var(--bd-shadow-sm);
+      box-shadow: -2px 4px 12px rgba(20, 184, 166, 0.3);
       z-index: 999999;
-      transition: all var(--bd-transition);
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       align-items: center;
-      gap: 6px;
-      opacity: 0.7;
+      justify-content: center;
     }
 
-    .bd-restore-pill:hover {
-      opacity: 1;
-      background: var(--bd-bg-secondary);
-      color: var(--bd-text-primary);
-      box-shadow: var(--bd-shadow-md);
+    .bd-pull-tab:hover {
+      width: 32px;
+      box-shadow: -4px 6px 16px rgba(20, 184, 166, 0.4);
     }
 
-    .bd-restore-pill:active {
-      transform: scale(0.96);
+    .bd-pull-tab:active {
+      width: 28px;
+    }
+
+    .bd-pull-tab-chevron {
+      font-size: 16px;
+      font-weight: bold;
+      transition: transform 0.2s;
+    }
+
+    .bd-pull-tab:hover .bd-pull-tab-chevron {
+      transform: translateX(-2px);
+    }
+
+    /* Pull tab position for bottom-left */
+    .bd-pull-tab--left {
+      right: auto;
+      left: 0;
+      border-radius: 0 8px 8px 0;
+      box-shadow: 2px 4px 12px rgba(20, 184, 166, 0.3);
+    }
+
+    .bd-pull-tab--left:hover {
+      box-shadow: 4px 6px 16px rgba(20, 184, 166, 0.4);
+    }
+
+    .bd-pull-tab--left .bd-pull-tab-chevron {
+      transform: rotate(180deg);
+    }
+
+    .bd-pull-tab--left:hover .bd-pull-tab-chevron {
+      transform: rotate(180deg) translateX(-2px);
     }
 
     @media (max-width: 640px) {
-      .bd-restore-pill {
+      .bd-pull-tab {
         bottom: 16px;
-        padding: 6px 12px;
-        font-size: 11px;
+        height: 44px;
+        width: 22px;
+      }
+
+      .bd-pull-tab:hover {
+        width: 28px;
+      }
+    }
+
+    /* Touch devices - always slightly expanded */
+    @media (hover: none) {
+      .bd-pull-tab {
+        width: 28px;
       }
     }
 
@@ -653,10 +703,18 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
     /* Mobile Responsiveness */
     @media (max-width: 640px) {
       .bd-trigger {
-        width: 52px;
-        height: 52px;
+        height: 40px;
+        padding: 0 14px;
         bottom: 16px;
-        font-size: 22px;
+        gap: 6px;
+      }
+
+      .bd-trigger-icon {
+        font-size: 16px;
+      }
+
+      .bd-trigger-label {
+        font-size: 13px;
       }
 
       .bd-overlay {
@@ -747,7 +805,7 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       }
 
       .bd-trigger:active {
-        transform: scale(0.95);
+        transform: scale(0.97);
       }
 
       /* Always show close button on touch devices */
