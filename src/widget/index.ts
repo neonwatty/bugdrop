@@ -23,6 +23,8 @@ interface WidgetConfig {
   showRestore: boolean; // Show a pull tab after dismissing (default true when dismissible)
   // Button visibility (false = API-only mode)
   showButton: boolean;
+  // Custom accent color (hex)
+  accentColor?: string;
 }
 
 // BugDrop JavaScript API interface
@@ -116,6 +118,8 @@ const config: WidgetConfig = {
   showRestore: script?.dataset.showRestore !== 'false',
   // Button visibility (default true, set to false for API-only mode)
   showButton: script?.dataset.button !== 'false',
+  // Custom accent color (e.g., "#FF6B35")
+  accentColor: script?.dataset.color || undefined,
 };
 
 // Validate config
@@ -166,6 +170,16 @@ function createPullTab(root: HTMLElement, config: WidgetConfig): HTMLElement {
 function initWidget(config: WidgetConfig) {
   // Store config for API access
   _widgetConfig = config;
+
+  // If button is not dismissible, clear any stale dismissed state from localStorage
+  // This ensures the button shows on non-dismissible pages even after visiting dismissible ones
+  if (!config.buttonDismissible) {
+    try {
+      localStorage.removeItem(BUGDROP_DISMISSED_KEY);
+    } catch {
+      // localStorage may be blocked
+    }
+  }
 
   // Create Shadow DOM for style isolation
   const host = document.createElement('div');
