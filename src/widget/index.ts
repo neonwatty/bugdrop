@@ -215,6 +215,9 @@ function initWidget(config: WidgetConfig) {
         e.stopPropagation(); // Don't trigger the main button
         dismissButton();
 
+        // Remove restoring class if present (to avoid animation conflicts)
+        trigger.classList.remove('bd-trigger--restoring');
+
         // Add dismiss animation
         trigger.classList.add('bd-trigger--dismissing');
 
@@ -328,6 +331,9 @@ function createTriggerButton(root: HTMLElement, config: WidgetConfig, isRestorin
     closeBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       dismissButton();
+
+      // Remove restoring class if present (to avoid animation conflicts)
+      trigger.classList.remove('bd-trigger--restoring');
 
       // Add dismiss animation
       trigger.classList.add('bd-trigger--dismissing');

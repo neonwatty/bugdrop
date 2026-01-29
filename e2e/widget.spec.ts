@@ -1048,6 +1048,321 @@ test.describe('JavaScript API', () => {
   });
 });
 
+test.describe('Custom Accent Color', () => {
+  test('default color is teal when data-color is not set', async ({ page }) => {
+    await page.goto('/test/color-default.html');
+    await page.waitForTimeout(500);
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Get the background color of the button
+    const bgColor = await trigger.evaluate(el => getComputedStyle(el).backgroundColor);
+
+    // Default dark theme color is #22d3ee (rgb(34, 211, 238))
+    // Parse RGB values
+    const rgbMatch = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+    expect(rgbMatch).not.toBeNull();
+
+    if (rgbMatch) {
+      const [, r, g, b] = rgbMatch.map(Number);
+      // Teal/cyan has high green and blue, low red
+      expect(r).toBeLessThan(100); // Low red
+      expect(g).toBeGreaterThan(150); // High green
+      expect(b).toBeGreaterThan(200); // High blue
+    }
+  });
+
+  test('custom color is applied when data-color is set', async ({ page }) => {
+    await page.goto('/test/color-custom.html');
+    await page.waitForTimeout(500);
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Get the background color of the button
+    const bgColor = await trigger.evaluate(el => getComputedStyle(el).backgroundColor);
+
+    // Custom color is #9333EA (purple) = rgb(147, 51, 234)
+    const rgbMatch = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+    expect(rgbMatch).not.toBeNull();
+
+    if (rgbMatch) {
+      const [, r, g, b] = rgbMatch.map(Number);
+      // Purple has medium red, low green, high blue
+      expect(r).toBeGreaterThan(100); // Medium-high red
+      expect(g).toBeLessThan(100); // Low green
+      expect(b).toBeGreaterThan(200); // High blue
+    }
+  });
+
+  test('custom color applies to focus ring on form inputs', async ({ page }) => {
+    // Mock the installation check to return installed: true
+    await page.route('**/api/check/**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ installed: true }),
+      });
+    });
+
+    await page.goto('/test/color-custom.html');
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Open modal
+    await trigger.click();
+
+    const modal = page.locator('#bugdrop-host').locator('css=.bd-modal');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+
+    // Click "Get Started" on welcome screen
+    const getStartedBtn = page.locator('#bugdrop-host').locator('css=[data-action="continue"]');
+    await expect(getStartedBtn).toBeVisible({ timeout: 5000 });
+    await getStartedBtn.click();
+
+    // Focus on title input
+    const titleInput = page.locator('#bugdrop-host').locator('css=#title');
+    await expect(titleInput).toBeVisible({ timeout: 5000 });
+    await titleInput.focus();
+
+    // Check that the --bd-border-focus CSS variable is set to the custom color
+    const root = page.locator('#bugdrop-host').locator('css=.bd-root');
+    const borderFocusColor = await root.evaluate(el => getComputedStyle(el).getPropertyValue('--bd-border-focus').trim());
+
+    // Should be the custom purple color
+    expect(borderFocusColor).toBe('#9333EA');
+  });
+
+  test('custom color persists after modal interactions', async ({ page }) => {
+    await page.goto('/test/color-custom.html');
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Open and close modal
+    await trigger.click();
+    const modal = page.locator('#bugdrop-host').locator('css=.bd-modal');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-close');
+    await closeBtn.click();
+    await expect(modal).not.toBeVisible();
+
+    // Button should still have custom color
+    const bgColor = await trigger.evaluate(el => getComputedStyle(el).backgroundColor);
+    const rgbMatch = bgColor.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+    expect(rgbMatch).not.toBeNull();
+
+    if (rgbMatch) {
+      const [, r, g, b] = rgbMatch.map(Number);
+      // Still purple
+      expect(r).toBeGreaterThan(100);
+      expect(g).toBeLessThan(100);
+      expect(b).toBeGreaterThan(200);
+    }
+  });
+});
+
+test.describe('Pull Tab Restore', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+    await page.evaluate(() => localStorage.removeItem('bugdrop_dismissed'));
+  });
+
+  test('pull tab appears after dismissing the button', async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Pull tab should not exist initially
+    const pullTab = page.locator('#bugdrop-host').locator('css=.bd-pull-tab');
+    await expect(pullTab).not.toBeAttached();
+
+    // Dismiss the button
+    await trigger.hover();
+    await page.waitForTimeout(200);
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await closeBtn.click();
+
+    // Wait for dismiss animation to complete
+    await page.waitForTimeout(400);
+
+    // Pull tab should now be visible
+    await expect(pullTab).toBeVisible();
+  });
+
+  test('clicking pull tab restores the feedback button', async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Dismiss the button
+    await trigger.hover();
+    await page.waitForTimeout(200);
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await closeBtn.click();
+
+    // Wait for dismiss animation
+    await page.waitForTimeout(400);
+
+    // Click the pull tab
+    const pullTab = page.locator('#bugdrop-host').locator('css=.bd-pull-tab');
+    await expect(pullTab).toBeVisible();
+    await pullTab.click();
+
+    // Wait for restore animation
+    await page.waitForTimeout(500);
+
+    // Button should be visible again
+    const triggerAfterRestore = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(triggerAfterRestore).toBeVisible();
+
+    // Pull tab should be gone
+    await expect(pullTab).not.toBeAttached();
+  });
+
+  test('pull tab restore clears localStorage dismissed state', async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Dismiss the button
+    await trigger.hover();
+    await page.waitForTimeout(200);
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await closeBtn.click();
+    await page.waitForTimeout(400);
+
+    // Verify localStorage is set
+    const dismissedBefore = await page.evaluate(() => localStorage.getItem('bugdrop_dismissed'));
+    expect(dismissedBefore).not.toBeNull();
+
+    // Click the pull tab
+    const pullTab = page.locator('#bugdrop-host').locator('css=.bd-pull-tab');
+    await pullTab.click();
+    await page.waitForTimeout(500);
+
+    // localStorage should be cleared
+    const dismissedAfter = await page.evaluate(() => localStorage.getItem('bugdrop_dismissed'));
+    expect(dismissedAfter).toBeNull();
+  });
+
+  test('restored button is fully functional', async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Dismiss and restore
+    await trigger.hover();
+    await page.waitForTimeout(200);
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await closeBtn.click();
+    await page.waitForTimeout(400);
+
+    const pullTab = page.locator('#bugdrop-host').locator('css=.bd-pull-tab');
+    await pullTab.click();
+    await page.waitForTimeout(500);
+
+    // Click the restored button to open modal
+    const restoredTrigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await restoredTrigger.click();
+
+    // Modal should open
+    const modal = page.locator('#bugdrop-host').locator('css=.bd-modal');
+    await expect(modal).toBeVisible({ timeout: 5000 });
+  });
+
+  test('restored button can be dismissed again', async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // First dismiss
+    await trigger.hover();
+    await page.waitForTimeout(200);
+    let closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await closeBtn.click();
+    await page.waitForTimeout(400);
+
+    // Restore via pull tab
+    const pullTab = page.locator('#bugdrop-host').locator('css=.bd-pull-tab');
+    await pullTab.click();
+    await page.waitForTimeout(500);
+
+    // Second dismiss
+    const restoredTrigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await restoredTrigger.hover();
+    await page.waitForTimeout(200);
+    closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await closeBtn.click();
+
+    // Wait for the slide-out animation to complete (animation is 0.3s + buffer for CI)
+    await page.waitForTimeout(600);
+
+    // Button should be gone, pull tab should reappear
+    await expect(restoredTrigger).not.toBeAttached({ timeout: 5000 });
+    const pullTabAgain = page.locator('#bugdrop-host').locator('css=.bd-pull-tab');
+    await expect(pullTabAgain).toBeVisible();
+  });
+
+  test('pull tab is keyboard accessible', async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Dismiss the button
+    await trigger.hover();
+    await page.waitForTimeout(200);
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await closeBtn.click();
+    await page.waitForTimeout(400);
+
+    // Focus the pull tab and press Enter
+    const pullTab = page.locator('#bugdrop-host').locator('css=.bd-pull-tab');
+    await pullTab.focus();
+    await page.keyboard.press('Enter');
+    await page.waitForTimeout(500);
+
+    // Button should be restored
+    const restoredTrigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(restoredTrigger).toBeVisible();
+  });
+
+  test('pull tab persists after page reload', async ({ page }) => {
+    await page.goto('/test/dismissible.html');
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Dismiss the button
+    await trigger.hover();
+    await page.waitForTimeout(200);
+    const closeBtn = page.locator('#bugdrop-host').locator('css=.bd-trigger-close');
+    await closeBtn.click();
+    await page.waitForTimeout(400);
+
+    // Reload page
+    await page.reload();
+    await page.waitForTimeout(500);
+
+    // Button should still be hidden
+    const triggerAfterReload = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(triggerAfterReload).not.toBeAttached();
+
+    // Pull tab should be visible
+    const pullTab = page.locator('#bugdrop-host').locator('css=.bd-pull-tab');
+    await expect(pullTab).toBeVisible();
+  });
+});
+
 test.describe('API-Only Mode (data-button="false")', () => {
   test('floating button is not rendered when data-button="false"', async ({ page }) => {
     await page.goto('/test/api-only.html');
