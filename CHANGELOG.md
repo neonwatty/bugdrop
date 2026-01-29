@@ -5,7 +5,27 @@ All notable changes to BugDrop will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.8.0] - 2026-01-29
+
+### Added
+- **Directional animations for dismiss/restore**: When dismissing the feedback pill, it now smoothly slides out to the right. When restoring via the pull tab, it slides in from the right. This creates a polished, intuitive flow that matches the spatial direction of the action.
+
+### Changed
+- Dismiss animation uses `animationend` event to properly sequence DOM removal after the slide-out completes.
+
+## [1.7.0] - 2026-01-29
+
+### Added
+- **Custom accent color**: Set `data-color="#FF6B35"` to customize the widget's accent color to match your app's design. The color is applied to the trigger button, focus rings, and other accent elements.
+- **Dismiss duration**: Set `data-dismiss-duration="7"` to have the dismissed button reappear after 7 days. Without this, dismissed buttons stay hidden forever.
+- **Pull tab restore**: After dismissing the button, a subtle pull tab appears on the screen edge so users can easily restore the full button. Disable with `data-show-restore="false"`.
+
+### Changed
+- `show()` API method now clears the dismissed state, allowing you to programmatically bring back a button that was dismissed by the user.
+- Dismissed state now stores a timestamp instead of a boolean, enabling the new duration feature. Legacy `'true'` values are still honored for backwards compatibility.
+- Non-dismissible widgets now automatically clear stale dismissed state from localStorage, ensuring the button always shows.
+
+## [1.6.0] - 2026-01-28
 
 ### Added
 - **JavaScript API**: Programmatic control via `window.BugDrop`:
@@ -14,17 +34,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `isOpen()` / `isButtonVisible()` - Query current state
 - **API-only mode**: Set `data-button="false"` to hide the floating button and trigger feedback only via the JavaScript API
 - **Ready event**: `bugdrop:ready` event fires when the API is available
-- **Dismiss duration**: Set `data-dismiss-duration="7"` to have the dismissed button reappear after 7 days. Without this, dismissed buttons stay hidden forever.
-- **Pull tab restore**: After dismissing the button, a subtle pull tab appears on the screen edge so users can easily restore the full button. Disable with `data-show-restore="false"`.
-- **Custom accent color**: Set `data-color="#FF6B35"` to customize the widget's accent color to match your app's design.
 
 ### Changed
 - **Feedback pill design**: The trigger button is now a pill showing "🐛 Feedback" instead of a circular icon, making it clearer what the button does.
 - **Improved feedback flow**: The widget now shows a welcome screen first, explaining what the feedback tool does. Users then fill out their feedback with an optional checkbox to include a screenshot. This makes the flow more intuitive and allows text-only feedback without the screenshot step.
 - **Smooth entry animations**: The feedback pill and pull tab now slide in with smooth animations when they appear.
-- `show()` API method now clears the dismissed state, allowing you to programmatically bring back a button that was dismissed by the user
-- Dismissed state now stores a timestamp instead of a boolean, enabling the new duration feature. Legacy `'true'` values are still honored for backwards compatibility.
-- Non-dismissible widgets now automatically clear stale dismissed state from localStorage, ensuring the button always shows.
 
 ## [1.1.0] - 2026-01-28
 
