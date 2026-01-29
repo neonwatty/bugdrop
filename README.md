@@ -52,6 +52,7 @@ See [CHANGELOG.md](./CHANGELOG.md) for version history and migration guides.
 | `data-repo` | `owner/repo` | required |
 | `data-theme` | `light`, `dark`, `auto` | `auto` |
 | `data-position` | `bottom-right`, `bottom-left` | `bottom-right` |
+| `data-color` | Hex color (e.g. `#FF6B35`) | `#14b8a6` (teal) |
 | `data-show-name` | `true`, `false` | `false` |
 | `data-require-name` | `true`, `false` | `false` |
 | `data-show-email` | `true`, `false` | `false` |
@@ -65,7 +66,8 @@ See [CHANGELOG.md](./CHANGELOG.md) for version history and migration guides.
 <script src="https://bugdrop.neonwatty.workers.dev/widget.js"
         data-repo="owner/repo"
         data-theme="dark"
-        data-position="bottom-left"></script>
+        data-position="bottom-left"
+        data-color="#FF6B35"></script>
 ```
 
 ### Collecting Submitter Info
@@ -93,9 +95,9 @@ Allow users to hide the floating button if they don't want it:
         data-button-dismissible="true"></script>
 ```
 
-When enabled, hovering over the button reveals an X icon. Clicking it hides the button and shows a subtle "🐛 Feedback" pill in its place. Users can click the pill to restore the full button. The dismissed state is saved to localStorage (`bugdrop_dismissed`).
+When enabled, hovering over the button reveals an X icon. Clicking it hides the button and shows a subtle pull tab on the screen edge. Users can click the pull tab to restore the full button. The dismissed state is saved to localStorage (`bugdrop_dismissed`).
 
-**Disable the restore pill** — if you don't want the restore pill to appear:
+**Disable the restore pull tab** — if you don't want the pull tab to appear:
 
 ```html
 <script src="https://bugdrop.neonwatty.workers.dev/widget.js"

@@ -3,6 +3,7 @@ interface WidgetConfig {
   apiUrl: string;
   position: 'bottom-right' | 'bottom-left';
   theme: 'light' | 'dark' | 'auto';
+  accentColor?: string;
 }
 
 // Detect system dark mode preference
@@ -108,17 +109,18 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
         var(--bd-shadow-md),
         0 0 0 0 var(--bd-primary);
       z-index: 999999;
-      transition: transform var(--bd-transition), box-shadow var(--bd-transition);
+      transition: transform var(--bd-transition), box-shadow var(--bd-transition), opacity var(--bd-transition);
       display: flex;
       align-items: center;
       gap: 8px;
+      animation: bd-triggerSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .bd-trigger:hover {
       transform: scale(1.03);
       box-shadow:
         var(--bd-shadow-lg),
-        0 0 20px rgba(20, 184, 166, 0.3);
+        0 0 20px color-mix(in srgb, var(--bd-primary) 30%, transparent);
     }
 
     .bd-trigger:active {
@@ -136,6 +138,17 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       letter-spacing: -0.01em;
     }
 
+    @keyframes bd-triggerSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px) scale(0.9);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
     /* Pull Tab (shown after dismissal) */
     .bd-pull-tab {
       position: fixed;
@@ -148,17 +161,18 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       background: var(--bd-primary);
       color: var(--bd-primary-text);
       cursor: pointer;
-      box-shadow: -2px 4px 12px rgba(20, 184, 166, 0.3);
+      box-shadow: -2px 4px 12px color-mix(in srgb, var(--bd-primary) 30%, transparent);
       z-index: 999999;
       transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       align-items: center;
       justify-content: center;
+      animation: bd-pullTabSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .bd-pull-tab:hover {
       width: 32px;
-      box-shadow: -4px 6px 16px rgba(20, 184, 166, 0.4);
+      box-shadow: -4px 6px 16px color-mix(in srgb, var(--bd-primary) 40%, transparent);
     }
 
     .bd-pull-tab:active {
@@ -180,11 +194,11 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       right: auto;
       left: 0;
       border-radius: 0 8px 8px 0;
-      box-shadow: 2px 4px 12px rgba(20, 184, 166, 0.3);
+      box-shadow: 2px 4px 12px color-mix(in srgb, var(--bd-primary) 30%, transparent);
     }
 
     .bd-pull-tab--left:hover {
-      box-shadow: 4px 6px 16px rgba(20, 184, 166, 0.4);
+      box-shadow: 4px 6px 16px color-mix(in srgb, var(--bd-primary) 40%, transparent);
     }
 
     .bd-pull-tab--left .bd-pull-tab-chevron {
@@ -362,11 +376,7 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
     .bd-input:focus, .bd-textarea:focus {
       outline: none;
       border-color: var(--bd-border-focus);
-      box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.15);
-    }
-
-    .bd-dark .bd-input:focus, .bd-dark .bd-textarea:focus {
-      box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--bd-border-focus) 15%, transparent);
     }
 
     .bd-textarea {
@@ -691,6 +701,11 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       to { transform: translateX(0); opacity: 1; }
     }
 
+    @keyframes bd-pullTabSlideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
     @keyframes bd-spin {
       to { transform: rotate(360deg); }
     }
@@ -857,6 +872,16 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
   // Create root wrapper with theme class
   const root = document.createElement('div');
   root.className = `bd-root${isDark ? ' bd-dark' : ''}`;
+
+  // Apply custom accent color if provided
+  if (config.accentColor) {
+    const color = config.accentColor;
+    // Generate a slightly darker hover color by mixing with black
+    root.style.setProperty('--bd-primary', color);
+    root.style.setProperty('--bd-primary-hover', `color-mix(in srgb, ${color} 85%, black)`);
+    root.style.setProperty('--bd-border-focus', color);
+  }
+
   shadow.appendChild(root);
 
   return root;
