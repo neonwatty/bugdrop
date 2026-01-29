@@ -90,6 +90,23 @@ test.describe('Widget Interaction', () => {
     const modal = page.locator('#bugdrop-host').locator('css=.bd-modal');
     await expect(modal).toBeVisible({ timeout: 5000 });
 
+    // New flow: Click "Get Started" on welcome screen
+    const getStartedBtn = page.locator('#bugdrop-host').locator('css=[data-action="continue"]');
+    await expect(getStartedBtn).toBeVisible({ timeout: 5000 });
+    await getStartedBtn.click();
+
+    // Fill in the feedback form and check "Include screenshot"
+    const titleInput = page.locator('#bugdrop-host').locator('css=#title');
+    await expect(titleInput).toBeVisible({ timeout: 5000 });
+    await titleInput.fill('Test feedback for SVG');
+
+    const screenshotCheckbox = page.locator('#bugdrop-host').locator('css=#include-screenshot');
+    await screenshotCheckbox.check();
+
+    // Click Continue to proceed to screenshot options
+    const continueBtn = page.locator('#bugdrop-host').locator('css=#submit-btn');
+    await continueBtn.click();
+
     // Click "Select Element" option
     const selectElementBtn = page.locator('#bugdrop-host').locator('css=[data-action="element"]');
     await expect(selectElementBtn).toBeVisible({ timeout: 5000 });
@@ -152,6 +169,23 @@ test.describe('Widget Interaction', () => {
 
     const modal = page.locator('#bugdrop-host').locator('css=.bd-modal');
     await expect(modal).toBeVisible({ timeout: 5000 });
+
+    // New flow: Click "Get Started" on welcome screen
+    const getStartedBtn = page.locator('#bugdrop-host').locator('css=[data-action="continue"]');
+    await expect(getStartedBtn).toBeVisible({ timeout: 5000 });
+    await getStartedBtn.click();
+
+    // Fill in the feedback form and check "Include screenshot"
+    const titleInput = page.locator('#bugdrop-host').locator('css=#title');
+    await expect(titleInput).toBeVisible({ timeout: 5000 });
+    await titleInput.fill('Test feedback for nested SVG');
+
+    const screenshotCheckbox = page.locator('#bugdrop-host').locator('css=#include-screenshot');
+    await screenshotCheckbox.check();
+
+    // Click Continue to proceed to screenshot options
+    const continueBtn = page.locator('#bugdrop-host').locator('css=#submit-btn');
+    await continueBtn.click();
 
     // Click "Select Element" option
     const selectElementBtn = page.locator('#bugdrop-host').locator('css=[data-action="element"]');

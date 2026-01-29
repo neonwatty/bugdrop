@@ -319,40 +319,51 @@ async function openFeedbackFlow(root: HTMLElement, config: WidgetConfig) {
     return;
   }
 
-  // Step 1: Screenshot options
-  const screenshotChoice = await showScreenshotOptions(root);
-
-  let screenshot: string | null = null;
-  let elementSelector: string | null = null;
-
-  if (screenshotChoice === 'capture') {
-    screenshot = await captureWithLoading(root);
-  } else if (screenshotChoice === 'element') {
-    const element = await createElementPicker();
-    if (element) {
-      screenshot = await captureWithLoading(root, element);
-      elementSelector = getElementSelector(element);
-    }
+  // Step 1: Welcome screen
+  const continueFlow = await showWelcomeScreen(root);
+  if (!continueFlow) {
+    _isModalOpen = false;
+    return;
   }
 
-  // Step 2: Annotate (if screenshot exists)
-  let annotatedScreenshot = screenshot;
-  if (screenshot) {
-    annotatedScreenshot = await showAnnotationStep(root, screenshot);
-  }
-
-  // Step 3: Feedback form
-  const formData = await showFeedbackForm(root, annotatedScreenshot, config);
-  if (!formData) {
+  // Step 2: Feedback form (with optional screenshot checkbox)
+  const formResult = await showFeedbackFormWithScreenshotOption(root, config);
+  if (!formResult) {
     // User cancelled
     _isModalOpen = false;
     return;
   }
 
+  let screenshot: string | null = null;
+  let elementSelector: string | null = null;
+
+  // Step 3: Screenshot flow (if user opted in)
+  if (formResult.includeScreenshot) {
+    const screenshotChoice = await showScreenshotOptions(root);
+
+    if (screenshotChoice === 'capture') {
+      screenshot = await captureWithLoading(root);
+    } else if (screenshotChoice === 'element') {
+      const element = await createElementPicker();
+      if (element) {
+        screenshot = await captureWithLoading(root, element);
+        elementSelector = getElementSelector(element);
+      }
+    }
+
+    // Step 4: Annotate (if screenshot exists)
+    if (screenshot) {
+      screenshot = await showAnnotationStep(root, screenshot);
+    }
+  }
+
   // Submit
   await submitFeedback(root, config, {
-    ...formData,
-    screenshot: annotatedScreenshot,
+    title: formResult.title,
+    description: formResult.description,
+    name: formResult.name,
+    email: formResult.email,
+    screenshot,
     elementSelector,
   });
 
@@ -461,15 +472,172 @@ function showInstallPrompt(root: HTMLElement, _config: WidgetConfig) {
   });
 }
 
+function showWelcomeScreen(root: HTMLElement): Promise<boolean> {
+  return new Promise((resolve) => {
+    const modal = createModal(
+      root,
+      'Share Your Feedback',
+      `
+        <div style="text-align: center; padding: 8px 0 16px;">
+          <div style="font-size: 3rem; margin-bottom: 12px;">💬</div>
+          <p style="margin: 0 0 12px; color: var(--bd-text-primary); font-size: 1.05rem; font-weight: 500;">
+            Help us improve by sharing your thoughts
+          </p>
+          <p style="margin: 0 0 8px; color: var(--bd-text-secondary); font-size: 0.95rem; line-height: 1.6;">
+            Report bugs, suggest features, or leave feedback.<br/>
+            You can optionally include annotated screenshots.
+          </p>
+        </div>
+        <div class="bd-actions" style="justify-content: center;">
+          <button class="bd-btn bd-btn-primary" data-action="continue">Get Started</button>
+        </div>
+      `
+    );
+
+    const closeBtn = modal.querySelector('.bd-close') as HTMLElement;
+    const continueBtn = modal.querySelector('[data-action="continue"]') as HTMLElement;
+
+    closeBtn?.addEventListener('click', () => {
+      modal.remove();
+      resolve(false);
+    });
+
+    continueBtn?.addEventListener('click', () => {
+      modal.remove();
+      resolve(true);
+    });
+  });
+}
+
+interface FeedbackFormResult {
+  title: string;
+  description: string;
+  name?: string;
+  email?: string;
+  includeScreenshot: boolean;
+}
+
+function showFeedbackFormWithScreenshotOption(
+  root: HTMLElement,
+  config: WidgetConfig
+): Promise<FeedbackFormResult | null> {
+  return new Promise((resolve) => {
+    // Build optional name field
+    const nameFieldHtml = config.showName
+      ? `
+          <div class="bd-form-group">
+            <label class="bd-label" for="name">Name${config.requireName ? ' *' : ''}</label>
+            <input type="text" id="name" class="bd-input" ${config.requireName ? 'required' : ''} placeholder="Your name" />
+          </div>
+        `
+      : '';
+
+    // Build optional email field
+    const emailFieldHtml = config.showEmail
+      ? `
+          <div class="bd-form-group">
+            <label class="bd-label" for="email">Email${config.requireEmail ? ' *' : ''}</label>
+            <input type="email" id="email" class="bd-input" ${config.requireEmail ? 'required' : ''} placeholder="your@email.com" />
+          </div>
+        `
+      : '';
+
+    const modal = createModal(
+      root,
+      'Send Feedback',
+      `
+        <form id="feedback-form">
+          ${nameFieldHtml}
+          ${emailFieldHtml}
+          <div class="bd-form-group">
+            <label class="bd-label" for="title">Title *</label>
+            <input type="text" id="title" class="bd-input" required placeholder="Brief description of the issue or suggestion" />
+          </div>
+          <div class="bd-form-group">
+            <label class="bd-label" for="description">Description</label>
+            <textarea id="description" class="bd-textarea" placeholder="Provide additional details, steps to reproduce, or context..."></textarea>
+          </div>
+          <div class="bd-form-group" style="display: flex; align-items: center; gap: 10px; margin-top: 8px;">
+            <input type="checkbox" id="include-screenshot" style="width: 18px; height: 18px; accent-color: var(--bd-primary); cursor: pointer;" />
+            <label for="include-screenshot" style="font-size: 0.95rem; color: var(--bd-text-secondary); cursor: pointer; user-select: none;">
+              📸 Include a screenshot
+            </label>
+          </div>
+          <div class="bd-actions">
+            <button type="button" class="bd-btn bd-btn-secondary" data-action="cancel">Cancel</button>
+            <button type="submit" class="bd-btn bd-btn-primary" id="submit-btn">Continue</button>
+          </div>
+        </form>
+      `
+    );
+
+    const form = modal.querySelector('#feedback-form') as HTMLFormElement;
+    const nameInput = modal.querySelector('#name') as HTMLInputElement | null;
+    const emailInput = modal.querySelector('#email') as HTMLInputElement | null;
+    const titleInput = modal.querySelector('#title') as HTMLInputElement;
+    const descInput = modal.querySelector('#description') as HTMLTextAreaElement;
+    const screenshotCheckbox = modal.querySelector('#include-screenshot') as HTMLInputElement;
+    const closeBtn = modal.querySelector('.bd-close') as HTMLElement;
+    const cancelBtn = modal.querySelector('[data-action="cancel"]') as HTMLElement;
+
+    const closeModal = () => {
+      modal.remove();
+      resolve(null);
+    };
+
+    closeBtn?.addEventListener('click', closeModal);
+    cancelBtn?.addEventListener('click', closeModal);
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      // Validate required fields
+      if (!titleInput.value.trim()) {
+        titleInput.classList.add('bd-input--error');
+        titleInput.focus();
+        return;
+      }
+
+      // Validate name if required
+      if (config.requireName && nameInput && !nameInput.value.trim()) {
+        nameInput.classList.add('bd-input--error');
+        nameInput.focus();
+        return;
+      }
+
+      // Validate email if required
+      if (config.requireEmail && emailInput && !emailInput.value.trim()) {
+        emailInput.classList.add('bd-input--error');
+        emailInput.focus();
+        return;
+      }
+
+      modal.remove();
+      resolve({
+        title: titleInput.value.trim(),
+        description: descInput.value.trim(),
+        name: nameInput?.value.trim() || undefined,
+        email: emailInput?.value.trim() || undefined,
+        includeScreenshot: screenshotCheckbox.checked,
+      });
+    });
+
+    // Clear error styling on input
+    titleInput.addEventListener('input', () => titleInput.classList.remove('bd-input--error'));
+    nameInput?.addEventListener('input', () => nameInput.classList.remove('bd-input--error'));
+    emailInput?.addEventListener('input', () => emailInput.classList.remove('bd-input--error'));
+  });
+}
+
 function showScreenshotOptions(root: HTMLElement): Promise<'skip' | 'capture' | 'element'> {
   return new Promise((resolve) => {
     const modal = createModal(
       root,
       'Capture Screenshot',
       `
-        <p style="margin: 0 0 16px; color: var(--bd-text-secondary);">Would you like to include a screenshot with your feedback?</p>
-        <div class="bd-actions">
-          <button class="bd-btn bd-btn-secondary" data-action="skip">Skip</button>
+        <p style="margin: 0 0 16px; color: var(--bd-text-secondary);">Choose what to capture:</p>
+        <div class="bd-actions" style="flex-wrap: wrap; gap: 8px;">
+          <button class="bd-btn bd-btn-secondary" data-action="skip">Skip Screenshot</button>
           <button class="bd-btn bd-btn-secondary" data-action="element">Select Element</button>
           <button class="bd-btn bd-btn-primary" data-action="capture">Full Page</button>
         </div>
@@ -565,139 +733,6 @@ function showAnnotationStep(root: HTMLElement, screenshot: string): Promise<stri
       annotator.destroy();
       modal.remove();
       resolve(annotated);
-    });
-  });
-}
-
-function showFeedbackForm(
-  root: HTMLElement,
-  screenshot: string | null,
-  config: WidgetConfig
-): Promise<{ title: string; description: string; name?: string; email?: string } | null> {
-  return new Promise((resolve) => {
-    const previewHtml = screenshot
-      ? `<div class="bd-preview"><img src="${screenshot}" alt="Screenshot preview" /></div>`
-      : '';
-
-    // Build optional name field
-    const nameFieldHtml = config.showName
-      ? `
-          <div class="bd-form-group">
-            <label class="bd-label" for="name">Name${config.requireName ? ' *' : ''}</label>
-            <input type="text" id="name" class="bd-input" ${config.requireName ? 'required' : ''} placeholder="Your name" />
-          </div>
-        `
-      : '';
-
-    // Build optional email field
-    const emailFieldHtml = config.showEmail
-      ? `
-          <div class="bd-form-group">
-            <label class="bd-label" for="email">Email${config.requireEmail ? ' *' : ''}</label>
-            <input type="email" id="email" class="bd-input" ${config.requireEmail ? 'required' : ''} placeholder="your@email.com" />
-          </div>
-        `
-      : '';
-
-    const modal = createModal(
-      root,
-      'Send Feedback',
-      `
-        ${previewHtml}
-        <form id="feedback-form">
-          ${nameFieldHtml}
-          ${emailFieldHtml}
-          <div class="bd-form-group">
-            <label class="bd-label" for="title">Title *</label>
-            <input type="text" id="title" class="bd-input" required placeholder="Brief description of the issue" />
-          </div>
-          <div class="bd-form-group">
-            <label class="bd-label" for="description">Description</label>
-            <textarea id="description" class="bd-textarea" placeholder="Additional details..."></textarea>
-          </div>
-          <div class="bd-actions">
-            <button type="button" class="bd-btn bd-btn-secondary" data-action="cancel">Cancel</button>
-            <button type="submit" class="bd-btn bd-btn-primary" id="submit-btn">Submit</button>
-          </div>
-        </form>
-      `
-    );
-
-    const form = modal.querySelector('#feedback-form') as HTMLFormElement;
-    const nameInput = modal.querySelector('#name') as HTMLInputElement | null;
-    const emailInput = modal.querySelector('#email') as HTMLInputElement | null;
-    const titleInput = modal.querySelector('#title') as HTMLInputElement;
-    const descriptionInput = modal.querySelector('#description') as HTMLTextAreaElement;
-    const closeBtn = modal.querySelector('.bd-close') as HTMLElement;
-    const cancelBtn = modal.querySelector('[data-action="cancel"]') as HTMLElement;
-
-    // Clear validation errors on input
-    const clearError = (input: HTMLInputElement) => {
-      input.classList.remove('bd-input--error');
-      const errorHint = input.parentElement?.querySelector('.bd-field-error');
-      if (errorHint) errorHint.remove();
-    };
-
-    titleInput?.addEventListener('input', () => clearError(titleInput));
-    nameInput?.addEventListener('input', () => clearError(nameInput));
-    emailInput?.addEventListener('input', () => clearError(emailInput));
-
-    closeBtn?.addEventListener('click', () => {
-      modal.remove();
-      resolve(null);
-    });
-
-    cancelBtn?.addEventListener('click', () => {
-      modal.remove();
-      resolve(null);
-    });
-
-    form?.addEventListener('submit', (e) => {
-      e.preventDefault();
-
-      // Validate required fields
-      let hasError = false;
-
-      const showError = (input: HTMLInputElement, message: string) => {
-        input.classList.add('bd-input--error');
-        const existingError = input.parentElement?.querySelector('.bd-field-error');
-        if (!existingError) {
-          const errorHint = document.createElement('div');
-          errorHint.className = 'bd-field-error';
-          errorHint.textContent = message;
-          input.parentElement?.appendChild(errorHint);
-        }
-        if (!hasError) {
-          input.focus();
-          hasError = true;
-        }
-      };
-
-      // Validate name if required
-      if (config.requireName && nameInput && !nameInput.value.trim()) {
-        showError(nameInput, 'Name is required');
-      }
-
-      // Validate email if required
-      if (config.requireEmail && emailInput && !emailInput.value.trim()) {
-        showError(emailInput, 'Email is required');
-      }
-
-      // Validate title (always required)
-      const title = titleInput.value.trim();
-      if (!title) {
-        showError(titleInput, 'Title is required');
-      }
-
-      if (hasError) return;
-
-      modal.remove();
-      resolve({
-        title,
-        description: descriptionInput.value.trim(),
-        name: nameInput?.value.trim() || undefined,
-        email: emailInput?.value.trim() || undefined,
-      });
     });
   });
 }
