@@ -406,9 +406,9 @@ describe('API Routes', () => {
       const issueBody = mockCreateIssue.mock.calls[0][4];
       expect(issueBody).toContain('## Description');
       expect(issueBody).toContain('This is a test feedback');
-      expect(issueBody).toContain('Technical Details');
+      expect(issueBody).toContain('System Info');
       expect(issueBody).toContain('http://localhost:3000');
-      expect(issueBody).toContain('1920 x 1080');
+      expect(issueBody).toContain('1920×1080');
       expect(issueBody).toContain('#submit-button');
       expect(issueBody).toContain('Submitted via');
     });

@@ -56,6 +56,82 @@ interface FeedbackData {
 // localStorage key for dismissed state
 const BUGDROP_DISMISSED_KEY = 'bugdrop_dismissed';
 
+// Parse user agent to extract browser info
+function parseBrowser(ua: string): { name: string; version: string } {
+  // Order matters - check more specific patterns first
+  const browsers: Array<{ name: string; pattern: RegExp }> = [
+    { name: 'Edge', pattern: /Edg(?:e|A|iOS)?\/(\d+[\d.]*)/ },
+    { name: 'Opera', pattern: /(?:OPR|Opera)\/(\d+[\d.]*)/ },
+    { name: 'Chrome', pattern: /Chrome\/(\d+[\d.]*)/ },
+    { name: 'Safari', pattern: /Version\/(\d+[\d.]*).*Safari/ },
+    { name: 'Firefox', pattern: /Firefox\/(\d+[\d.]*)/ },
+  ];
+
+  for (const { name, pattern } of browsers) {
+    const match = ua.match(pattern);
+    if (match) {
+      return { name, version: match[1] || 'unknown' };
+    }
+  }
+
+  return { name: 'Unknown', version: 'unknown' };
+}
+
+// Parse user agent to extract OS info
+function parseOS(ua: string): { name: string; version: string } {
+  const osPatterns: Array<{ name: string; pattern: RegExp; versionIndex?: number }> = [
+    { name: 'iOS', pattern: /iPhone OS (\d+[_\d]*)/, versionIndex: 1 },
+    { name: 'iOS', pattern: /iPad.*OS (\d+[_\d]*)/, versionIndex: 1 },
+    { name: 'macOS', pattern: /Mac OS X (\d+[_.\d]*)/, versionIndex: 1 },
+    { name: 'Windows', pattern: /Windows NT (\d+\.\d+)/, versionIndex: 1 },
+    { name: 'Android', pattern: /Android (\d+[\d.]*)/, versionIndex: 1 },
+    { name: 'Linux', pattern: /Linux/, versionIndex: undefined },
+    { name: 'Chrome OS', pattern: /CrOS/, versionIndex: undefined },
+  ];
+
+  for (const { name, pattern, versionIndex } of osPatterns) {
+    const match = ua.match(pattern);
+    if (match) {
+      const version = versionIndex !== undefined && match[versionIndex]
+        ? match[versionIndex].replace(/_/g, '.')
+        : '';
+      return { name, version };
+    }
+  }
+
+  return { name: 'Unknown', version: '' };
+}
+
+// Redact sensitive parts of URL (query params, common ID patterns)
+function redactUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    // Remove query string and hash
+    return `${parsed.origin}${parsed.pathname}`;
+  } catch {
+    // If URL parsing fails, return as-is but try to strip query params
+    return url.split('?')[0].split('#')[0];
+  }
+}
+
+// Collect system info for feedback submission
+function getSystemInfo(): {
+  browser: { name: string; version: string };
+  os: { name: string; version: string };
+  devicePixelRatio: number;
+  language: string;
+  url: string;
+} {
+  const ua = navigator.userAgent;
+  return {
+    browser: parseBrowser(ua),
+    os: parseOS(ua),
+    devicePixelRatio: window.devicePixelRatio || 1,
+    language: navigator.language || 'unknown',
+    url: redactUrl(window.location.href),
+  };
+}
+
 // Store widget state for API access
 let _widgetRoot: HTMLElement | null = null;
 let _triggerButton: HTMLElement | null = null;
@@ -809,6 +885,9 @@ async function submitFeedback(
       ? { name: data.name, email: data.email }
       : undefined;
 
+    // Collect system info
+    const systemInfo = getSystemInfo();
+
     const response = await fetch(`${config.apiUrl}/feedback`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -819,7 +898,7 @@ async function submitFeedback(
         screenshot: data.screenshot,
         submitter,
         metadata: {
-          url: window.location.href,
+          url: systemInfo.url, // Redacted URL (no query params)
           userAgent: navigator.userAgent,
           viewport: {
             width: window.innerWidth,
@@ -827,6 +906,11 @@ async function submitFeedback(
           },
           timestamp: new Date().toISOString(),
           elementSelector: data.elementSelector,
+          // Parsed system info
+          browser: systemInfo.browser,
+          os: systemInfo.os,
+          devicePixelRatio: systemInfo.devicePixelRatio,
+          language: systemInfo.language,
         },
       }),
     });
