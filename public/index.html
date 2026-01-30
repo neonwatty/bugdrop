@@ -462,6 +462,87 @@
       color: var(--accent-cyan);
     }
 
+    /* Demo section */
+    .demo-section {
+      margin-bottom: 5rem;
+    }
+
+    .demo-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .demo-container h3 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+
+    .demo-container > p {
+      color: var(--text-subtle);
+      margin-bottom: 1.5rem;
+    }
+
+    .demo-frame-wrapper {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--bg-deep);
+    }
+
+    .demo-frame-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .demo-frame-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--border);
+    }
+
+    .demo-frame-dot.red { background: #f7768e; }
+    .demo-frame-dot.yellow { background: #e0af68; }
+    .demo-frame-dot.green { background: #9ece6a; }
+
+    .demo-frame-url {
+      flex: 1;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .demo-iframe {
+      width: 100%;
+      height: 500px;
+      border: none;
+      display: block;
+    }
+
+    .demo-cta {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .demo-cta .btn {
+      padding: 0.75rem 1.5rem;
+      font-size: 0.9rem;
+    }
+
     /* Try it callout */
     .try-callout {
       background: linear-gradient(135deg, rgba(255, 158, 100, 0.1) 0%, rgba(247, 118, 142, 0.1) 100%);
@@ -575,6 +656,14 @@
       .config-table td {
         padding: 0.75rem;
       }
+
+      .demo-iframe {
+        height: 400px;
+      }
+
+      .demo-container {
+        padding: 1.5rem;
+      }
     }
 
     @media (max-width: 480px) {
@@ -674,6 +763,31 @@
         <p>No tracking, no cookies. URLs are redacted. Your data stays yours.</p>
       </div>
     </div>
+
+    <section class="demo-section">
+      <h2>See It In Action</h2>
+      <div class="demo-container">
+        <h3>Live Demo</h3>
+        <p>Try BugDrop on a real app. Click the feedback button in the bottom-right corner of the demo below.</p>
+        <div class="demo-frame-wrapper">
+          <div class="demo-frame-header">
+            <span class="demo-frame-dot red"></span>
+            <span class="demo-frame-dot yellow"></span>
+            <span class="demo-frame-dot green"></span>
+            <span class="demo-frame-url">neonwatty.github.io/feedback-widget-test</span>
+          </div>
+          <iframe
+            class="demo-iframe"
+            src="https://neonwatty.github.io/feedback-widget-test/"
+            title="BugDrop Demo App"
+            loading="lazy"
+          ></iframe>
+        </div>
+        <div class="demo-cta">
+          <a href="https://neonwatty.github.io/feedback-widget-test/" class="btn btn-secondary" target="_blank">Open in New Tab ↗</a>
+        </div>
+      </div>
+    </section>
 
     <section class="install-section">
       <h3>Quick Start</h3>
