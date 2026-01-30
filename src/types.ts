@@ -29,6 +29,11 @@ export interface FeedbackPayload {
     viewport: { width: number; height: number };
     timestamp: string;
     elementSelector?: string;
+    // Parsed system info
+    browser?: { name: string; version: string };
+    os?: { name: string; version: string };
+    devicePixelRatio?: number;
+    language?: string;
   };
 }
 

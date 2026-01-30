@@ -187,14 +187,41 @@ function formatIssueBody(
     sections.push('');
   }
 
-  // Metadata
+  // System Info
   sections.push('<details>');
-  sections.push('<summary>Technical Details</summary>');
+  sections.push('<summary>System Info</summary>');
   sections.push('');
   sections.push('| Property | Value |');
   sections.push('|----------|-------|');
-  sections.push(`| **URL** | ${payload.metadata.url} |`);
-  sections.push(`| **Viewport** | ${payload.metadata.viewport.width} x ${payload.metadata.viewport.height} |`);
+
+  // Browser and OS (if available)
+  if (payload.metadata.browser) {
+    const browserVersion = payload.metadata.browser.version
+      ? ` ${payload.metadata.browser.version}`
+      : '';
+    sections.push(`| **Browser** | ${payload.metadata.browser.name}${browserVersion} |`);
+  }
+
+  if (payload.metadata.os) {
+    const osVersion = payload.metadata.os.version
+      ? ` ${payload.metadata.os.version}`
+      : '';
+    sections.push(`| **OS** | ${payload.metadata.os.name}${osVersion} |`);
+  }
+
+  // Viewport with pixel ratio
+  const pixelRatio = payload.metadata.devicePixelRatio
+    ? ` @${payload.metadata.devicePixelRatio}x`
+    : '';
+  sections.push(`| **Viewport** | ${payload.metadata.viewport.width}×${payload.metadata.viewport.height}${pixelRatio} |`);
+
+  // Language
+  if (payload.metadata.language) {
+    sections.push(`| **Language** | ${payload.metadata.language} |`);
+  }
+
+  // URL (redacted)
+  sections.push(`| **Page** | ${payload.metadata.url} |`);
   sections.push(`| **Timestamp** | ${payload.metadata.timestamp} |`);
 
   if (payload.metadata.elementSelector) {
