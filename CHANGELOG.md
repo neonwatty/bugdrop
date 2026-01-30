@@ -5,6 +5,25 @@ All notable changes to BugDrop will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0] - 2026-01-30
+
+### Added
+- **Feedback categories**: Users can now select a category (Bug 🐛, Feature ✨, or Question ❓) when submitting feedback. Categories are mapped to GitHub labels (`bug`, `enhancement`, `question`) for easy triage.
+
+## [1.9.0] - 2026-01-30
+
+### Added
+- **Automatic browser/OS detection**: The widget now automatically captures and parses browser name/version and OS name/version from the user agent string. This information is displayed in a collapsible "System Info" section on the GitHub issue for easier debugging.
+- **Enhanced system metadata**: Issues now include viewport size with device pixel ratio, browser language, and cleaner formatting in a markdown table.
+
+### Changed
+- **URL privacy**: URLs are now automatically redacted to remove query parameters and hash fragments, protecting potentially sensitive data while still providing useful page context.
+
+## [1.8.1] - 2026-01-29
+
+### Fixed
+- Fixed animation timing issue where dismiss animation could be interrupted.
+
 ## [1.8.0] - 2026-01-29
 
 ### Added
@@ -96,6 +115,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Minor versions** (v1.0 → v1.1): New features, backwards compatible
 - **Patch versions** (v1.0.0 → v1.0.1): Bug fixes only
 
-[Unreleased]: https://github.com/neonwatty/bugdrop/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/neonwatty/bugdrop/compare/v1.10.0...HEAD
+[1.10.0]: https://github.com/neonwatty/bugdrop/compare/v1.9.0...v1.10.0
+[1.9.0]: https://github.com/neonwatty/bugdrop/compare/v1.8.1...v1.9.0
+[1.8.1]: https://github.com/neonwatty/bugdrop/compare/v1.8.0...v1.8.1
+[1.8.0]: https://github.com/neonwatty/bugdrop/compare/v1.7.0...v1.8.0
+[1.7.0]: https://github.com/neonwatty/bugdrop/compare/v1.6.0...v1.7.0
+[1.6.0]: https://github.com/neonwatty/bugdrop/compare/v1.1.0...v1.6.0
 [1.1.0]: https://github.com/neonwatty/bugdrop/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/neonwatty/bugdrop/releases/tag/v1.0.0

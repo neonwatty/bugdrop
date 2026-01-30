@@ -1434,3 +1434,113 @@ test.describe('API-Only Mode (data-button="false")', () => {
     await expect(trigger).not.toBeAttached();
   });
 });
+
+test.describe('Feedback Categories', () => {
+  test('category selector is visible on feedback form', async ({ page }) => {
+    // Mock installation check
+    await page.route('**/api/check/**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ installed: true }),
+      });
+    });
+
+    await page.goto('/test/index.html');
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Click to open modal
+    await trigger.click();
+    await page.waitForTimeout(300);
+
+    // Click continue on welcome screen
+    const continueBtn = page.locator('#bugdrop-host').locator('css=[data-action="continue"]');
+    await continueBtn.click();
+
+    // Wait for form to appear by checking for title input
+    const titleInput = page.locator('#bugdrop-host').locator('css=#title');
+    await expect(titleInput).toBeVisible({ timeout: 5000 });
+
+    // Category selector should be visible
+    const categorySelector = page.locator('#bugdrop-host').locator('css=.bd-category-selector');
+    await expect(categorySelector).toBeVisible();
+
+    // All three options should be present
+    const bugOption = page.locator('#bugdrop-host').locator('css=input[name="category"][value="bug"]');
+    const featureOption = page.locator('#bugdrop-host').locator('css=input[name="category"][value="feature"]');
+    const questionOption = page.locator('#bugdrop-host').locator('css=input[name="category"][value="question"]');
+
+    await expect(bugOption).toBeAttached();
+    await expect(featureOption).toBeAttached();
+    await expect(questionOption).toBeAttached();
+  });
+
+  test('bug category is selected by default', async ({ page }) => {
+    // Mock installation check
+    await page.route('**/api/check/**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ installed: true }),
+      });
+    });
+
+    await page.goto('/test/index.html');
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await trigger.click();
+    await page.waitForTimeout(300);
+
+    const continueBtn = page.locator('#bugdrop-host').locator('css=[data-action="continue"]');
+    await continueBtn.click();
+
+    // Wait for form to appear
+    const titleInput = page.locator('#bugdrop-host').locator('css=#title');
+    await expect(titleInput).toBeVisible({ timeout: 5000 });
+
+    // Bug should be checked by default
+    const bugOption = page.locator('#bugdrop-host').locator('css=input[name="category"][value="bug"]');
+    await expect(bugOption).toBeChecked();
+  });
+
+  test('can select different categories', async ({ page }) => {
+    // Mock installation check
+    await page.route('**/api/check/**', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ installed: true }),
+      });
+    });
+
+    await page.goto('/test/index.html');
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await trigger.click();
+    await page.waitForTimeout(300);
+
+    const continueBtn = page.locator('#bugdrop-host').locator('css=[data-action="continue"]');
+    await continueBtn.click();
+
+    // Wait for form to appear
+    const titleInput = page.locator('#bugdrop-host').locator('css=#title');
+    await expect(titleInput).toBeVisible({ timeout: 5000 });
+
+    // Select feature
+    const featureOption = page.locator('#bugdrop-host').locator('css=input[name="category"][value="feature"]');
+    await featureOption.click();
+    await expect(featureOption).toBeChecked();
+
+    // Bug should no longer be checked
+    const bugOption = page.locator('#bugdrop-host').locator('css=input[name="category"][value="bug"]');
+    await expect(bugOption).not.toBeChecked();
+
+    // Select question
+    const questionOption = page.locator('#bugdrop-host').locator('css=input[name="category"][value="question"]');
+    await questionOption.click();
+    await expect(questionOption).toBeChecked();
+    await expect(featureOption).not.toBeChecked();
+  });
+});

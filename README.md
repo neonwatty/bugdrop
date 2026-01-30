@@ -1,7 +1,7 @@
 # BugDrop 🐛
 
 [![CI](https://github.com/neonwatty/bugdrop/actions/workflows/ci.yml/badge.svg)](https://github.com/neonwatty/bugdrop/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-1.1.0-14b8a6)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.10.0-14b8a6)](./CHANGELOG.md)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](./SECURITY.md)
 [![Live Demo](https://img.shields.io/badge/Demo-Try_It_Live-ff9e64)](https://neonwatty.github.io/feedback-widget-test/)
 
@@ -116,6 +116,30 @@ When enabled, hovering over the button reveals an X icon. Clicking it hides the 
 ```
 
 With `data-dismiss-duration="7"`, users who dismiss the button will see it again after 7 days. Without this attribute, the button stays hidden forever (until localStorage is cleared).
+
+### Feedback Categories
+
+When users submit feedback, they can select a category:
+
+| Category | Emoji | GitHub Label |
+|----------|-------|--------------|
+| Bug | 🐛 | `bug` |
+| Feature | ✨ | `enhancement` |
+| Question | ❓ | `question` |
+
+The selected category is automatically mapped to a GitHub label on the created issue, making it easy to filter and triage feedback. Bug is selected by default.
+
+### Automatic System Info
+
+Each feedback submission automatically includes:
+
+- **Browser** name and version (e.g., Chrome 120)
+- **OS** name and version (e.g., macOS 14.2)
+- **Viewport** size with device pixel ratio
+- **Language** preference
+- **Page URL** (with query params redacted for privacy)
+
+This information appears in a collapsible "System Info" section on the GitHub issue.
 
 ### JavaScript API
 
