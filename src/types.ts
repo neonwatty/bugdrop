@@ -13,7 +13,7 @@ export interface Env {
   ASSETS: Fetcher;
 }
 
-export type FeedbackCategory = 'bug' | 'feature' | 'question';
+type FeedbackCategory = 'bug' | 'feature' | 'question';
 
 export interface FeedbackPayload {
   repo: string;           // "owner/repo" format
