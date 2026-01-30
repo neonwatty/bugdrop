@@ -47,6 +47,7 @@ declare global {
 interface FeedbackData {
   title: string;
   description: string;
+  category: FeedbackCategory;
   screenshot: string | null;
   elementSelector: string | null;
   name?: string;
@@ -486,6 +487,7 @@ async function openFeedbackFlow(root: HTMLElement, config: WidgetConfig) {
   await submitFeedback(root, config, {
     title: formResult.title,
     description: formResult.description,
+    category: formResult.category,
     name: formResult.name,
     email: formResult.email,
     screenshot,
@@ -634,9 +636,12 @@ function showWelcomeScreen(root: HTMLElement): Promise<boolean> {
   });
 }
 
+type FeedbackCategory = 'bug' | 'feature' | 'question';
+
 interface FeedbackFormResult {
   title: string;
   description: string;
+  category: FeedbackCategory;
   name?: string;
   email?: string;
   includeScreenshot: boolean;
@@ -677,6 +682,23 @@ function showFeedbackFormWithScreenshotOption(
           <div class="bd-form-group">
             <label class="bd-label" for="title">Title *</label>
             <input type="text" id="title" class="bd-input" required placeholder="Brief description of the issue or suggestion" />
+          </div>
+          <div class="bd-form-group">
+            <label class="bd-label">Category</label>
+            <div class="bd-category-selector" style="display: flex; gap: 8px; margin-top: 6px;">
+              <label class="bd-category-option" style="flex: 1; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid var(--bd-border); border-radius: 6px; cursor: pointer; transition: all 0.15s ease;">
+                <input type="radio" name="category" value="bug" checked style="accent-color: var(--bd-primary);" />
+                <span style="font-size: 0.9rem;">🐛 Bug</span>
+              </label>
+              <label class="bd-category-option" style="flex: 1; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid var(--bd-border); border-radius: 6px; cursor: pointer; transition: all 0.15s ease;">
+                <input type="radio" name="category" value="feature" style="accent-color: var(--bd-primary);" />
+                <span style="font-size: 0.9rem;">✨ Feature</span>
+              </label>
+              <label class="bd-category-option" style="flex: 1; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid var(--bd-border); border-radius: 6px; cursor: pointer; transition: all 0.15s ease;">
+                <input type="radio" name="category" value="question" style="accent-color: var(--bd-primary);" />
+                <span style="font-size: 0.9rem;">❓ Question</span>
+              </label>
+            </div>
           </div>
           <div class="bd-form-group">
             <label class="bd-label" for="description">Description</label>
@@ -737,10 +759,15 @@ function showFeedbackFormWithScreenshotOption(
         return;
       }
 
+      // Get selected category
+      const categoryInput = modal.querySelector('input[name="category"]:checked') as HTMLInputElement;
+      const category = (categoryInput?.value || 'bug') as FeedbackCategory;
+
       modal.remove();
       resolve({
         title: titleInput.value.trim(),
         description: descInput.value.trim(),
+        category,
         name: nameInput?.value.trim() || undefined,
         email: emailInput?.value.trim() || undefined,
         includeScreenshot: screenshotCheckbox.checked,
@@ -895,6 +922,7 @@ async function submitFeedback(
         repo: config.repo,
         title: data.title,
         description: data.description,
+        category: data.category,
         screenshot: data.screenshot,
         submitter,
         metadata: {

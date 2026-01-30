@@ -127,14 +127,24 @@ api.post('/feedback', async (c) => {
     // Check repo visibility (for UI to decide whether to show issue link)
     const isPublic = await isRepoPublic(token, owner, repo);
 
-    // Create issue
+    // Map category to GitHub label
+    const categoryLabels: Record<string, string> = {
+      bug: 'bug',
+      feature: 'enhancement',
+      question: 'question',
+    };
+    const categoryLabel = payload.category
+      ? categoryLabels[payload.category] || 'bug'
+      : 'bug';
+
+    // Create issue with category label
     const issue = await createIssue(
       token,
       owner,
       repo,
       payload.title,
       body,
-      ['bug', 'bugdrop']
+      [categoryLabel, 'bugdrop']
     );
 
     return c.json({

@@ -13,10 +13,13 @@ export interface Env {
   ASSETS: Fetcher;
 }
 
+type FeedbackCategory = 'bug' | 'feature' | 'question';
+
 export interface FeedbackPayload {
   repo: string;           // "owner/repo" format
   title: string;
   description: string;
+  category?: FeedbackCategory; // Feedback type (maps to GitHub labels)
   screenshot?: string;    // base64 data URL
   annotations?: string;   // base64 annotated image
   submitter?: {           // Optional submitter info (configured per widget)
