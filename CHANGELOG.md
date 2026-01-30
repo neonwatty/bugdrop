@@ -5,6 +5,11 @@ All notable changes to BugDrop will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.11.0] - 2026-01-30
+
+### Added
+- **Rate limiting**: API now includes rate limiting to prevent spam and protect GitHub API quotas. Limits: 10 requests per 15 minutes per IP, 50 requests per hour per repository. Returns `429 Too Many Requests` with `Retry-After` header when exceeded.
+
 ## [1.10.0] - 2026-01-30
 
 ### Added
@@ -115,7 +120,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Minor versions** (v1.0 → v1.1): New features, backwards compatible
 - **Patch versions** (v1.0.0 → v1.0.1): Bug fixes only
 
-[Unreleased]: https://github.com/neonwatty/bugdrop/compare/v1.10.0...HEAD
+[Unreleased]: https://github.com/neonwatty/bugdrop/compare/v1.11.0...HEAD
+[1.11.0]: https://github.com/neonwatty/bugdrop/compare/v1.10.0...v1.11.0
 [1.10.0]: https://github.com/neonwatty/bugdrop/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/neonwatty/bugdrop/compare/v1.8.1...v1.9.0
 [1.8.1]: https://github.com/neonwatty/bugdrop/compare/v1.8.0...v1.8.1
