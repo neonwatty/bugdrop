@@ -33,18 +33,9 @@ app.use('*', logger());
 // Mount API routes
 app.route('/api', api);
 
-// Root endpoint
-app.get('/', (c) => {
-  return c.json({
-    name: 'BugDrop API',
-    version: '1.0.0',
-    docs: {
-      health: 'GET /api/health',
-      check: 'GET /api/check/:owner/:repo',
-      feedback: 'POST /api/feedback',
-      widget: 'GET /widget.js',
-    },
-  });
+// Landing page
+app.get('/', async (c) => {
+  return c.env.ASSETS.fetch(new Request(new URL('/index.html', c.req.url)));
 });
 
 // Serve widget.js from static assets
