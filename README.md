@@ -1,7 +1,7 @@
 # BugDrop 🐛
 
 [![CI](https://github.com/neonwatty/bugdrop/actions/workflows/ci.yml/badge.svg)](https://github.com/neonwatty/bugdrop/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-1.10.0-14b8a6)](./CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.11.0-14b8a6)](./CHANGELOG.md)
 [![Security Policy](https://img.shields.io/badge/Security-Policy-blue)](./SECURITY.md)
 [![Live Demo](https://img.shields.io/badge/Demo-Try_It_Live-ff9e64)](https://neonwatty.github.io/feedback-widget-test/)
 
@@ -204,6 +204,20 @@ User clicks bug button → Widget captures screenshot → Worker authenticates v
 - **Permissions**: Issues (R/W), Contents (R/W) - only on repos you install it on
 - **Data storage**: Screenshots stored in your repo's `.bugdrop/` folder
 - **Privacy**: No user data stored by the widget service
+
+## Rate Limiting
+
+The API includes rate limiting to prevent spam and protect GitHub API quotas:
+
+| Scope | Limit | Window |
+|-------|-------|--------|
+| Per IP | 10 requests | 15 minutes |
+| Per Repository | 50 requests | 1 hour |
+
+When rate limited, the API returns a `429 Too Many Requests` response with a `Retry-After` header indicating when to retry. Rate limit headers are included on all responses:
+
+- `X-RateLimit-Limit`: Maximum requests allowed
+- `X-RateLimit-Remaining`: Requests remaining in current window
 
 ## Self-Hosting
 

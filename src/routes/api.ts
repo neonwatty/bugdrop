@@ -7,6 +7,7 @@ import {
   uploadScreenshotAsAsset,
   isRepoPublic,
 } from '../lib/github';
+import { rateLimit, rateLimitByRepo } from '../middleware/rateLimit';
 
 const api = new Hono<{ Bindings: Env }>();
 
@@ -34,6 +35,19 @@ api.use('*', async (c, next) => {
 
   return corsMiddleware(c, next);
 });
+
+// Rate limit: 10 requests per 15 minutes per IP
+api.use('/feedback', rateLimit({
+  windowMs: 15 * 60 * 1000,  // 15 minutes
+  maxRequests: 10,
+  keyPrefix: 'ip'
+}));
+
+// Rate limit: 50 requests per hour per repo
+api.use('/feedback', rateLimitByRepo({
+  windowMs: 60 * 60 * 1000,  // 1 hour
+  maxRequests: 50
+}));
 
 // Health check
 api.get('/health', (c) => {

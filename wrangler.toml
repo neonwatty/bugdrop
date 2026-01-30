@@ -19,6 +19,12 @@ MAX_SCREENSHOT_SIZE_MB = "5"  # Maximum screenshot size in MB
 # ENVIRONMENT = "production"
 # ALLOWED_ORIGINS = "https://yourdomain.com,https://app.yourdomain.com"
 
+# Rate limiting KV namespace
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "e6454ed79f514ed3a9e24eea99dd6cd3"
+preview_id = "ff8f3809037d4403befd09369a9f7e36"
+
 # Secrets (set with: wrangler secret put GITHUB_APP_ID)
 # GITHUB_APP_ID
 # GITHUB_PRIVATE_KEY
