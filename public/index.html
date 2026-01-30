@@ -467,32 +467,14 @@
       margin-bottom: 5rem;
     }
 
-    .demo-grid {
-      display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 2rem;
-      align-items: start;
-    }
-
-    .demo-video-container {
+    .demo-container {
       background: var(--bg-surface);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.5rem;
+      border-radius: 24px;
+      padding: 3rem;
       text-align: center;
-    }
-
-    .demo-video-container h3 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: var(--text-primary);
-    }
-
-    .demo-video-container > p {
-      color: var(--text-subtle);
-      font-size: 0.85rem;
-      margin-bottom: 1rem;
+      max-width: 500px;
+      margin: 0 auto;
     }
 
     .demo-video-wrapper {
@@ -500,89 +482,32 @@
       border-radius: 12px;
       overflow: hidden;
       background: #000;
+      margin-bottom: 2rem;
     }
 
     .demo-video-wrapper iframe {
       width: 100%;
       aspect-ratio: 9/16;
-      border: none;
-      display: block;
-    }
-
-    .demo-container {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 2rem;
-      text-align: center;
-    }
-
-    .demo-container h3 {
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: var(--text-primary);
-    }
-
-    .demo-container > p {
-      color: var(--text-subtle);
-      margin-bottom: 1.5rem;
-    }
-
-    .demo-frame-wrapper {
-      position: relative;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      background: var(--bg-deep);
-    }
-
-    .demo-frame-header {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1rem;
-      background: var(--bg-elevated);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .demo-frame-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--border);
-    }
-
-    .demo-frame-dot.red { background: #f7768e; }
-    .demo-frame-dot.yellow { background: #e0af68; }
-    .demo-frame-dot.green { background: #9ece6a; }
-
-    .demo-frame-url {
-      flex: 1;
-      text-align: center;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    .demo-iframe {
-      width: 100%;
-      height: 500px;
+      max-height: 400px;
       border: none;
       display: block;
     }
 
     .demo-cta {
-      margin-top: 1.5rem;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       gap: 1rem;
-      flex-wrap: wrap;
+      align-items: center;
     }
 
-    .demo-cta .btn {
-      padding: 0.75rem 1.5rem;
-      font-size: 0.9rem;
+    .demo-cta .btn-primary {
+      padding: 1rem 2rem;
+      font-size: 1rem;
+    }
+
+    .demo-cta p {
+      color: var(--text-muted);
+      font-size: 0.85rem;
     }
 
     /* Try it callout */
@@ -699,21 +624,8 @@
         padding: 0.75rem;
       }
 
-      .demo-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .demo-video-container {
-        max-width: 300px;
-        margin: 0 auto;
-      }
-
-      .demo-iframe {
-        height: 400px;
-      }
-
       .demo-container {
-        padding: 1.5rem;
+        padding: 2rem;
       }
     }
 
@@ -781,6 +693,25 @@
       </div>
     </section>
 
+    <section class="demo-section">
+      <h2>See It In Action</h2>
+      <div class="demo-container">
+        <div class="demo-video-wrapper">
+          <iframe
+            src="https://www.youtube.com/embed/VkLvP1xmRzo"
+            title="BugDrop Demo Video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            loading="lazy"
+          ></iframe>
+        </div>
+        <div class="demo-cta">
+          <a href="https://neonwatty.github.io/feedback-widget-test/" class="btn btn-primary" target="_blank">Try Live Demo →</a>
+          <p>See BugDrop running on a real app</p>
+        </div>
+      </div>
+    </section>
+
     <h2>Features</h2>
     <div class="feature-grid">
       <div class="feature-card">
@@ -814,46 +745,6 @@
         <p>No tracking, no cookies. URLs are redacted. Your data stays yours.</p>
       </div>
     </div>
-
-    <section class="demo-section">
-      <h2>See It In Action</h2>
-      <div class="demo-grid">
-        <div class="demo-video-container">
-          <h3>Watch Demo</h3>
-          <p>60-second walkthrough</p>
-          <div class="demo-video-wrapper">
-            <iframe
-              src="https://www.youtube.com/embed/VkLvP1xmRzo"
-              title="BugDrop Demo Video"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-              loading="lazy"
-            ></iframe>
-          </div>
-        </div>
-        <div class="demo-container">
-          <h3>Try It Live</h3>
-          <p>Click the feedback button in the bottom-right corner of the demo below.</p>
-          <div class="demo-frame-wrapper">
-            <div class="demo-frame-header">
-              <span class="demo-frame-dot red"></span>
-              <span class="demo-frame-dot yellow"></span>
-              <span class="demo-frame-dot green"></span>
-              <span class="demo-frame-url">neonwatty.github.io/feedback-widget-test</span>
-            </div>
-            <iframe
-              class="demo-iframe"
-              src="https://neonwatty.github.io/feedback-widget-test/"
-              title="BugDrop Demo App"
-              loading="lazy"
-            ></iframe>
-          </div>
-          <div class="demo-cta">
-            <a href="https://neonwatty.github.io/feedback-widget-test/" class="btn btn-secondary" target="_blank">Open in New Tab ↗</a>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <section class="install-section">
       <h3>Quick Start</h3>
