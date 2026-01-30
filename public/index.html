@@ -467,6 +467,48 @@
       margin-bottom: 5rem;
     }
 
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    .demo-video-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .demo-video-container h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text-primary);
+    }
+
+    .demo-video-container > p {
+      color: var(--text-subtle);
+      font-size: 0.85rem;
+      margin-bottom: 1rem;
+    }
+
+    .demo-video-wrapper {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    .demo-video-wrapper iframe {
+      width: 100%;
+      aspect-ratio: 9/16;
+      border: none;
+      display: block;
+    }
+
     .demo-container {
       background: var(--bg-surface);
       border: 1px solid var(--border);
@@ -476,7 +518,7 @@
     }
 
     .demo-container h3 {
-      font-size: 1.5rem;
+      font-size: 1.25rem;
       font-weight: 600;
       margin-bottom: 0.5rem;
       color: var(--text-primary);
@@ -657,6 +699,15 @@
         padding: 0.75rem;
       }
 
+      .demo-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .demo-video-container {
+        max-width: 300px;
+        margin: 0 auto;
+      }
+
       .demo-iframe {
         height: 400px;
       }
@@ -766,25 +817,40 @@
 
     <section class="demo-section">
       <h2>See It In Action</h2>
-      <div class="demo-container">
-        <h3>Live Demo</h3>
-        <p>Try BugDrop on a real app. Click the feedback button in the bottom-right corner of the demo below.</p>
-        <div class="demo-frame-wrapper">
-          <div class="demo-frame-header">
-            <span class="demo-frame-dot red"></span>
-            <span class="demo-frame-dot yellow"></span>
-            <span class="demo-frame-dot green"></span>
-            <span class="demo-frame-url">neonwatty.github.io/feedback-widget-test</span>
+      <div class="demo-grid">
+        <div class="demo-video-container">
+          <h3>Watch Demo</h3>
+          <p>60-second walkthrough</p>
+          <div class="demo-video-wrapper">
+            <iframe
+              src="https://www.youtube.com/embed/VkLvP1xmRzo"
+              title="BugDrop Demo Video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              loading="lazy"
+            ></iframe>
           </div>
-          <iframe
-            class="demo-iframe"
-            src="https://neonwatty.github.io/feedback-widget-test/"
-            title="BugDrop Demo App"
-            loading="lazy"
-          ></iframe>
         </div>
-        <div class="demo-cta">
-          <a href="https://neonwatty.github.io/feedback-widget-test/" class="btn btn-secondary" target="_blank">Open in New Tab ↗</a>
+        <div class="demo-container">
+          <h3>Try It Live</h3>
+          <p>Click the feedback button in the bottom-right corner of the demo below.</p>
+          <div class="demo-frame-wrapper">
+            <div class="demo-frame-header">
+              <span class="demo-frame-dot red"></span>
+              <span class="demo-frame-dot yellow"></span>
+              <span class="demo-frame-dot green"></span>
+              <span class="demo-frame-url">neonwatty.github.io/feedback-widget-test</span>
+            </div>
+            <iframe
+              class="demo-iframe"
+              src="https://neonwatty.github.io/feedback-widget-test/"
+              title="BugDrop Demo App"
+              loading="lazy"
+            ></iframe>
+          </div>
+          <div class="demo-cta">
+            <a href="https://neonwatty.github.io/feedback-widget-test/" class="btn btn-secondary" target="_blank">Open in New Tab ↗</a>
+          </div>
         </div>
       </div>
     </section>
