@@ -52,7 +52,34 @@ make dev
 
 Visit http://localhost:8787/test/ to try the widget.
 
-## 4. Deploy to Cloudflare
+## 4. Set Up Rate Limiting (Optional)
+
+Rate limiting prevents spam and protects GitHub API quotas. It uses Cloudflare KV for distributed storage.
+
+```bash
+# Create KV namespaces
+npx wrangler kv:namespace create RATE_LIMIT
+npx wrangler kv:namespace create RATE_LIMIT --preview
+```
+
+Copy the IDs from the output and update `wrangler.toml`:
+
+```toml
+[[kv_namespaces]]
+binding = "RATE_LIMIT"
+id = "<your-production-id>"
+preview_id = "<your-preview-id>"
+```
+
+**Default limits:**
+- 10 requests per 15 minutes per IP
+- 50 requests per hour per repository
+
+To customize limits, edit `src/middleware/rateLimit.ts` and the middleware config in `src/routes/api.ts`.
+
+> **Note:** If you skip this step, rate limiting is disabled but the app still works.
+
+## 5. Deploy to Cloudflare
 
 ### Manual Deploy
 
@@ -104,6 +131,7 @@ The release tag (e.g., `v1.2.0`) becomes the version number for the widget files
 | `ALLOWED_ORIGINS` | No | Comma-separated allowed domains (default: `*`) |
 | `GITHUB_APP_NAME` | No | Your app's URL slug for install links |
 | `MAX_SCREENSHOT_SIZE_MB` | No | Max screenshot size in MB (default: `5`) |
+| `RATE_LIMIT` | No | KV namespace binding for rate limiting (see section 4) |
 
 ### wrangler.toml
 
