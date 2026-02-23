@@ -27,7 +27,7 @@ jobs:
 
   # Fast checks run first
   check:
-    name: Lint, Typecheck, Knip
+    name: Lint, Typecheck, Knip, Audit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,7 +40,7 @@ jobs:
       - name: Install dependencies
         run: make install
 
-      - name: Run checks (lint, typecheck, knip)
+      - name: Run checks (lint, typecheck, knip, audit)
         run: make check
 
   # Unit tests and build
@@ -103,6 +103,34 @@ jobs:
           name: playwright-report-shard-${{ matrix.shard }}
           path: playwright-report/
           retention-days: 7
+
+  # Automated release via semantic-release (only on push to main)
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: [test, e2e]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: make install
+
+      - name: Run semantic-release
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # Deploy to Cloudflare Workers (only on release publish)
   # Note: secrets job is skipped for releases (already scanned on merge to main)
