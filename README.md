@@ -53,6 +53,7 @@ See [CHANGELOG.md](./CHANGELOG.md) for version history and migration guides.
 | `data-theme` | `light`, `dark`, `auto` | `auto` |
 | `data-position` | `bottom-right`, `bottom-left` | `bottom-right` |
 | `data-color` | Hex color (e.g. `#FF6B35`) | `#14b8a6` (teal) |
+| `data-icon` | Image URL | (bug emoji) |
 | `data-show-name` | `true`, `false` | `false` |
 | `data-require-name` | `true`, `false` | `false` |
 | `data-show-email` | `true`, `false` | `false` |
@@ -69,6 +70,18 @@ See [CHANGELOG.md](./CHANGELOG.md) for version history and migration guides.
         data-position="bottom-left"
         data-color="#FF6B35"></script>
 ```
+
+### Custom Icon
+
+Replace the default bug emoji with your own image:
+
+```html
+<script src="https://bugdrop.neonwatty.workers.dev/widget.js"
+        data-repo="owner/repo"
+        data-icon="https://example.com/my-logo.svg"></script>
+```
+
+The image is displayed at 18px (16px on mobile). If the image fails to load, the default bug emoji is shown as a fallback.
 
 ### Collecting Submitter Info
 
