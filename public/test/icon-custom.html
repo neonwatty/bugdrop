@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BugDrop Custom Icon Test</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      padding: 2rem;
+      background: #1a1b26;
+      color: #c0caf5;
+    }
+    h1 { margin-bottom: 1rem; }
+    p { color: #787c99; margin-bottom: 1rem; }
+    .info {
+      background: rgba(125, 207, 255, 0.1);
+      border: 1px solid rgba(125, 207, 255, 0.2);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Custom Icon Test</h1>
+  <div class="info">
+    <p><strong>Test:</strong> This page loads BugDrop with <code>data-icon</code> set to a data URI image.</p>
+    <p>The feedback button should show a custom image instead of the default 🐛 emoji.</p>
+  </div>
+
+  <!-- Load BugDrop WITH custom icon (1x1 green PNG as data URI) -->
+  <script src="/widget.js" data-repo="neonwatty/feedback-widget-test" data-theme="dark" data-icon="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="></script>
+</body>
+</html>
