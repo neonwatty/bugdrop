@@ -25,6 +25,8 @@ interface WidgetConfig {
   showButton: boolean;
   // Custom accent color (hex)
   accentColor?: string;
+  // Custom icon URL (replaces default bug emoji)
+  iconUrl?: string;
 }
 
 // BugDrop JavaScript API interface
@@ -197,6 +199,8 @@ const config: WidgetConfig = {
   showButton: script?.dataset.button !== 'false',
   // Custom accent color (e.g., "#FF6B35")
   accentColor: script?.dataset.color || undefined,
+  // Custom icon URL
+  iconUrl: script?.dataset.icon || undefined,
 };
 
 // Validate config
@@ -204,6 +208,14 @@ if (!config.repo) {
   console.error('[BugDrop] Missing data-repo attribute');
 } else {
   initWidget(config);
+}
+
+// Build the trigger button icon HTML - custom image with emoji fallback, or default emoji
+function getTriggerIconHtml(config: WidgetConfig): string {
+  if (config.iconUrl) {
+    return `<img src="${config.iconUrl}" alt="" onerror="this.style.display='none';this.nextSibling.style.display=''"><span style="display:none">🐛</span>`;
+  }
+  return '🐛';
 }
 
 // Create the pull tab shown after dismissing the button
@@ -276,7 +288,7 @@ function initWidget(config: WidgetConfig) {
   if (shouldShowButton) {
     const trigger = document.createElement('button');
     trigger.className = 'bd-trigger';
-    trigger.innerHTML = '<span class="bd-trigger-icon">🐛</span><span class="bd-trigger-label">Feedback</span>';
+    trigger.innerHTML = `<span class="bd-trigger-icon">${getTriggerIconHtml(config)}</span><span class="bd-trigger-label">Feedback</span>`;
     trigger.setAttribute('aria-label', 'Report a bug or send feedback');
 
     // Add close button if dismissible
@@ -395,7 +407,7 @@ function exposeBugDropAPI(root: HTMLElement, config: WidgetConfig) {
 function createTriggerButton(root: HTMLElement, config: WidgetConfig, isRestoring = false) {
   const trigger = document.createElement('button');
   trigger.className = isRestoring ? 'bd-trigger bd-trigger--restoring' : 'bd-trigger';
-  trigger.innerHTML = '<span class="bd-trigger-icon">🐛</span><span class="bd-trigger-label">Feedback</span>';
+  trigger.innerHTML = `<span class="bd-trigger-icon">${getTriggerIconHtml(config)}</span><span class="bd-trigger-label">Feedback</span>`;
   trigger.setAttribute('aria-label', 'Report a bug or send feedback');
 
   if (config.buttonDismissible) {
