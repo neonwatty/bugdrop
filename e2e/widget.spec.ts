@@ -1544,3 +1544,64 @@ test.describe('Feedback Categories', () => {
     await expect(featureOption).not.toBeChecked();
   });
 });
+
+test.describe('Custom Icon', () => {
+  test('custom icon renders img element with correct src', async ({ page }) => {
+    await page.goto('/test/icon-custom.html');
+    await page.waitForTimeout(500);
+
+    const trigger = page.locator('#bugdrop-host').locator('css=.bd-trigger');
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+
+    // Should have an img inside the trigger icon
+    const img = page.locator('#bugdrop-host').locator('css=.bd-trigger-icon img');
+    await expect(img).toBeVisible();
+
+    // Img src should contain the data URI
+    const src = await img.getAttribute('src');
+    expect(src).toContain('data:image/png;base64,');
+  });
+
+  test('broken icon URL falls back to default emoji', async ({ page }) => {
+    // Navigate to a page and inject widget with broken icon URL
+    await page.goto('/test/icon-custom.html');
+    await page.waitForTimeout(500);
+
+    // Modify the page to use a broken URL by evaluating script
+    await page.evaluate(() => {
+      const host = document.getElementById('bugdrop-host');
+      if (host) host.remove();
+
+      const script = document.createElement('script');
+      script.src = '/widget.js';
+      script.dataset.repo = 'neonwatty/feedback-widget-test';
+      script.dataset.theme = 'dark';
+      script.dataset.icon = 'https://invalid.example.com/nonexistent.png';
+      document.body.appendChild(script);
+    });
+    await page.waitForTimeout(1000);
+
+    const triggerIcon = page.locator('#bugdrop-host').locator('css=.bd-trigger-icon');
+    await expect(triggerIcon).toBeVisible({ timeout: 5000 });
+
+    // The img should be hidden (display:none from onerror) and fallback emoji visible
+    const fallbackText = await triggerIcon.textContent();
+    expect(fallbackText).toContain('🐛');
+  });
+
+  test('default emoji shows when no data-icon is set', async ({ page }) => {
+    await page.goto('/test/index.html');
+    await page.waitForTimeout(500);
+
+    const triggerIcon = page.locator('#bugdrop-host').locator('css=.bd-trigger-icon');
+    await expect(triggerIcon).toBeVisible({ timeout: 5000 });
+
+    // Should NOT have an img element
+    const img = page.locator('#bugdrop-host').locator('css=.bd-trigger-icon img');
+    await expect(img).not.toBeAttached();
+
+    // Should have the default emoji
+    const text = await triggerIcon.textContent();
+    expect(text).toContain('🐛');
+  });
+});

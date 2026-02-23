@@ -132,6 +132,13 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       line-height: 1;
     }
 
+    .bd-trigger-icon img {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      display: block;
+    }
+
     .bd-trigger-label {
       font-size: 14px;
       font-weight: 600;
@@ -757,6 +764,11 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
 
       .bd-trigger-icon {
         font-size: 16px;
+      }
+
+      .bd-trigger-icon img {
+        width: 16px;
+        height: 16px;
       }
 
       .bd-trigger-label {
