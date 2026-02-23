@@ -1,4 +1,4 @@
-.PHONY: dev build build-widget build-all deploy test test-watch test-e2e test-e2e-ui test-e2e-shard lint lint-fix typecheck knip check ci clean install install-playwright help
+.PHONY: dev build build-widget build-all deploy test test-watch test-e2e test-e2e-ui test-e2e-shard lint lint-fix typecheck knip audit check ci clean install install-playwright help
 
 # Development
 dev:
@@ -43,6 +43,9 @@ lint:
 lint-fix:
 	npx eslint . --fix
 
+audit:
+	npm audit --audit-level=critical
+
 typecheck:
 	npm run typecheck
 
@@ -50,7 +53,7 @@ knip:
 	npx knip
 
 # Combined Commands
-check: lint typecheck knip
+check: lint typecheck knip audit
 	@echo "✓ All checks passed"
 
 ci: check test build-all test-e2e
@@ -89,9 +92,10 @@ help:
 	@echo "    make lint-fix         - Run ESLint with auto-fix"
 	@echo "    make typecheck        - Run TypeScript type checking"
 	@echo "    make knip             - Check for dead code"
+	@echo "    make audit            - Run npm security audit"
 	@echo ""
 	@echo "  Combined:"
-	@echo "    make check            - Run lint, typecheck, and knip"
+	@echo "    make check            - Run lint, typecheck, knip, and audit"
 	@echo "    make ci               - Run full CI pipeline locally"
 	@echo ""
 	@echo "  Utilities:"
