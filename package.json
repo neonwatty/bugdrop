@@ -3,6 +3,19 @@
   "version": "1.14.0",
   "description": "In-app feedback → GitHub Issues. Screenshots, annotations, the works.",
   "type": "module",
+  "main": "./public/widget.js",
+  "exports": {
+    ".": "./public/widget.js",
+    "./widget": "./public/widget.js",
+    "./widget.js": "./public/widget.js"
+  },
+  "files": [
+    "public/widget.js",
+    "public/widget.v*.js",
+    "src/widget/",
+    "LICENSE",
+    "README.md"
+  ],
   "scripts": {
     "dev": "wrangler dev --port 8787",
     "build": "tsc",
