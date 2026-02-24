@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14b8a6"/>
+      <stop offset="100%" stop-color="#0d9488"/>
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="40" fill="url(#bg)"/>
+  <!-- Bug body -->
+  <ellipse cx="100" cy="115" rx="32" ry="40" fill="white"/>
+  <ellipse cx="100" cy="80" rx="22" ry="20" fill="white"/>
+  <!-- Eyes -->
+  <circle cx="90" cy="78" r="5" fill="#14b8a6"/>
+  <circle cx="110" cy="78" r="5" fill="#14b8a6"/>
+  <!-- Antennae -->
+  <line x1="88" y1="62" x2="75" y2="42" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <line x1="112" y1="62" x2="125" y2="42" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="75" cy="42" r="4" fill="white"/>
+  <circle cx="125" cy="42" r="4" fill="white"/>
+  <!-- Legs -->
+  <line x1="70" y1="100" x2="52" y2="88" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <line x1="130" y1="100" x2="148" y2="88" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <line x1="68" y1="118" x2="48" y2="118" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <line x1="132" y1="118" x2="152" y2="118" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <line x1="70" y1="136" x2="52" y2="148" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <line x1="130" y1="136" x2="148" y2="148" stroke="white" stroke-width="4" stroke-linecap="round"/>
+  <!-- Body segment line -->
+  <line x1="72" y1="108" x2="128" y2="108" stroke="#14b8a6" stroke-width="2" opacity="0.4"/>
+  <line x1="70" y1="122" x2="130" y2="122" stroke="#14b8a6" stroke-width="2" opacity="0.4"/>
+</svg>
