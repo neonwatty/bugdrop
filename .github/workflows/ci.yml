@@ -5,16 +5,12 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
-  release:
-    types: [published]
 
 jobs:
   # Secret scanning (runs in parallel with other checks)
-  # Note: Gitleaks doesn't support the release event, so we skip it for releases
   secrets:
     name: Scan for Secrets
     runs-on: ubuntu-latest
-    if: github.event_name != 'release'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -132,14 +128,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Deploy to Cloudflare Workers (only on release publish)
-  # Note: secrets job is skipped for releases (already scanned on merge to main)
+  # Deploy to Cloudflare Workers (runs after release on push to main)
   deploy:
     name: Deploy to Cloudflare
     runs-on: ubuntu-latest
-    needs: [test, e2e]
-    # Only deploy when a release is published
-    if: github.event_name == 'release'
+    needs: [release]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
 
@@ -151,10 +145,8 @@ jobs:
       - name: Install dependencies
         run: make install
 
-      - name: Build all (using release tag version)
+      - name: Build all
         run: make build-all
-        env:
-          VERSION: ${{ github.event.release.tag_name }}
 
       - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
