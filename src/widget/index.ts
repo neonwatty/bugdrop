@@ -180,7 +180,7 @@ const script = document.currentScript as HTMLScriptElement;
 const rawTheme = script?.dataset.theme as WidgetConfig['theme'] | undefined;
 const config: WidgetConfig = {
   repo: script?.dataset.repo || '',
-  apiUrl: script?.src.replace('/widget.js', '/api') || '',
+  apiUrl: script?.src.replace(/\/widget(?:\.v[\d.]+)?\.js$/, '/api') || '',
   position: (script?.dataset.position as WidgetConfig['position']) || 'bottom-right',
   theme: rawTheme || 'auto', // Default to auto-detection
   // Name/email field configuration (all default to false for backwards compatibility)
