@@ -514,7 +514,12 @@ async function openFeedbackFlow(root: HTMLElement, config: WidgetConfig) {
     if (screenshotChoice === 'capture') {
       screenshot = await captureWithLoading(root);
     } else if (screenshotChoice === 'element') {
-      const element = await createElementPicker();
+      const element = await createElementPicker({
+        accentColor: config.accentColor,
+        font: config.font,
+        radius: config.radius,
+        borderWidth: config.borderWidth,
+      });
       if (element) {
         screenshot = await captureWithLoading(root, element);
         elementSelector = getElementSelector(element);
@@ -730,15 +735,15 @@ function showFeedbackFormWithScreenshotOption(
           <div class="bd-form-group">
             <label class="bd-label">Category</label>
             <div class="bd-category-selector" style="display: flex; gap: 8px; margin-top: 6px;">
-              <label class="bd-category-option" style="flex: 1; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid var(--bd-border); border-radius: 6px; cursor: pointer; transition: all 0.15s ease;">
+              <label class="bd-category-option" style="flex: 1; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: var(--bd-border-style); border-radius: var(--bd-radius-sm); cursor: pointer; transition: all 0.15s ease;">
                 <input type="radio" name="category" value="bug" checked style="accent-color: var(--bd-primary);" />
                 <span style="font-size: 0.9rem;">🐛 Bug</span>
               </label>
-              <label class="bd-category-option" style="flex: 1; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid var(--bd-border); border-radius: 6px; cursor: pointer; transition: all 0.15s ease;">
+              <label class="bd-category-option" style="flex: 1; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: var(--bd-border-style); border-radius: var(--bd-radius-sm); cursor: pointer; transition: all 0.15s ease;">
                 <input type="radio" name="category" value="feature" style="accent-color: var(--bd-primary);" />
                 <span style="font-size: 0.9rem;">✨ Feature</span>
               </label>
-              <label class="bd-category-option" style="flex: 1; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid var(--bd-border); border-radius: 6px; cursor: pointer; transition: all 0.15s ease;">
+              <label class="bd-category-option" style="flex: 1; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: var(--bd-border-style); border-radius: var(--bd-radius-sm); cursor: pointer; transition: all 0.15s ease;">
                 <input type="radio" name="category" value="question" style="accent-color: var(--bd-primary);" />
                 <span style="font-size: 0.9rem;">❓ Question</span>
               </label>
