@@ -25,8 +25,19 @@ interface WidgetConfig {
   showButton: boolean;
   // Custom accent color (hex)
   accentColor?: string;
-  // Custom icon URL (replaces default bug emoji)
+  // Custom icon URL (replaces default bug emoji), or 'none' to hide the icon
   iconUrl?: string;
+  // Custom trigger button label text (default: 'Feedback')
+  label?: string;
+  // Tier 1 styling customization
+  font?: string; // 'inherit' to use host page font, or a custom font-family string
+  radius?: string; // Border radius in px (e.g., '0', '8', '16')
+  bgColor?: string; // Background color override (e.g., '#fffef0')
+  textColor?: string; // Text color override (e.g., '#1a1a1a')
+  // Tier 2 styling customization
+  borderWidth?: string; // Border width in px (e.g., '4')
+  borderColor?: string; // Border color (e.g., '#1a1a1a')
+  shadow?: string; // Shadow preset: 'none', 'soft' (default), 'hard'
 }
 
 // BugDrop JavaScript API interface
@@ -199,8 +210,19 @@ const config: WidgetConfig = {
   showButton: script?.dataset.button !== 'false',
   // Custom accent color (e.g., "#FF6B35")
   accentColor: script?.dataset.color || undefined,
-  // Custom icon URL
+  // Custom icon URL (or 'none' to hide)
   iconUrl: script?.dataset.icon || undefined,
+  // Custom trigger label
+  label: script?.dataset.label || undefined,
+  // Tier 1 styling customization
+  font: script?.dataset.font || undefined,
+  radius: script?.dataset.radius || undefined,
+  bgColor: script?.dataset.bg || undefined,
+  textColor: script?.dataset.text || undefined,
+  // Tier 2 styling customization
+  borderWidth: script?.dataset.borderWidth || undefined,
+  borderColor: script?.dataset.borderColor || undefined,
+  shadow: script?.dataset.shadow || undefined,
 };
 
 // Validate config
@@ -210,12 +232,20 @@ if (!config.repo) {
   initWidget(config);
 }
 
-// Build the trigger button icon HTML - custom image with emoji fallback, or default emoji
+// Build the trigger button icon HTML - custom image with emoji fallback, 'none' to hide, or default emoji
 function getTriggerIconHtml(config: WidgetConfig): string {
+  if (config.iconUrl === 'none') {
+    return '';
+  }
   if (config.iconUrl) {
     return `<img src="${config.iconUrl}" alt="" onerror="this.style.display='none';this.nextSibling.style.display=''"><span style="display:none">🐛</span>`;
   }
   return '🐛';
+}
+
+// Build the trigger button label text
+function getTriggerLabel(config: WidgetConfig): string {
+  return config.label !== undefined ? config.label : 'Feedback';
 }
 
 // Create the pull tab shown after dismissing the button
@@ -288,7 +318,8 @@ function initWidget(config: WidgetConfig) {
   if (shouldShowButton) {
     const trigger = document.createElement('button');
     trigger.className = 'bd-trigger';
-    trigger.innerHTML = `<span class="bd-trigger-icon">${getTriggerIconHtml(config)}</span><span class="bd-trigger-label">Feedback</span>`;
+    const iconHtml = getTriggerIconHtml(config);
+    trigger.innerHTML = `${iconHtml ? `<span class="bd-trigger-icon">${iconHtml}</span>` : ''}<span class="bd-trigger-label">${getTriggerLabel(config)}</span>`;
     trigger.setAttribute('aria-label', 'Report a bug or send feedback');
 
     // Add close button if dismissible
@@ -407,7 +438,8 @@ function exposeBugDropAPI(root: HTMLElement, config: WidgetConfig) {
 function createTriggerButton(root: HTMLElement, config: WidgetConfig, isRestoring = false) {
   const trigger = document.createElement('button');
   trigger.className = isRestoring ? 'bd-trigger bd-trigger--restoring' : 'bd-trigger';
-  trigger.innerHTML = `<span class="bd-trigger-icon">${getTriggerIconHtml(config)}</span><span class="bd-trigger-label">Feedback</span>`;
+  const iconHtml = getTriggerIconHtml(config);
+    trigger.innerHTML = `${iconHtml ? `<span class="bd-trigger-icon">${iconHtml}</span>` : ''}<span class="bd-trigger-label">${getTriggerLabel(config)}</span>`;
   trigger.setAttribute('aria-label', 'Report a bug or send feedback');
 
   if (config.buttonDismissible) {

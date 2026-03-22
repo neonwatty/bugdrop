@@ -49,11 +49,14 @@ See [CHANGELOG.md](./CHANGELOG.md) for version history and migration guides.
 
 | Attribute | Values | Default |
 |-----------|--------|---------|
+| Attribute | Values | Default |
+|-----------|--------|---------|
 | `data-repo` | `owner/repo` | required |
 | `data-theme` | `light`, `dark`, `auto` | `auto` |
 | `data-position` | `bottom-right`, `bottom-left` | `bottom-right` |
 | `data-color` | Hex color (e.g. `#FF6B35`) | `#14b8a6` (teal) |
-| `data-icon` | Image URL | (bug emoji) |
+| `data-icon` | Image URL or `none` | (bug emoji) |
+| `data-label` | Any string | `Feedback` |
 | `data-show-name` | `true`, `false` | `false` |
 | `data-require-name` | `true`, `false` | `false` |
 | `data-show-email` | `true`, `false` | `false` |
@@ -63,6 +66,18 @@ See [CHANGELOG.md](./CHANGELOG.md) for version history and migration guides.
 | `data-show-restore` | `true`, `false` | `true` |
 | `data-button` | `true`, `false` | `true` |
 
+**Styling options** — make the widget match your app's design:
+
+| Attribute | Values | Default |
+|-----------|--------|---------|
+| `data-font` | `inherit` or font-family string | `Space Grotesk` |
+| `data-radius` | Pixels (e.g. `0`, `8`, `16`) | `6` |
+| `data-bg` | CSS color (e.g. `#fffef0`) | theme default |
+| `data-text` | CSS color (e.g. `#1a1a1a`) | theme default |
+| `data-border-width` | Pixels (e.g. `4`) | `1` |
+| `data-border-color` | CSS color (e.g. `#1a1a1a`) | theme default |
+| `data-shadow` | `soft`, `hard`, `none` | `soft` |
+
 ```html
 <script src="https://bugdrop.neonwatty.workers.dev/widget.js"
         data-repo="owner/repo"
@@ -71,17 +86,62 @@ See [CHANGELOG.md](./CHANGELOG.md) for version history and migration guides.
         data-color="#FF6B35"></script>
 ```
 
-### Custom Icon
+### Custom Styling
 
-Replace the default bug emoji with your own image:
+Use `data-font="inherit"` to pick up your page's font instead of BugDrop's built-in Space Grotesk. Combine with `data-radius`, `data-bg`, and `data-text` to make the widget look native to your app:
 
 ```html
+<!-- Elegant serif site -->
+<script src="https://bugdrop.neonwatty.workers.dev/widget.js"
+        data-repo="owner/repo"
+        data-font="inherit"
+        data-radius="8"
+        data-bg="#fafafa"
+        data-text="#1a1a1a"
+        data-color="#c5a55a"></script>
+```
+
+For bold or brutalist designs, add thick borders and hard drop shadows:
+
+```html
+<!-- Comic / punk design -->
+<script src="https://bugdrop.neonwatty.workers.dev/widget.js"
+        data-repo="owner/repo"
+        data-font="inherit"
+        data-radius="0"
+        data-bg="#fffef0"
+        data-text="#1a1a1a"
+        data-color="#e53935"
+        data-border-width="4"
+        data-border-color="#1a1a1a"
+        data-shadow="hard"></script>
+```
+
+Shadow presets: `soft` (default subtle shadows), `hard` (offset drop shadow), `none` (no shadows).
+
+### Custom Icon & Label
+
+Replace the default bug emoji with your own image, hide it entirely, or change the button text:
+
+```html
+<!-- Custom icon -->
 <script src="https://bugdrop.neonwatty.workers.dev/widget.js"
         data-repo="owner/repo"
         data-icon="https://example.com/my-logo.svg"></script>
+
+<!-- No icon, just text -->
+<script src="https://bugdrop.neonwatty.workers.dev/widget.js"
+        data-repo="owner/repo"
+        data-icon="none"
+        data-label="?"></script>
+
+<!-- Custom label -->
+<script src="https://bugdrop.neonwatty.workers.dev/widget.js"
+        data-repo="owner/repo"
+        data-label="Report Issue"></script>
 ```
 
-The image is displayed at 18px (16px on mobile). If the image fails to load, the default bug emoji is shown as a fallback.
+The icon image is displayed at 18px (16px on mobile). If the image fails to load, the default bug emoji is shown as a fallback.
 
 ### Collecting Submitter Info
 
