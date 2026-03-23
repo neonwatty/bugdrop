@@ -25,8 +25,19 @@ interface WidgetConfig {
   showButton: boolean;
   // Custom accent color (hex)
   accentColor?: string;
-  // Custom icon URL (replaces default bug emoji)
+  // Custom icon URL (replaces default bug emoji), or 'none' to hide the icon
   iconUrl?: string;
+  // Custom trigger button label text (default: 'Feedback')
+  label?: string;
+  // Tier 1 styling customization
+  font?: string; // 'inherit' to use host page font, or a custom font-family string
+  radius?: string; // Border radius in px (e.g., '0', '8', '16')
+  bgColor?: string; // Background color override (e.g., '#fffef0')
+  textColor?: string; // Text color override (e.g., '#1a1a1a')
+  // Tier 2 styling customization
+  borderWidth?: string; // Border width in px (e.g., '4')
+  borderColor?: string; // Border color (e.g., '#1a1a1a')
+  shadow?: string; // Shadow preset: 'none', 'soft' (default), 'hard'
 }
 
 // BugDrop JavaScript API interface
@@ -199,8 +210,19 @@ const config: WidgetConfig = {
   showButton: script?.dataset.button !== 'false',
   // Custom accent color (e.g., "#FF6B35")
   accentColor: script?.dataset.color || undefined,
-  // Custom icon URL
+  // Custom icon URL (or 'none' to hide)
   iconUrl: script?.dataset.icon || undefined,
+  // Custom trigger label
+  label: script?.dataset.label || undefined,
+  // Tier 1 styling customization
+  font: script?.dataset.font || undefined,
+  radius: script?.dataset.radius || undefined,
+  bgColor: script?.dataset.bg || undefined,
+  textColor: script?.dataset.text || undefined,
+  // Tier 2 styling customization
+  borderWidth: script?.dataset.borderWidth || undefined,
+  borderColor: script?.dataset.borderColor || undefined,
+  shadow: script?.dataset.shadow || undefined,
 };
 
 // Validate config
@@ -210,12 +232,20 @@ if (!config.repo) {
   initWidget(config);
 }
 
-// Build the trigger button icon HTML - custom image with emoji fallback, or default emoji
+// Build the trigger button icon HTML - custom image with emoji fallback, 'none' to hide, or default emoji
 function getTriggerIconHtml(config: WidgetConfig): string {
+  if (config.iconUrl === 'none') {
+    return '';
+  }
   if (config.iconUrl) {
     return `<img src="${config.iconUrl}" alt="" onerror="this.style.display='none';this.nextSibling.style.display=''"><span style="display:none">🐛</span>`;
   }
   return '🐛';
+}
+
+// Build the trigger button label text
+function getTriggerLabel(config: WidgetConfig): string {
+  return config.label !== undefined ? config.label : 'Feedback';
 }
 
 // Create the pull tab shown after dismissing the button
@@ -288,7 +318,8 @@ function initWidget(config: WidgetConfig) {
   if (shouldShowButton) {
     const trigger = document.createElement('button');
     trigger.className = 'bd-trigger';
-    trigger.innerHTML = `<span class="bd-trigger-icon">${getTriggerIconHtml(config)}</span><span class="bd-trigger-label">Feedback</span>`;
+    const iconHtml = getTriggerIconHtml(config);
+    trigger.innerHTML = `${iconHtml ? `<span class="bd-trigger-icon">${iconHtml}</span>` : ''}<span class="bd-trigger-label">${getTriggerLabel(config)}</span>`;
     trigger.setAttribute('aria-label', 'Report a bug or send feedback');
 
     // Add close button if dismissible
@@ -407,7 +438,8 @@ function exposeBugDropAPI(root: HTMLElement, config: WidgetConfig) {
 function createTriggerButton(root: HTMLElement, config: WidgetConfig, isRestoring = false) {
   const trigger = document.createElement('button');
   trigger.className = isRestoring ? 'bd-trigger bd-trigger--restoring' : 'bd-trigger';
-  trigger.innerHTML = `<span class="bd-trigger-icon">${getTriggerIconHtml(config)}</span><span class="bd-trigger-label">Feedback</span>`;
+  const iconHtml = getTriggerIconHtml(config);
+    trigger.innerHTML = `${iconHtml ? `<span class="bd-trigger-icon">${iconHtml}</span>` : ''}<span class="bd-trigger-label">${getTriggerLabel(config)}</span>`;
   trigger.setAttribute('aria-label', 'Report a bug or send feedback');
 
   if (config.buttonDismissible) {
@@ -482,7 +514,16 @@ async function openFeedbackFlow(root: HTMLElement, config: WidgetConfig) {
     if (screenshotChoice === 'capture') {
       screenshot = await captureWithLoading(root);
     } else if (screenshotChoice === 'element') {
-      const element = await createElementPicker();
+      const element = await createElementPicker({
+        accentColor: config.accentColor,
+        font: config.font,
+        radius: config.radius,
+        borderWidth: config.borderWidth,
+        bgColor: config.bgColor,
+        textColor: config.textColor,
+        borderColor: config.borderColor,
+        theme: config.theme,
+      });
       if (element) {
         screenshot = await captureWithLoading(root, element);
         elementSelector = getElementSelector(element);
@@ -491,7 +532,7 @@ async function openFeedbackFlow(root: HTMLElement, config: WidgetConfig) {
 
     // Step 4: Annotate (if screenshot exists)
     if (screenshot) {
-      screenshot = await showAnnotationStep(root, screenshot);
+      screenshot = await showAnnotationStep(root, screenshot, config);
     }
   }
 
@@ -698,15 +739,15 @@ function showFeedbackFormWithScreenshotOption(
           <div class="bd-form-group">
             <label class="bd-label">Category</label>
             <div class="bd-category-selector" style="display: flex; gap: 8px; margin-top: 6px;">
-              <label class="bd-category-option" style="flex: 1; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid var(--bd-border); border-radius: 6px; cursor: pointer; transition: all 0.15s ease;">
+              <label class="bd-category-option" style="flex: 1; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: var(--bd-border-style); border-radius: var(--bd-radius-sm); cursor: pointer; transition: all 0.15s ease;">
                 <input type="radio" name="category" value="bug" checked style="accent-color: var(--bd-primary);" />
                 <span style="font-size: 0.9rem;">🐛 Bug</span>
               </label>
-              <label class="bd-category-option" style="flex: 1; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid var(--bd-border); border-radius: 6px; cursor: pointer; transition: all 0.15s ease;">
+              <label class="bd-category-option" style="flex: 1; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: var(--bd-border-style); border-radius: var(--bd-radius-sm); cursor: pointer; transition: all 0.15s ease;">
                 <input type="radio" name="category" value="feature" style="accent-color: var(--bd-primary);" />
                 <span style="font-size: 0.9rem;">✨ Feature</span>
               </label>
-              <label class="bd-category-option" style="flex: 1; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: 1px solid var(--bd-border); border-radius: 6px; cursor: pointer; transition: all 0.15s ease;">
+              <label class="bd-category-option" style="flex: 1; display: flex; align-items: center; gap: 6px; padding: 8px 12px; border: var(--bd-border-style); border-radius: var(--bd-radius-sm); cursor: pointer; transition: all 0.15s ease;">
                 <input type="radio" name="category" value="question" style="accent-color: var(--bd-primary);" />
                 <span style="font-size: 0.9rem;">❓ Question</span>
               </label>
@@ -835,7 +876,7 @@ function showScreenshotOptions(root: HTMLElement): Promise<'skip' | 'capture' | 
   });
 }
 
-function showAnnotationStep(root: HTMLElement, screenshot: string): Promise<string> {
+function showAnnotationStep(root: HTMLElement, screenshot: string, config?: WidgetConfig): Promise<string> {
   return new Promise((resolve) => {
     const modal = createModal(
       root,
@@ -856,7 +897,7 @@ function showAnnotationStep(root: HTMLElement, screenshot: string): Promise<stri
     );
 
     const canvasContainer = modal.querySelector('#annotation-canvas') as HTMLElement;
-    const annotator = createAnnotator(canvasContainer, screenshot);
+    const annotator = createAnnotator(canvasContainer, screenshot, config?.accentColor);
 
     // Tool buttons
     const toolButtons = modal.querySelectorAll('[data-tool]');

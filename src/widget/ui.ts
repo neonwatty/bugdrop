@@ -4,6 +4,13 @@ interface WidgetConfig {
   position: 'bottom-right' | 'bottom-left';
   theme: 'light' | 'dark' | 'auto';
   accentColor?: string;
+  font?: string;
+  radius?: string;
+  bgColor?: string;
+  textColor?: string;
+  borderWidth?: string;
+  borderColor?: string;
+  shadow?: string;
 }
 
 // Detect system dark mode preference
@@ -20,18 +27,46 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
   const resolvedTheme = config.theme === 'auto' ? getSystemTheme() : config.theme;
   const isDark = resolvedTheme === 'dark';
 
+  // Determine font settings
+  const useInheritFont = config.font === 'inherit';
+  const customFont = config.font && config.font !== 'inherit' ? config.font : null;
+  const fontImport = useInheritFont || customFont
+    ? ''
+    : `@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');`;
+  const fontFamily = useInheritFont
+    ? 'inherit'
+    : customFont
+      ? `${customFont}, system-ui, sans-serif`
+      : `'Space Grotesk', system-ui, sans-serif`;
+
+  // Determine radius settings
+  const radiusPx = config.radius !== undefined ? parseInt(config.radius, 10) : null;
+  const radiusSm = radiusPx !== null ? `${radiusPx}px` : '6px';
+  const radiusMd = radiusPx !== null ? `${Math.round(radiusPx * 1.4)}px` : '10px';
+  const radiusLg = radiusPx !== null ? `${Math.round(radiusPx * 2)}px` : '14px';
+
+  // Determine border settings
+  const borderW = config.borderWidth ? parseInt(config.borderWidth, 10) : null;
+  const borderC = config.borderColor || null;
+
+  // Determine shadow preset
+  const shadowPreset = config.shadow || null; // 'none', 'soft', 'hard'
+
   const styles = document.createElement('style');
   styles.textContent = `
-    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    ${fontImport}
 
     :host {
       /* Typography */
-      --bd-font: 'Space Grotesk', system-ui, sans-serif;
+      --bd-font: ${fontFamily};
 
       /* Radius */
-      --bd-radius-sm: 6px;
-      --bd-radius-md: 10px;
-      --bd-radius-lg: 14px;
+      --bd-radius-sm: ${radiusSm};
+      --bd-radius-md: ${radiusMd};
+      --bd-radius-lg: ${radiusLg};
+
+      /* Border */
+      --bd-border-style: ${borderW !== null ? `${borderW}px` : '1px'} solid var(--bd-border);
 
       /* Transitions */
       --bd-transition: 0.15s ease;
@@ -100,8 +135,8 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       ${pos};
       height: 44px;
       padding: 0 16px;
-      border-radius: 22px;
-      border: none;
+      border-radius: ${radiusPx !== null ? `${radiusPx * 2}px` : '22px'};
+      border: ${borderW !== null ? 'var(--bd-border-style)' : 'none'};
       background: var(--bd-primary);
       color: var(--bd-primary-text);
       cursor: pointer;
@@ -286,7 +321,7 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
     .bd-modal {
       background: var(--bd-bg-primary);
       border-radius: var(--bd-radius-lg);
-      border: 1px solid var(--bd-border);
+      border: var(--bd-border-style);
       box-shadow: var(--bd-shadow-lg), var(--bd-shadow-glow);
       max-width: 600px;
       width: 90%;
@@ -300,7 +335,7 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
     /* Modal Header */
     .bd-header {
       padding: 16px 20px;
-      border-bottom: 1px solid var(--bd-border);
+      border-bottom: var(--bd-border-style);
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -369,7 +404,7 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       width: 100%;
       padding: 12px 14px;
       background: var(--bd-bg-primary);
-      border: 1px solid var(--bd-border);
+      border: var(--bd-border-style);
       border-radius: var(--bd-radius-sm);
       font-size: 14px;
       color: var(--bd-text-primary);
@@ -420,7 +455,7 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
 
     .bd-btn-secondary {
       background: var(--bd-bg-primary);
-      border: 1px solid var(--bd-border);
+      border: var(--bd-border-style);
       color: var(--bd-text-primary);
     }
 
@@ -624,7 +659,7 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
       gap: 6px;
       padding: 8px;
       background: var(--bd-bg-secondary);
-      border: 1px solid var(--bd-border);
+      border: var(--bd-border-style);
       border-radius: var(--bd-radius-md);
       margin-bottom: 12px;
     }
@@ -654,7 +689,7 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
 
     /* Preview */
     .bd-preview {
-      border: 1px solid var(--bd-border);
+      border: var(--bd-border-style);
       border-radius: var(--bd-radius-md);
       overflow: hidden;
       margin-bottom: 16px;
@@ -923,6 +958,51 @@ export function injectStyles(shadow: ShadowRoot, config: WidgetConfig) {
     root.style.setProperty('--bd-primary', color);
     root.style.setProperty('--bd-primary-hover', `color-mix(in srgb, ${color} 85%, black)`);
     root.style.setProperty('--bd-border-focus', color);
+  }
+
+  // Apply custom background color if provided
+  if (config.bgColor) {
+    root.style.setProperty('--bd-bg-primary', config.bgColor);
+    // Generate secondary/tertiary bg variants by mixing with black (light) or white (dark)
+    if (isDark) {
+      root.style.setProperty('--bd-bg-secondary', `color-mix(in srgb, ${config.bgColor} 85%, white)`);
+      root.style.setProperty('--bd-bg-tertiary', `color-mix(in srgb, ${config.bgColor} 70%, white)`);
+    } else {
+      root.style.setProperty('--bd-bg-secondary', `color-mix(in srgb, ${config.bgColor} 93%, black)`);
+      root.style.setProperty('--bd-bg-tertiary', `color-mix(in srgb, ${config.bgColor} 85%, black)`);
+    }
+  }
+
+  // Apply custom text color if provided
+  if (config.textColor) {
+    root.style.setProperty('--bd-text-primary', config.textColor);
+    // Generate secondary/muted text variants by mixing with the background
+    const bgBase = config.bgColor || (isDark ? '#0f172a' : '#fafaf9');
+    root.style.setProperty('--bd-text-secondary', `color-mix(in srgb, ${config.textColor} 65%, ${bgBase})`);
+    root.style.setProperty('--bd-text-muted', `color-mix(in srgb, ${config.textColor} 40%, ${bgBase})`);
+  }
+
+  // Apply custom border styling if provided
+  if (borderW !== null || borderC !== null) {
+    const bw = borderW !== null ? `${borderW}px` : '1px';
+    const bc = borderC || 'var(--bd-border)';
+    root.style.setProperty('--bd-border', bc);
+    root.style.setProperty('--bd-border-style', `${bw} solid ${bc}`);
+  }
+
+  // Apply shadow preset if provided
+  if (shadowPreset === 'none') {
+    root.style.setProperty('--bd-shadow-sm', 'none');
+    root.style.setProperty('--bd-shadow-md', 'none');
+    root.style.setProperty('--bd-shadow-lg', 'none');
+    root.style.setProperty('--bd-shadow-glow', 'none');
+  } else if (shadowPreset === 'hard') {
+    const shadowColor = borderC || (isDark ? '#000' : '#1a1a1a');
+    const offset = borderW !== null ? `${borderW + 2}px` : '6px';
+    root.style.setProperty('--bd-shadow-sm', `${shadowColor} 2px 2px 0 0`);
+    root.style.setProperty('--bd-shadow-md', `${shadowColor} ${offset} ${offset} 0 0`);
+    root.style.setProperty('--bd-shadow-lg', `${shadowColor} ${offset} ${offset} 0 0`);
+    root.style.setProperty('--bd-shadow-glow', 'none');
   }
 
   shadow.appendChild(root);

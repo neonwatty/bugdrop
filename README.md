@@ -49,11 +49,14 @@ See [CHANGELOG.md](./CHANGELOG.md) for version history and migration guides.
 
 | Attribute | Values | Default |
 |-----------|--------|---------|
+| Attribute | Values | Default |
+|-----------|--------|---------|
 | `data-repo` | `owner/repo` | required |
 | `data-theme` | `light`, `dark`, `auto` | `auto` |
 | `data-position` | `bottom-right`, `bottom-left` | `bottom-right` |
 | `data-color` | Hex color (e.g. `#FF6B35`) | `#14b8a6` (teal) |
-| `data-icon` | Image URL | (bug emoji) |
+| `data-icon` | Image URL or `none` | (bug emoji) |
+| `data-label` | Any string | `Feedback` |
 | `data-show-name` | `true`, `false` | `false` |
 | `data-require-name` | `true`, `false` | `false` |
 | `data-show-email` | `true`, `false` | `false` |
@@ -63,6 +66,18 @@ See [CHANGELOG.md](./CHANGELOG.md) for version history and migration guides.
 | `data-show-restore` | `true`, `false` | `true` |
 | `data-button` | `true`, `false` | `true` |
 
+**Styling options** — make the widget match your app's design:
+
+| Attribute | Values | Default |
+|-----------|--------|---------|
+| `data-font` | `inherit` or font-family string | `Space Grotesk` |
+| `data-radius` | Pixels (e.g. `0`, `8`, `16`) | `6` |
+| `data-bg` | CSS color (e.g. `#fffef0`) | theme default |
+| `data-text` | CSS color (e.g. `#1a1a1a`) | theme default |
+| `data-border-width` | Pixels (e.g. `4`) | `1` |
+| `data-border-color` | CSS color (e.g. `#1a1a1a`) | theme default |
+| `data-shadow` | `soft`, `hard`, `none` | `soft` |
+
 ```html
 <script src="https://bugdrop.neonwatty.workers.dev/widget.js"
         data-repo="owner/repo"
@@ -71,17 +86,62 @@ See [CHANGELOG.md](./CHANGELOG.md) for version history and migration guides.
         data-color="#FF6B35"></script>
 ```
 
-### Custom Icon
+### Custom Styling
 
-Replace the default bug emoji with your own image:
+Use `data-font="inherit"` to pick up your page's font instead of BugDrop's built-in Space Grotesk. Combine with `data-radius`, `data-bg`, and `data-text` to make the widget look native to your app:
 
 ```html
+<!-- Elegant serif site -->
+<script src="https://bugdrop.neonwatty.workers.dev/widget.js"
+        data-repo="owner/repo"
+        data-font="inherit"
+        data-radius="8"
+        data-bg="#fafafa"
+        data-text="#1a1a1a"
+        data-color="#c5a55a"></script>
+```
+
+For bold or brutalist designs, add thick borders and hard drop shadows:
+
+```html
+<!-- Comic / punk design -->
+<script src="https://bugdrop.neonwatty.workers.dev/widget.js"
+        data-repo="owner/repo"
+        data-font="inherit"
+        data-radius="0"
+        data-bg="#fffef0"
+        data-text="#1a1a1a"
+        data-color="#e53935"
+        data-border-width="4"
+        data-border-color="#1a1a1a"
+        data-shadow="hard"></script>
+```
+
+Shadow presets: `soft` (default subtle shadows), `hard` (offset drop shadow), `none` (no shadows).
+
+### Custom Icon & Label
+
+Replace the default bug emoji with your own image, hide it entirely, or change the button text:
+
+```html
+<!-- Custom icon -->
 <script src="https://bugdrop.neonwatty.workers.dev/widget.js"
         data-repo="owner/repo"
         data-icon="https://example.com/my-logo.svg"></script>
+
+<!-- No icon, just text -->
+<script src="https://bugdrop.neonwatty.workers.dev/widget.js"
+        data-repo="owner/repo"
+        data-icon="none"
+        data-label="?"></script>
+
+<!-- Custom label -->
+<script src="https://bugdrop.neonwatty.workers.dev/widget.js"
+        data-repo="owner/repo"
+        data-label="Report Issue"></script>
 ```
 
-The image is displayed at 18px (16px on mobile). If the image fails to load, the default bug emoji is shown as a fallback.
+The icon image is displayed at 18px (16px on mobile). If the image fails to load, the default bug emoji is shown as a fallback.
 
 ### Collecting Submitter Info
 
@@ -196,6 +256,166 @@ window.BugDrop = {
 ```
 
 The `bugdrop:ready` event fires when the API is available. You can also check `if (window.BugDrop)` for synchronous initialization.
+
+## Testing Your Configuration
+
+If you've customized the widget styling, you can add this Playwright test to your CI pipeline to verify things look correct on every deploy.
+
+**Install Playwright** (if you haven't already):
+
+```bash
+npm install -D @playwright/test
+npx playwright install
+```
+
+**Create `tests/bugdrop.spec.ts`:**
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+// ============================================================
+// CONFIGURE THESE VALUES TO MATCH YOUR BUGDROP SETUP
+// ============================================================
+const APP_URL = 'https://your-app.com'; // Your app's URL
+const EXPECTED = {
+  accentColor: '#e53935',   // Your data-color value (or null to skip)
+  bgColor: '#fffef0',       // Your data-bg value (or null to skip)
+  textColor: '#1a1a1a',     // Your data-text value (or null to skip)
+  borderRadius: '0px',      // Your data-radius + 'px' (or null to skip)
+  fontFamily: null,         // Substring to check (e.g., 'Georgia') or null
+};
+// ============================================================
+
+// WCAG contrast ratio helper — no dependencies needed
+function luminance(r: number, g: number, b: number): number {
+  const [rs, gs, bs] = [r, g, b].map(c => {
+    c = c / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+function parseColor(color: string): [number, number, number] {
+  const m = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+  if (m) return [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])];
+  return [0, 0, 0];
+}
+
+function contrastRatio(fg: string, bg: string): number {
+  const l1 = luminance(...parseColor(fg));
+  const l2 = luminance(...parseColor(bg));
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+test.describe('BugDrop widget', () => {
+  test('renders and is visible', async ({ page }) => {
+    await page.goto(APP_URL);
+    const host = page.locator('#bugdrop-host');
+    await expect(host).toBeAttached({ timeout: 10000 });
+
+    // Trigger button should be visible inside shadow DOM
+    const trigger = host.locator('internal:shadow=.bd-trigger');
+    await expect(trigger).toBeVisible();
+  });
+
+  test('modal opens on click', async ({ page }) => {
+    await page.goto(APP_URL);
+    const host = page.locator('#bugdrop-host');
+    const trigger = host.locator('internal:shadow=.bd-trigger');
+    await trigger.click();
+
+    // A modal or overlay should appear
+    const overlay = host.locator('internal:shadow=.bd-overlay');
+    await expect(overlay).toBeVisible({ timeout: 5000 });
+  });
+
+  test('meets WCAG AA contrast requirements', async ({ page }) => {
+    await page.goto(APP_URL);
+    const host = page.locator('#bugdrop-host');
+    const trigger = host.locator('internal:shadow=.bd-trigger');
+    await trigger.click();
+
+    // Wait for modal
+    const overlay = host.locator('internal:shadow=.bd-overlay');
+    await expect(overlay).toBeVisible({ timeout: 5000 });
+
+    // Check text contrast inside the modal
+    const styles = await page.evaluate(() => {
+      const host = document.querySelector('#bugdrop-host');
+      if (!host?.shadowRoot) return null;
+      const modal = host.shadowRoot.querySelector('.bd-modal');
+      if (!modal) return null;
+      const cs = getComputedStyle(modal);
+      const title = host.shadowRoot.querySelector('.bd-title');
+      const titleCs = title ? getComputedStyle(title) : null;
+      return {
+        modalBg: cs.backgroundColor,
+        titleColor: titleCs?.color || cs.color,
+      };
+    });
+
+    expect(styles).not.toBeNull();
+    const ratio = contrastRatio(styles!.titleColor, styles!.modalBg);
+    expect(ratio).toBeGreaterThanOrEqual(4.5); // WCAG AA
+  });
+
+  test('config values match expected', async ({ page }) => {
+    await page.goto(APP_URL);
+    const host = page.locator('#bugdrop-host');
+    const trigger = host.locator('internal:shadow=.bd-trigger');
+
+    const styles = await page.evaluate(() => {
+      const host = document.querySelector('#bugdrop-host');
+      if (!host?.shadowRoot) return null;
+      const root = host.shadowRoot.querySelector('.bd-root') as HTMLElement;
+      if (!root) return null;
+      const cs = getComputedStyle(root);
+      const triggerEl = host.shadowRoot.querySelector('.bd-trigger') as HTMLElement;
+      const triggerCs = triggerEl ? getComputedStyle(triggerEl) : null;
+      return {
+        bgColor: cs.getPropertyValue('--bd-bg-primary').trim(),
+        textColor: cs.getPropertyValue('--bd-text-primary').trim(),
+        accentColor: cs.getPropertyValue('--bd-primary').trim(),
+        borderRadius: triggerCs?.borderRadius || '',
+        fontFamily: cs.fontFamily,
+      };
+    });
+
+    expect(styles).not.toBeNull();
+
+    if (EXPECTED.accentColor) {
+      expect(styles!.accentColor).toBe(EXPECTED.accentColor);
+    }
+    if (EXPECTED.bgColor) {
+      expect(styles!.bgColor).toBe(EXPECTED.bgColor);
+    }
+    if (EXPECTED.textColor) {
+      expect(styles!.textColor).toBe(EXPECTED.textColor);
+    }
+    if (EXPECTED.borderRadius) {
+      expect(styles!.borderRadius).toContain(EXPECTED.borderRadius);
+    }
+    if (EXPECTED.fontFamily) {
+      expect(styles!.fontFamily).toContain(EXPECTED.fontFamily);
+    }
+  });
+});
+```
+
+**Run the tests:**
+
+```bash
+npx playwright test tests/bugdrop.spec.ts
+```
+
+The test checks three things:
+1. **Functional** — widget renders, trigger is visible, modal opens
+2. **Accessibility** — title text meets WCAG AA contrast ratio (4.5:1) against modal background
+3. **Config verification** — computed CSS values match your expected `data-*` attribute values
+
+Customize the `EXPECTED` object at the top to match your configuration. Set any value to `null` to skip that check.
 
 ## Live Demo
 

@@ -1,26 +1,45 @@
-export function createElementPicker(): Promise<Element | null> {
+interface PickerStyle {
+  accentColor?: string;
+  font?: string;
+  radius?: string;
+  borderWidth?: string;
+  bgColor?: string;
+  textColor?: string;
+  borderColor?: string;
+  theme?: string;
+}
+
+export function createElementPicker(style?: PickerStyle): Promise<Element | null> {
   return new Promise((resolve) => {
     // Small delay to ensure any modal has been removed from the DOM
     setTimeout(() => {
-      startPicker(resolve);
+      startPicker(resolve, style);
     }, 50);
   });
 }
 
-function startPicker(resolve: (element: Element | null) => void): void {
+function startPicker(resolve: (element: Element | null) => void, style?: PickerStyle): void {
+  const isDark = style?.theme === 'dark';
+  const accent = style?.accentColor || '#14b8a6';
+  const fontFamily = style?.font === 'inherit' ? 'system-ui, sans-serif' : (style?.font || "'Space Grotesk', system-ui, sans-serif");
+  const radius = style?.radius !== undefined ? `${style.radius}px` : '6px';
+  const bw = style?.borderWidth || '3';
+  const tooltipBg = style?.bgColor || (isDark ? '#0f172a' : '#1a1a1a');
+  const tooltipText = style?.textColor || '#f1f5f9';
+  const tooltipBorder = style?.borderColor || (isDark ? '#334155' : '#333');
+
   // Create highlight overlay with higher z-index than modal (1000000)
   const highlight = document.createElement('div');
   highlight.id = 'bugdrop-element-picker-highlight';
-  // Use teal color to match the widget theme
   highlight.style.cssText = `
     position: fixed;
     pointer-events: none;
-    border: 3px solid #14b8a6;
-    background: rgba(20, 184, 166, 0.15);
+    border: ${bw}px solid ${accent};
+    background: color-mix(in srgb, ${accent} 15%, transparent);
     z-index: 2147483646;
     transition: all 0.05s ease-out;
-    box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.3);
-    border-radius: 6px;
+    box-shadow: 0 0 0 4px color-mix(in srgb, ${accent} 30%, transparent);
+    border-radius: ${radius};
   `;
   document.body.appendChild(highlight);
 
@@ -32,16 +51,16 @@ function startPicker(resolve: (element: Element | null) => void): void {
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: #0f172a;
-    color: #f1f5f9;
+    background: ${tooltipBg};
+    color: ${tooltipText};
     padding: 14px 28px;
-    border-radius: 10px;
-    font-family: 'Space Grotesk', system-ui, sans-serif;
+    border-radius: ${radius};
+    font-family: ${fontFamily};
     font-size: 14px;
     font-weight: 500;
     z-index: 2147483647;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 40px rgba(34, 211, 238, 0.1);
-    border: 1px solid #334155;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    border: ${bw}px solid ${tooltipBorder};
   `;
   tooltip.textContent = 'Click on any element to capture it (ESC to cancel)';
   document.body.appendChild(tooltip);
