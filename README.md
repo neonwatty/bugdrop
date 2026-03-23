@@ -257,6 +257,166 @@ window.BugDrop = {
 
 The `bugdrop:ready` event fires when the API is available. You can also check `if (window.BugDrop)` for synchronous initialization.
 
+## Testing Your Configuration
+
+If you've customized the widget styling, you can add this Playwright test to your CI pipeline to verify things look correct on every deploy.
+
+**Install Playwright** (if you haven't already):
+
+```bash
+npm install -D @playwright/test
+npx playwright install
+```
+
+**Create `tests/bugdrop.spec.ts`:**
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+// ============================================================
+// CONFIGURE THESE VALUES TO MATCH YOUR BUGDROP SETUP
+// ============================================================
+const APP_URL = 'https://your-app.com'; // Your app's URL
+const EXPECTED = {
+  accentColor: '#e53935',   // Your data-color value (or null to skip)
+  bgColor: '#fffef0',       // Your data-bg value (or null to skip)
+  textColor: '#1a1a1a',     // Your data-text value (or null to skip)
+  borderRadius: '0px',      // Your data-radius + 'px' (or null to skip)
+  fontFamily: null,         // Substring to check (e.g., 'Georgia') or null
+};
+// ============================================================
+
+// WCAG contrast ratio helper — no dependencies needed
+function luminance(r: number, g: number, b: number): number {
+  const [rs, gs, bs] = [r, g, b].map(c => {
+    c = c / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * rs + 0.7152 * gs + 0.0722 * bs;
+}
+
+function parseColor(color: string): [number, number, number] {
+  const m = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+  if (m) return [parseInt(m[1]), parseInt(m[2]), parseInt(m[3])];
+  return [0, 0, 0];
+}
+
+function contrastRatio(fg: string, bg: string): number {
+  const l1 = luminance(...parseColor(fg));
+  const l2 = luminance(...parseColor(bg));
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+test.describe('BugDrop widget', () => {
+  test('renders and is visible', async ({ page }) => {
+    await page.goto(APP_URL);
+    const host = page.locator('#bugdrop-host');
+    await expect(host).toBeAttached({ timeout: 10000 });
+
+    // Trigger button should be visible inside shadow DOM
+    const trigger = host.locator('internal:shadow=.bd-trigger');
+    await expect(trigger).toBeVisible();
+  });
+
+  test('modal opens on click', async ({ page }) => {
+    await page.goto(APP_URL);
+    const host = page.locator('#bugdrop-host');
+    const trigger = host.locator('internal:shadow=.bd-trigger');
+    await trigger.click();
+
+    // A modal or overlay should appear
+    const overlay = host.locator('internal:shadow=.bd-overlay');
+    await expect(overlay).toBeVisible({ timeout: 5000 });
+  });
+
+  test('meets WCAG AA contrast requirements', async ({ page }) => {
+    await page.goto(APP_URL);
+    const host = page.locator('#bugdrop-host');
+    const trigger = host.locator('internal:shadow=.bd-trigger');
+    await trigger.click();
+
+    // Wait for modal
+    const overlay = host.locator('internal:shadow=.bd-overlay');
+    await expect(overlay).toBeVisible({ timeout: 5000 });
+
+    // Check text contrast inside the modal
+    const styles = await page.evaluate(() => {
+      const host = document.querySelector('#bugdrop-host');
+      if (!host?.shadowRoot) return null;
+      const modal = host.shadowRoot.querySelector('.bd-modal');
+      if (!modal) return null;
+      const cs = getComputedStyle(modal);
+      const title = host.shadowRoot.querySelector('.bd-title');
+      const titleCs = title ? getComputedStyle(title) : null;
+      return {
+        modalBg: cs.backgroundColor,
+        titleColor: titleCs?.color || cs.color,
+      };
+    });
+
+    expect(styles).not.toBeNull();
+    const ratio = contrastRatio(styles!.titleColor, styles!.modalBg);
+    expect(ratio).toBeGreaterThanOrEqual(4.5); // WCAG AA
+  });
+
+  test('config values match expected', async ({ page }) => {
+    await page.goto(APP_URL);
+    const host = page.locator('#bugdrop-host');
+    const trigger = host.locator('internal:shadow=.bd-trigger');
+
+    const styles = await page.evaluate(() => {
+      const host = document.querySelector('#bugdrop-host');
+      if (!host?.shadowRoot) return null;
+      const root = host.shadowRoot.querySelector('.bd-root') as HTMLElement;
+      if (!root) return null;
+      const cs = getComputedStyle(root);
+      const triggerEl = host.shadowRoot.querySelector('.bd-trigger') as HTMLElement;
+      const triggerCs = triggerEl ? getComputedStyle(triggerEl) : null;
+      return {
+        bgColor: cs.getPropertyValue('--bd-bg-primary').trim(),
+        textColor: cs.getPropertyValue('--bd-text-primary').trim(),
+        accentColor: cs.getPropertyValue('--bd-primary').trim(),
+        borderRadius: triggerCs?.borderRadius || '',
+        fontFamily: cs.fontFamily,
+      };
+    });
+
+    expect(styles).not.toBeNull();
+
+    if (EXPECTED.accentColor) {
+      expect(styles!.accentColor).toBe(EXPECTED.accentColor);
+    }
+    if (EXPECTED.bgColor) {
+      expect(styles!.bgColor).toBe(EXPECTED.bgColor);
+    }
+    if (EXPECTED.textColor) {
+      expect(styles!.textColor).toBe(EXPECTED.textColor);
+    }
+    if (EXPECTED.borderRadius) {
+      expect(styles!.borderRadius).toContain(EXPECTED.borderRadius);
+    }
+    if (EXPECTED.fontFamily) {
+      expect(styles!.fontFamily).toContain(EXPECTED.fontFamily);
+    }
+  });
+});
+```
+
+**Run the tests:**
+
+```bash
+npx playwright test tests/bugdrop.spec.ts
+```
+
+The test checks three things:
+1. **Functional** — widget renders, trigger is visible, modal opens
+2. **Accessibility** — title text meets WCAG AA contrast ratio (4.5:1) against modal background
+3. **Config verification** — computed CSS values match your expected `data-*` attribute values
+
+Customize the `EXPECTED` object at the top to match your configuration. Set any value to `null` to skip that check.
+
 ## Live Demo
 
 Try it on [WienerMatch](https://neonwatty.github.io/feedback-widget-test/) — click the bug button in the bottom right corner.
